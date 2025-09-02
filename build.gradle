@@ -1,0 +1,103 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.asciidoctor.jvm.convert' version '4.0.5'
+}
+
+group = 'com.mtcoding'
+version = '0.0.1-SNAPSHOT'
+description = 'minigram'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('snippetsDir', file("build/generated-snippets"))
+}
+
+dependencies {
+    // ── Spring Boot 핵심 웹/검증 ─────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-web'          // MVC, Tomcat, JSON 직렬화 등
+    implementation 'org.springframework.boot:spring-boot-starter-validation'   // Bean Validation(@Valid, @NotNull 등)
+
+    // ── JPA/DB 접근 ─────────────────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'     // Spring Data JPA (EntityManager, Tx)
+    runtimeOnly 'com.mysql:mysql-connector-j'                                   // 운영/개발 MySQL 드라이버
+    runtimeOnly 'com.h2database:h2'                                            // 로컬/테스트용 인메모리 DB
+
+    // ── 보안 / 인증 ─────────────────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-security'     // Spring Security (필터 체인 등)
+    implementation 'com.auth0:java-jwt:4.3.0'                                  // JWT 생성/검증 라이브러리
+    implementation 'org.mindrot:jbcrypt:0.4'                                   // 비밀번호 해싱(BCrypt)
+
+    // ── AOP (횡단 관심사) ────────────────────────────────────────────────
+    implementation 'org.springframework.boot:spring-boot-starter-aop'          // 로깅, 트랜잭션, 보안 등 AOP 적용
+
+    // ── SQL/native 쿼리 매핑 보조 ─────────────────────────────────────
+    implementation 'org.qlrm:qlrm:4.0.1'                                       // Native Query → DTO 매핑 편의
+
+    // ── 유틸 / 롬복 ─────────────────────────────────────────────────────────
+    implementation 'org.apache.commons:commons-lang3:3.12.0'                   // 문자열/컬렉션 등 유틸
+    compileOnly 'org.projectlombok:lombok'                                     // 롬복 애너테이션 (컴파일 시에만 필요)
+    annotationProcessor 'org.projectlombok:lombok'                             // 롬복 애너테이션 처리기
+
+    // ── 개발 편의(로컬 전용) ────────────────────────────────────────────────
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'            // 코드 변경 감지, LiveReload 등 (로컬)
+
+    // ── 테스트 ──────────────────────────────────────────────────────────────
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'     // JUnit, AssertJ, Mockito 등
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'  // REST Docs (MockMvc 기반 문서화)
+    testImplementation 'org.springframework.security:spring-security-test'     // Security 테스트 지원(WithMockUser 등)
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'               // JUnit 플랫폼 런처(IDE/Gradle 실행)
+}
+
+ext {
+    set('snippetsDir', file("build/generated-snippets"))
+}
+
+tasks.named('test') {
+    outputs.dir snippetsDir
+    useJUnitPlatform()
+}
+
+tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
+    dependsOn test
+}
+
+tasks.register('copyRestDocs', Copy) {
+    dependsOn tasks.named('asciidoctor')
+    from "${asciidoctor.outputDir}"
+    into "src/main/resources/static/docs"
+}
+
+tasks.named('bootJar') {
+    dependsOn tasks.named('copyRestDocs')
+}
+
+jar {
+    enabled = false
+}
+
+bootRun {
+    jvmArgs = ['-Duser.timezone=Asia/Seoul']
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += ['-Duser.timezone=Asia/Seoul']
+}
