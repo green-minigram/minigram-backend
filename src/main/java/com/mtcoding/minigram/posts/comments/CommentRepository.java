@@ -8,4 +8,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CommentRepository {
     private final EntityManager em;
+
+    public long countByPostId(Integer postId) {
+        var jpql = "select count(c) from Comment c where c.post.id = :postId";
+        return em.createQuery(jpql, Long.class)
+                .setParameter("postId", postId)
+                .getSingleResult();
+    }
 }
