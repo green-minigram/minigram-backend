@@ -18,7 +18,7 @@ public class PostRepository {
     }
 
     public List<PostImage> findImagesByPostId(Integer postId) {
-        var jpql = "select pi from PostImage pi where pi.post.id = :postId order by pi.orders asc";
+        var jpql = "select pi from PostImage pi where pi.post.id = :postId";
         return em.createQuery(jpql, PostImage.class)
                 .setParameter("postId", postId)
                 .getResultList();
