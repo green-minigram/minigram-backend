@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts.comments;
 
+import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,13 @@ import java.util.*;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final PostRepository postRepository;
 
     @Transactional(readOnly = true)
     public List<CommentResponse.ItemDTO> getCommentsByPostId(Integer postId, Integer viewerId) {
+
+        Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
+
         // 부모/자식 조회 (네 기존 로직)
         List<Comment> parents = commentRepository.findParentsByPostId(postId);
         if (parents.isEmpty()) return List.of();
@@ -44,17 +49,25 @@ public class CommentService {
         // DTO 변환 + likes 세팅
         return parents.stream().map(p -> {
             List<CommentResponse.ItemDTO> childDtos = childrenMap.getOrDefault(p.getId(), List.of())
-                    .stream().map(c -> toItemWithLikes(c, countMap, likedSet)).toList();
-            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, countMap, likedSet);
+                    .stream().map(c -> toItemWithLikes(c, viewerId, postAuthorId, countMap, likedSet)).toList();
+            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, viewerId, postAuthorId, countMap, likedSet);
             parentDto.setChildren(childDtos);
             return parentDto;
         }).toList();
     }
 
     private CommentResponse.ItemDTO toItemWithLikes(Comment c,
+                                                    Integer viewerId,
+                                                    Integer postAuthorId,
                                                     Map<Integer, Integer> countMap,
                                                     Set<Integer> likedSet) {
         var dto = new CommentResponse.ItemDTO(c);
+
+        dto.setOwner(viewerId != null && viewerId.equals(c.getUser().getId()));
+
+        dto.setPostAuthor(Objects.equals(c.getUser().getId(), postAuthorId));
+
+
         int likeCount = countMap.getOrDefault(c.getId(), 0);
         boolean liked = likedSet.contains(c.getId());
         dto.setLikes(new CommentLikeResponse.LikesDTO(likeCount, liked));
