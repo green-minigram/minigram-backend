@@ -26,7 +26,9 @@ public class AuthorizationFilter implements Filter {
             "/api/auth/join",
             "/api/auth/login",
             "/api/auth/check-email",
-            "/api/auth/check-username"
+            "/api/auth/check-username",
+            "/users/1/token",
+            "/users/2/token"
     );
 
     // 하위 경로 전체 허용
