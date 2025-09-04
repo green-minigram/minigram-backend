@@ -38,7 +38,7 @@ public class PresignControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void update_test() throws Exception {
+    public void create_upload_url_test() throws Exception {
         // given
         PresignRequest.UploadDTO reqDTO = new PresignRequest.UploadDTO();
         reqDTO.setUploadType(UploadType.IMAGE);
