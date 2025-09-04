@@ -7,6 +7,7 @@ import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.storage.PresignRequest;
 import com.mtcoding.minigram.storage.UploadType;
 import com.mtcoding.minigram.users.User;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,19 +40,18 @@ public class PresignControllerTest extends MyRestDoc {
     @Test
     public void update_test() throws Exception {
         // given
-
         PresignRequest.UploadDTO reqDTO = new PresignRequest.UploadDTO();
         reqDTO.setUploadType(UploadType.IMAGE);
         reqDTO.setMimeType("image/png");
 
 
         String requestBody = om.writeValueAsString(reqDTO);
-        System.out.println(requestBody);
+        // System.out.println(requestBody);
 
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
-                        .put("/api/storage/presignUrl")
+                        .post("/api/storage/presignedUrl")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken)
@@ -64,8 +64,8 @@ public class PresignControllerTest extends MyRestDoc {
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.key").value(""));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.presignedUrl").value(""));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.key").value(Matchers.matchesPattern("^images/\\d+/[0-9a-f]{32}\\.png$")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.presignedUrl").value(Matchers.matchesPattern("^https://.+\\.s3\\.ap-northeast-2\\.amazonaws\\.com/images/\\d+/[0-9a-f]{32}\\.png\\?.*$")));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.expiresIn").value(900));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.mimeType").value("image/png"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
