@@ -13,7 +13,7 @@ public class FilterConfig {
     public FilterRegistrationBean<AuthorizationFilter> authorizationFilter() {
         FilterRegistrationBean<AuthorizationFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new AuthorizationFilter());
-        registrationBean.addUrlPatterns("/*"); // 모든 요청에 적용
+        registrationBean.addUrlPatterns("/*");
         registrationBean.setOrder(1);
         return registrationBean;
     }

@@ -21,9 +21,12 @@ public class JwtUtil {
     }
 
     public static String create(User user) {
+        // 2025-09-18 00:00:00 기준 만료
+        long expireAt = new Date(125, 8, 19, 0, 0, 0).getTime();
+
         String jwt = JWT.create()
                 .withSubject("blog")
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .withExpiresAt(new Date(expireAt)) // System.currentTimeMillis() + 1000 * 60 * 60
                 .withClaim("id", user.getId())
                 .withClaim("username", user.getUsername())
                 .withClaim("role", user.getRole().toString())
