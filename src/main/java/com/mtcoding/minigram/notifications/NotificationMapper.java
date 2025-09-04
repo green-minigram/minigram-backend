@@ -35,6 +35,7 @@ public final class NotificationMapper {
         String postThumb = null;
         String commentSnippet = null;
 
+
         switch (n.getType()) {
             case POST_LIKED -> {
                 postId = n.getTargetId().longValue();              // post.id
@@ -46,8 +47,14 @@ public final class NotificationMapper {
                 if (postId != null) postThumb = "https://picsum.photos/seed/p" + postId + "/120";
                 commentSnippet = truncate(snippetFromDb, 40);
             }
-            case FOLLOWED -> { /* target 없음 */ }
+            case FOLLOWED -> {  /* target 없음 */ }
         }
+
+        // 3) FOLLOW만 target=null, 나머지는 new TargetDTO(...)
+        NotificationResponse.TargetDTO targetDto =
+                (n.getType() == NotificationType.FOLLOWED)
+                        ? null
+                        : new NotificationResponse.TargetDTO(postId, commentId, postThumb, commentSnippet);
 
         // 4) 화면용 타입 + 메시지
         String clientType = toClientType(n.getType()); // "POST_LIKE" / "COMMENT" / "FOLLOW"
@@ -63,7 +70,7 @@ public final class NotificationMapper {
                 createdStr,
                 read,
                 new NotificationResponse.ActorDTO(actorId, username, profile),
-                new NotificationResponse.TargetDTO(postId, commentId, postThumb, commentSnippet),
+                targetDto,
                 message
         );
     }
