@@ -18,7 +18,7 @@ import java.util.UUID;
 public class PresignService {
 
     private final S3Presigner presigner;  // S3Config에서 기본 체인으로 생성
-    private final StorageProps props;     // 버킷/TTL/CloudFront 정책
+    private final StorageProps props;     // 버킷/TTL 정책
 
     // 업로드용 presign 발급
     public PresignResponse.UploadDTO createUploadUrl(PresignRequest.UploadDTO reqDTO, User sessionUser) {
@@ -72,7 +72,7 @@ public class PresignService {
     );
 
     // Content-Type을 받아서 확장자를 반환
-    private String mapExt(String contentType) {
-        return EXTENSION.getOrDefault(contentType.toLowerCase(), "bin");
+    private String mapExt(String mimeType) {
+        return EXTENSION.getOrDefault(mimeType.toLowerCase(), "bin");
     }
 }

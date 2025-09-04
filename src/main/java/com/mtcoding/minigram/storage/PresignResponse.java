@@ -7,9 +7,9 @@ public class PresignResponse {
     @Data
     public static class UploadDTO {
         public String key;         // S3 object key
-        public String presignedUrl;   // 클라이언트가 PUT할 presigned URL
+        public String presignedUrl;
         public int expiresIn;   // TTL(sec)
-        public String mimeType; // 클라이언트가 PUT할 때 동일 헤더 필수(서명 포함)
+        public String mimeType;
 
         public UploadDTO(String key, String presignedUrl, int expiresIn, String mimeType) {
             this.key = key;
