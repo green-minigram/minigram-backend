@@ -27,8 +27,6 @@ public class UsersController {
                 .role(userId == 1 ? Role.ADMIN : Role.USER)
                 .build();
 
-        session.setAttribute("sessionUser", tempUser);
-
         String accessToken = JwtUtil.create(tempUser);
 
         Map<String, Object> body = Map.of("accessToken", accessToken);
