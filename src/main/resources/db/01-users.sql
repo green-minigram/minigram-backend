@@ -5,7 +5,7 @@ VALUES
 -- 관리자 계정
 ('admin@minigram.com', 'minigram',
  '$2a$10$FpS0L/H5Te23KLSIqdB2DOoYkpRqvPDs9YubWYNJoMl7I09NzOMEe',
- 'ADMIN', '관리자', NULL, NULL, NULL, '미니그램 시스템 관리자'),
+ 'ADMIN, USER', '관리자', NULL, NULL, NULL, '미니그램 시스템 관리자'),
 
 -- 일반 유저들
 ('ssar@nate.com', 'ssar',

@@ -1,6 +1,5 @@
 package com.mtcoding.minigram.users;
 
-import com.mtcoding.minigram._core.enums.Role;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram._core.util.Resp;
 import jakarta.servlet.http.HttpSession;
@@ -24,7 +23,7 @@ public class UsersController {
         User tempUser = User.builder()
                 .id(userId)
                 .username(userId == 1 ? "minigram" : "ssar")
-                .role(userId == 1 ? Role.ADMIN : Role.USER)
+                .roles(userId == 1 ? "ADMIN" : "USER")
                 .build();
 
         String accessToken = JwtUtil.create(tempUser);
