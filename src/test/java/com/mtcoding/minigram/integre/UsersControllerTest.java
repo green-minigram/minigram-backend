@@ -25,9 +25,9 @@ public class UsersControllerTest extends MyRestDoc {
     @BeforeEach
     public void setUp() {
         // 테스트 시작 전에 실행할 코드
-        User ssar = User.builder().id(1).username("ssar123").role(Role.USER).build();
+        User ssar = User.builder().id(2).username("ssar").role(Role.USER).build();
         accessToken1 = JwtUtil.create(ssar);
-        User cos = User.builder().id(2).username("cos123").role(Role.USER).build();
+        User cos = User.builder().id(3).username("cos").role(Role.USER).build();
         accessToken2 = JwtUtil.create(cos);
     }
 

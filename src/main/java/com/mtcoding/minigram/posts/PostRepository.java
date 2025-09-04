@@ -13,13 +13,17 @@ import java.util.Optional;
 public class PostRepository {
     private final EntityManager em;
 
+    // 게시글 단건 조회
     public Optional<Post> findById(Integer id) {
         return Optional.ofNullable(em.find(Post.class, id));
     }
 
+    // 게시글 이미지 목록 조회
     public List<PostImage> findImagesByPostId(Integer postId) {
-        var jpql = "select pi from PostImage pi where pi.post.id = :postId";
-        return em.createQuery(jpql, PostImage.class)
+        return em.createQuery(
+                        "select pi from PostImage pi where pi.post.id = :postId",
+                        PostImage.class
+                )
                 .setParameter("postId", postId)
                 .getResultList();
     }

@@ -1,7 +1,7 @@
 package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram.posts.images.PostImage;
-import com.mtcoding.minigram.posts.likes.PostLikeResponse;
+import com.mtcoding.minigram.posts.likes.PostLikeResponse.LikesDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,33 +14,30 @@ public class PostResponse {
     public static class DetailDTO {
         private Integer postId;
         private AuthorDTO author;
-        private String content;
         private List<ImageDTO> images;
-        private LocalDateTime createdAt;
-
-        private PostLikeResponse.LikesDTO likes;
+        private String content;
+        private LikesDTO likes;
         private Integer commentCount;
-
-        private Boolean isFollowing;   // viewer → author
-        private Boolean isOwner;
+        private LocalDateTime postedAt;
+        private Boolean isReported;
 
         public DetailDTO(Post post, List<PostImage> images) {
             this.postId = post.getId();
             this.author = new AuthorDTO(
                     post.getUser().getId(),
                     post.getUser().getUsername(),
-                    post.getUser().getProfileImageUrl()
+                    post.getUser().getProfileImageUrl(),
+                    false, // isFollowing (default)
+                    false // isOwner (default)
             );
-            this.content = post.getContent();
             this.images = images.stream()
                     .map(i -> new ImageDTO(i.getId(), i.getUrl()))
                     .collect(Collectors.toList());
-            this.createdAt = post.getCreatedAt();
-
-            this.likes = new PostLikeResponse.LikesDTO(0, false);
+            this.content = post.getContent();
+            this.likes = new LikesDTO(0, false);
             this.commentCount = 0;
-            this.isFollowing = false;
-            this.isOwner = false;
+            this.postedAt = post.getCreatedAt();
+            this.isReported = false;
         }
     }
 
@@ -50,10 +47,17 @@ public class PostResponse {
         private String username;
         private String profileImageUrl;
 
-        public AuthorDTO(Integer userId, String username, String profileImageUrl) {
+        private Boolean isFollowing;
+
+        private Boolean isOwner;
+
+        public AuthorDTO(Integer userId, String username, String profileImageUrl,
+                         Boolean isFollowing, Boolean isOwner) {
             this.userId = userId;
             this.username = username;
             this.profileImageUrl = profileImageUrl;
+            this.isFollowing = isFollowing;
+            this.isOwner = isOwner;
         }
     }
 
