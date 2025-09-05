@@ -1,7 +1,6 @@
 package com.mtcoding.minigram.integre;
 
 import com.mtcoding.minigram.MyRestDoc;
-import com.mtcoding.minigram._core.enums.Role;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +33,7 @@ public class PostsControllerTest extends MyRestDoc {
     @BeforeEach
     public void setUp() {
         // 테스트 시작 전에 실행할 코드
-        User user = User.builder().id(2).username("ssar").role(Role.USER).build();
+        User user = User.builder().id(2).username("ssar").roles("USER").build();
         accessToken = JwtUtil.create(user);
     }
 

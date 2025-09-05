@@ -2,7 +2,6 @@ package com.mtcoding.minigram.integre;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
-import com.mtcoding.minigram._core.enums.Role;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,9 +24,9 @@ public class UsersControllerTest extends MyRestDoc {
     @BeforeEach
     public void setUp() {
         // 테스트 시작 전에 실행할 코드
-        User ssar = User.builder().id(2).username("ssar").role(Role.USER).build();
+        User ssar = User.builder().id(1).username("minigram").roles("ADMIN, USER").build();
         accessToken1 = JwtUtil.create(ssar);
-        User cos = User.builder().id(3).username("cos").role(Role.USER).build();
+        User cos = User.builder().id(2).username("ssar").roles("USER").build();
         accessToken2 = JwtUtil.create(cos);
     }
 
