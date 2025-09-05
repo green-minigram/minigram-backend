@@ -33,7 +33,6 @@ public class CommentsControllerTest extends MyRestDoc {
     @Autowired
     private ObjectMapper om;
 
-    private User mockUser;
 
     private MockHttpSession session;
     private User viewer;
@@ -55,7 +54,7 @@ public class CommentsControllerTest extends MyRestDoc {
         int postId = 18; // 더미에 존재하는 ID
 
         ResultActions actions = mvc.perform(
-                get("/api/posts/{postId}/comments", postId)
+                get("/s/api/posts/{postId}/comments", postId)
                         .header("Authorization", "Bearer " + accessToken)
                         .param("page", "0")
                         .param("size", "10")

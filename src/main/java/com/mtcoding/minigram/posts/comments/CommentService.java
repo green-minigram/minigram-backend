@@ -3,10 +3,10 @@ package com.mtcoding.minigram.posts.comments;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
+import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -22,8 +22,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
 
-    @Transactional(readOnly = true)
-    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer viewerId) {
+    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, User sessionUser) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
 
@@ -50,18 +49,18 @@ public class CommentService {
         Map<Integer, Integer> countMap = allIds.isEmpty()
                 ? Map.of()
                 : commentLikeRepository.countByCommentIds(allIds);
-        Set<Integer> likedSet = (viewerId == null || allIds.isEmpty())
+        Set<Integer> likedSet = (sessionUser.getId() == null || allIds.isEmpty())
                 ? Set.of()
-                : commentLikeRepository.findLikedCommentIdsByUser(viewerId, allIds);
+                : commentLikeRepository.findLikedCommentIdsByUser(sessionUser.getId(), allIds);
 
         // DTO 변환 + children 세팅
         return parents.stream().map(p -> {
             List<CommentResponse.ItemDTO> childDtos = childrenMap.getOrDefault(p.getId(), List.of())
                     .stream()
-                    .map(c -> toItemWithLikes(c, viewerId, postAuthorId, countMap, likedSet))
+                    .map(c -> toItemWithLikes(c, sessionUser.getId(), postAuthorId, countMap, likedSet))
                     .toList();
 
-            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, viewerId, postAuthorId, countMap, likedSet);
+            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, sessionUser.getId(), postAuthorId, countMap, likedSet);
             parentDto.setChildren(childDtos);
             return parentDto;
         }).toList();
@@ -74,17 +73,17 @@ public class CommentService {
             Map<Integer, Integer> countMap,
             Set<Integer> likedSet
     ) {
-        CommentResponse.ItemDTO dto = new CommentResponse.ItemDTO(c);
+        CommentResponse.ItemDTO itemDTO = new CommentResponse.ItemDTO(c);
 
         // 소유자/게시글 작성자 여부
-        dto.setOwner(viewerId != null && viewerId.equals(c.getUser().getId()));
-        dto.setPostAuthor(Objects.equals(c.getUser().getId(), postAuthorId));
+        itemDTO.setOwner(viewerId != null && viewerId.equals(c.getUser().getId()));
+        itemDTO.setPostAuthor(Objects.equals(c.getUser().getId(), postAuthorId));
 
         // 좋아요 정보
         int likeCount = countMap.getOrDefault(c.getId(), 0);
         boolean liked = likedSet.contains(c.getId());
-        dto.setLikes(new CommentLikeResponse.LikesDTO(likeCount, liked));
+        itemDTO.setLikes(new CommentLikeResponse.LikesDTO(likeCount, liked));
 
-        return dto;
+        return itemDTO;
     }
 }
