@@ -67,7 +67,6 @@ public class PostService {
         // 신고 여부
         boolean reported = viewerId != null
                 && reportRepository.existsActivePostReportByUser(postId, viewerId);
-        // 상태 무관으로 막고 싶다면 위 라인 대신 existsAnyPostReportByUser 사용
         dto.setIsReported(reported);
 
         return dto;
