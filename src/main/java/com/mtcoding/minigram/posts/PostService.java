@@ -6,7 +6,7 @@ import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.posts.likes.PostLikeResponse.LikesDTO;
-import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.reports.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,13 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final FollowRepository followRepository;
+    private final ReportRepository reportRepository;
 
 
     // 게시글 상세
     @Transactional(readOnly = true)
-    public PostResponse.DetailDTO find(Integer postId, User user) {
-        Integer userId = (user == null) ? null : user.getId();
+    public PostResponse.DetailDTO find(Integer postId, Integer viewerId) {
+//        Integer userId = (user == null) ? null : user.getId();
 
         // 1) 엔티티 로드
         Post postPS = postRepository.findById(postId)
@@ -43,7 +44,7 @@ public class PostService {
 
         // 3) 좋아요 정보
         int likeCount = (int) postLikeRepository.countByPostId(postId);
-        boolean liked = userId != null && postLikeRepository.existsByPostIdAndUserId(postId, userId);
+        boolean liked = viewerId != null && postLikeRepository.existsByPostIdAndUserId(postId, viewerId);
         dto.setLikes(new LikesDTO(likeCount, liked));
 
         // 4) 댓글 개수
@@ -51,18 +52,23 @@ public class PostService {
         dto.setCommentCount(commentCount);
 
         // 5) 소유자/팔로잉 여부 (AuthorDTO 내부 필드로 세팅)
-        boolean owner = user.getId() != null && user.getId().equals(postPS.getUser().getId());
+        boolean owner = viewerId != null && viewerId.equals(postPS.getUser().getId());
         dto.getAuthor().setIsOwner(owner);
 
         // 팔로우 여부
         boolean following = false;
-        if (userId != null && !owner) {
+        if (viewerId != null && !owner) {
             following = followRepository.existsByFollowerIdAndFolloweeId(
-                    userId, postPS.getUser().getId()
+                    viewerId, postPS.getUser().getId()
             );
         }
         dto.getAuthor().setIsFollowing(following);
 
+        // 신고 여부
+        boolean reported = viewerId != null
+                && reportRepository.existsActivePostReportByUser(postId, viewerId);
+        // 상태 무관으로 막고 싶다면 위 라인 대신 existsAnyPostReportByUser 사용
+        dto.setIsReported(reported);
 
         return dto;
     }
