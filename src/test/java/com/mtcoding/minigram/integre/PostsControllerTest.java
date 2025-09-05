@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
-@AutoConfigureMockMvc(printOnlyOnFailure = true)
+@AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class PostsControllerTest extends MyRestDoc {
 
@@ -47,7 +47,7 @@ public class PostsControllerTest extends MyRestDoc {
         ResultActions actions = mvc.perform(
                 get("/s/api/posts/{postId}", postId)
                         .header("Authorization", "Bearer " + accessToken)
-                        .accept(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();

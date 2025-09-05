@@ -6,7 +6,6 @@ import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.ReportRepository;
-import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,7 @@ public class PostService {
 
 
     // 게시글 상세
-    public PostResponse.DetailDTO find(Integer postId, User sessionUser) {
-//        Integer userId = (user == null) ? null : user.getId();
+    public PostResponse.DetailDTO find(Integer postId, Integer userId) {
 
         // 1) 엔티티 로드
         Post postPS = postRepository.findById(postId)
@@ -40,23 +38,23 @@ public class PostService {
         // 2) 동적 값 계산
         int likeCount = (int) postLikeRepository.countByPostId(postId);
 
-        boolean liked = sessionUser.getId() != null && postLikeRepository.existsByPostIdAndUserId(postId, sessionUser.getId());
+        boolean liked = userId != null && postLikeRepository.existsByPostIdAndUserId(postId, userId);
 
         int commentCount = (int) commentRepository.countByPostId(postId);
 
-        boolean owner = sessionUser.getId() != null && sessionUser.getId().equals(postPS.getUser().getId());
+        boolean owner = userId != null && userId.equals(postPS.getUser().getId());
 
         // 팔로잉 여부
         boolean following = false;
-        if (sessionUser.getId() != null && !owner) {
+        if (userId != null && !owner) {
             following = followRepository.existsByFollowerIdAndFolloweeId(
-                    sessionUser.getId(), postPS.getUser().getId()
+                    userId, postPS.getUser().getId()
             );
         }
 
         // 신고 여부
-        boolean reported = sessionUser.getId() != null
-                && reportRepository.existsActivePostReportByUser(postId, sessionUser.getId());
+        boolean reported = userId != null
+                && reportRepository.existsActivePostReportByUser(postId, userId);
 
 
         log.info("[POST_FIND] out: likes(count={}, liked={}), comments={}, owner={}, following={}, reported={}",

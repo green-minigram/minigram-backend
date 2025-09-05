@@ -5,6 +5,7 @@ import com.mtcoding.minigram.users.User;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,9 +17,8 @@ public class PostsController {
     private final HttpSession session;
 
     @GetMapping("/s/api/posts/{postId}")
-    public ResponseEntity<?> find(@PathVariable Integer postId) {
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        PostResponse.DetailDTO respDTO = postService.find(postId, sessionUser);
+    public ResponseEntity<?> find(@PathVariable Integer postId, @AuthenticationPrincipal User user) {
+        PostResponse.DetailDTO respDTO = postService.find(postId, user.getId());
         return Resp.ok(respDTO);
     }
 
