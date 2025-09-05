@@ -42,7 +42,7 @@ public class CommentsControllerTest extends MyRestDoc {
 
     @BeforeEach
     void setUp() {
-        viewer = User.builder().id(1).username("ssar123").role(Role.USER).build();
+        viewer = User.builder().id(2).username("ssar123").role(Role.USER).build();
         accessToken = JwtUtil.create(viewer);
         session = new MockHttpSession();
         session.setAttribute("sessionUser", viewer);

@@ -21,12 +21,13 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
 
+
     @Transactional(readOnly = true)
-    public List<CommentResponse.ItemDTO> getCommentsByPostId(Integer postId, Integer viewerId) {
+    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer viewerId) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
 
-        // 부모/자식 조회 (네 기존 로직)
+        // 부모/자식 조회
         List<Comment> parents = commentRepository.findParentsByPostId(postId);
         if (parents.isEmpty()) return List.of();
 
@@ -36,41 +37,54 @@ public class CommentService {
         // parentId -> children 매핑
         Map<Integer, List<Comment>> childrenMap = new LinkedHashMap<>();
         parentIds.forEach(id -> childrenMap.put(id, new ArrayList<>()));
-        for (Comment ch : children) childrenMap.get(ch.getParent().getId()).add(ch);
+        for (Comment ch : children) {
+            childrenMap.get(ch.getParent().getId()).add(ch);
+        }
 
         // 전체 commentId 수집
-        List<Integer> allIds = new ArrayList<>(parentIds);
+        List<Integer> allIds = new ArrayList<>(parentIds.size() + children.size());
+        allIds.addAll(parentIds);
         allIds.addAll(children.stream().map(Comment::getId).toList());
 
-        // 좋아요 “조회만” (2쿼리)
-        Map<Integer, Integer> countMap = commentLikeRepository.countByCommentIds(allIds);
-        Set<Integer> likedSet = commentLikeRepository.findLikedCommentIdsByUser(viewerId, allIds);
+        // 좋아요 집계/뷰어 좋아요 (빈 목록 방어)
+        Map<Integer, Integer> countMap = allIds.isEmpty()
+                ? Map.of()
+                : commentLikeRepository.countByCommentIds(allIds);
+        Set<Integer> likedSet = (viewerId == null || allIds.isEmpty())
+                ? Set.of()
+                : commentLikeRepository.findLikedCommentIdsByUser(viewerId, allIds);
 
-        // DTO 변환 + likes 세팅
+        // DTO 변환 + children 세팅
         return parents.stream().map(p -> {
             List<CommentResponse.ItemDTO> childDtos = childrenMap.getOrDefault(p.getId(), List.of())
-                    .stream().map(c -> toItemWithLikes(c, viewerId, postAuthorId, countMap, likedSet)).toList();
+                    .stream()
+                    .map(c -> toItemWithLikes(c, viewerId, postAuthorId, countMap, likedSet))
+                    .toList();
+
             CommentResponse.ItemDTO parentDto = toItemWithLikes(p, viewerId, postAuthorId, countMap, likedSet);
             parentDto.setChildren(childDtos);
             return parentDto;
         }).toList();
     }
 
-    private CommentResponse.ItemDTO toItemWithLikes(Comment c,
-                                                    Integer viewerId,
-                                                    Integer postAuthorId,
-                                                    Map<Integer, Integer> countMap,
-                                                    Set<Integer> likedSet) {
-        var dto = new CommentResponse.ItemDTO(c);
+    private CommentResponse.ItemDTO toItemWithLikes(
+            Comment c,
+            Integer viewerId,
+            Integer postAuthorId,
+            Map<Integer, Integer> countMap,
+            Set<Integer> likedSet
+    ) {
+        CommentResponse.ItemDTO dto = new CommentResponse.ItemDTO(c);
 
+        // 소유자/게시글 작성자 여부
         dto.setOwner(viewerId != null && viewerId.equals(c.getUser().getId()));
-
         dto.setPostAuthor(Objects.equals(c.getUser().getId(), postAuthorId));
 
-
+        // 좋아요 정보
         int likeCount = countMap.getOrDefault(c.getId(), 0);
         boolean liked = likedSet.contains(c.getId());
         dto.setLikes(new CommentLikeResponse.LikesDTO(likeCount, liked));
+
         return dto;
     }
 }

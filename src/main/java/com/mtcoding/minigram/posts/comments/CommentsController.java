@@ -15,6 +15,6 @@ public class CommentsController {
 
     @GetMapping
     public List<CommentResponse.ItemDTO> getComments(@PathVariable Integer postId, @RequestParam(required = false) Integer viewerId) {
-        return commentService.getCommentsByPostId(postId, viewerId);
+        return commentService.findAllByPostId(postId, viewerId);
     }
 }
