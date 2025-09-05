@@ -1,8 +1,8 @@
 package com.mtcoding.minigram.posts.comments;
 
+import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
-import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,9 +20,12 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
 
+    //게시글 댓글 조회
     public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer userId) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
+        if (postAuthorId == null) throw new ExceptionApi404("게시글이 존재하지 않습니다"); // [CHANGED] 존재하지 않는 게시글 처리
+
 
         // 부모/자식 조회
         List<Comment> parents = commentRepository.findParentsByPostId(postId);
@@ -34,8 +37,8 @@ public class CommentService {
         // parentId -> children 매핑
         Map<Integer, List<Comment>> childrenMap = new LinkedHashMap<>();
         parentIds.forEach(id -> childrenMap.put(id, new ArrayList<>()));
-        for (Comment ch : children) {
-            childrenMap.get(ch.getParent().getId()).add(ch);
+        for (Comment child : children) {
+            childrenMap.get(child.getParent().getId()).add(child);
         }
 
         // 전체 commentId 수집
@@ -52,36 +55,31 @@ public class CommentService {
                 : commentLikeRepository.findLikedCommentIdsByUser(userId, allIds);
 
         // DTO 변환 + children 세팅
-        return parents.stream().map(p -> {
-            List<CommentResponse.ItemDTO> childDtos = childrenMap.getOrDefault(p.getId(), List.of())
-                    .stream()
-                    .map(c -> toItemWithLikes(c, userId, postAuthorId, countMap, likedSet))
-                    .toList();
+        List<CommentResponse.ItemDTO> result = parents.stream()
+                .map(parent -> {
+                    List<CommentResponse.ItemDTO> childDtos = childrenMap
+                            .getOrDefault(parent.getId(), List.of())
+                            .stream()
+                            .map(child -> toItemWithLikes(child, userId, postAuthorId, countMap, likedSet, List.of()))
+                            .toList();
 
-            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, userId, postAuthorId, countMap, likedSet);
-            parentDto.setChildren(childDtos);
-            return parentDto;
-        }).toList();
+                    return toItemWithLikes(parent, userId, postAuthorId, countMap, likedSet, childDtos);
+                })
+                .toList();
+
+        log.info("comments.result parents={}, children={}, allIds={}, likedSetSize={}",
+                result.size(), children.size(), allIds.size(), likedSet.size()); // 테스트 확인 로그 추가
+
+        return result;
     }
 
-    private CommentResponse.ItemDTO toItemWithLikes(
-            Comment c,
-            Integer viewerId,
-            Integer postAuthorId,
-            Map<Integer, Integer> countMap,
-            Set<Integer> likedSet
-    ) {
-        CommentResponse.ItemDTO itemDTO = new CommentResponse.ItemDTO(c);
+    // 단일 댓글에 대해 likeCount/liked 계산 후 DTO로 변환하고 owner/postAuthor 플래그 설정
+    private CommentResponse.ItemDTO toItemWithLikes(Comment comment, Integer userId, Integer postAuthorId, Map<Integer, Integer> countMap, Set<Integer> likedSet, List<CommentResponse.ItemDTO> childrenDtos) {
+        int likeCount = countMap.getOrDefault(comment.getId(), 0);
+        boolean liked = likedSet.contains(comment.getId());
+        boolean owner = (userId != null) && userId.equals(comment.getUser().getId());
+        boolean isPostAuthor = Objects.equals(comment.getUser().getId(), postAuthorId);
 
-        // 소유자/게시글 작성자 여부
-        itemDTO.setOwner(viewerId != null && viewerId.equals(c.getUser().getId()));
-        itemDTO.setPostAuthor(Objects.equals(c.getUser().getId(), postAuthorId));
-
-        // 좋아요 정보
-        int likeCount = countMap.getOrDefault(c.getId(), 0);
-        boolean liked = likedSet.contains(c.getId());
-        itemDTO.setLikes(new CommentLikeResponse.LikesDTO(likeCount, liked));
-
-        return itemDTO;
+        return CommentResponse.ItemDTO.from(comment, (childrenDtos == null) ? List.of() : childrenDtos, likeCount, liked, owner, isPostAuthor);
     }
 }
