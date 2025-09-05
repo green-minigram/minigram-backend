@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PostResponse {
 
@@ -21,23 +20,35 @@ public class PostResponse {
         private LocalDateTime postedAt;
         private Boolean isReported;
 
-        public DetailDTO(Post post, List<PostImage> images) {
+        public DetailDTO(Post post,
+                         java.util.List<PostImage> images,
+                         int likeCount, boolean isLiked,
+                         int commentCount,
+                         boolean isOwner, boolean isFollowing,
+                         boolean isReported) {
+
             this.postId = post.getId();
+            this.content = post.getContent();
+            this.postedAt = post.getCreatedAt();
+
+            // author: 생성 시점에 owner/following 주입
             this.author = new AuthorDTO(
                     post.getUser().getId(),
                     post.getUser().getUsername(),
                     post.getUser().getProfileImageUrl(),
-                    false, // isFollowing (default)
-                    false // isOwner (default)
+                    isFollowing,
+                    isOwner
             );
+
+            // images 매핑
             this.images = images.stream()
                     .map(i -> new ImageDTO(i.getId(), i.getUrl()))
-                    .collect(Collectors.toList());
-            this.content = post.getContent();
-            this.likes = new LikesDTO(0, false);
-            this.commentCount = 0;
-            this.postedAt = post.getCreatedAt();
-            this.isReported = false;
+                    .collect(java.util.stream.Collectors.toList());
+
+            // likes / comments / report
+            this.likes = new LikesDTO(likeCount, isLiked);
+            this.commentCount = commentCount;
+            this.isReported = isReported;
         }
     }
 

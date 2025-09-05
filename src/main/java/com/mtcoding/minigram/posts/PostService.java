@@ -5,12 +5,11 @@ import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.posts.likes.PostLikeRepository;
-import com.mtcoding.minigram.posts.likes.PostLikeResponse.LikesDTO;
 import com.mtcoding.minigram.reports.ReportRepository;
+import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,8 +28,7 @@ public class PostService {
 
 
     // 게시글 상세
-    @Transactional(readOnly = true)
-    public PostResponse.DetailDTO find(Integer postId, Integer viewerId) {
+    public PostResponse.DetailDTO find(Integer postId, User sessionUser) {
 //        Integer userId = (user == null) ? null : user.getId();
 
         // 1) 엔티티 로드
@@ -39,36 +37,32 @@ public class PostService {
 
         List<PostImage> images = postRepository.findImagesByPostId(postId);
 
-        // 2) 기본 DTO 구성
-        PostResponse.DetailDTO dto = new PostResponse.DetailDTO(postPS, images);
-
-        // 3) 좋아요 정보
+        // 2) 동적 값 계산
         int likeCount = (int) postLikeRepository.countByPostId(postId);
-        boolean liked = viewerId != null && postLikeRepository.existsByPostIdAndUserId(postId, viewerId);
-        dto.setLikes(new LikesDTO(likeCount, liked));
 
-        // 4) 댓글 개수
+        boolean liked = sessionUser.getId() != null && postLikeRepository.existsByPostIdAndUserId(postId, sessionUser.getId());
+
         int commentCount = (int) commentRepository.countByPostId(postId);
-        dto.setCommentCount(commentCount);
 
-        // 5) 소유자/팔로잉 여부 (AuthorDTO 내부 필드로 세팅)
-        boolean owner = viewerId != null && viewerId.equals(postPS.getUser().getId());
-        dto.getAuthor().setIsOwner(owner);
+        boolean owner = sessionUser.getId() != null && sessionUser.getId().equals(postPS.getUser().getId());
 
-        // 팔로우 여부
+        // 팔로잉 여부
         boolean following = false;
-        if (viewerId != null && !owner) {
+        if (sessionUser.getId() != null && !owner) {
             following = followRepository.existsByFollowerIdAndFolloweeId(
-                    viewerId, postPS.getUser().getId()
+                    sessionUser.getId(), postPS.getUser().getId()
             );
         }
-        dto.getAuthor().setIsFollowing(following);
 
         // 신고 여부
-        boolean reported = viewerId != null
-                && reportRepository.existsActivePostReportByUser(postId, viewerId);
-        dto.setIsReported(reported);
+        boolean reported = sessionUser.getId() != null
+                && reportRepository.existsActivePostReportByUser(postId, sessionUser.getId());
 
-        return dto;
+
+        log.info("[POST_FIND] out: likes(count={}, liked={}), comments={}, owner={}, following={}, reported={}",
+                likeCount, liked, commentCount, owner, following, reported);
+
+        // 3) 생성자 주입으로 한 번에 완성
+        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
     }
 }
