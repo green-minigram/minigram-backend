@@ -1,6 +1,6 @@
 -- 01-users.sql
 
-INSERT INTO users_tb (email, username, password, role, name, gender, birthdate, profile_image_url, bio)
+INSERT INTO users_tb (email, username, password, roles, name, gender, birthdate, profile_image_url, bio)
 VALUES
 -- 관리자 계정
 ('admin@minigram.com', 'minigram',
