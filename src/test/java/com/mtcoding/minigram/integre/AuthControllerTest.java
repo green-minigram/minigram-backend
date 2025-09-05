@@ -74,7 +74,7 @@ public class AuthControllerTest extends MyRestDoc {
         reqDTO.setPassword("1234");
 
         String requestBody = om.writeValueAsString(reqDTO);
-        System.out.println(requestBody);
+        // System.out.println(requestBody);
 
         // when
         ResultActions actions = mvc.perform(
@@ -86,7 +86,7 @@ public class AuthControllerTest extends MyRestDoc {
 
         // eye
         String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+        // System.out.println(responseBody);
 
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
