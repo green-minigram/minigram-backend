@@ -22,5 +22,13 @@ public class UserResponse {
         private Integer userId;
         private String username;
         private String roles;
+
+        public LoginDTO(String accessToken, User user) {
+            this.accessToken = accessToken;
+            this.userId = user.getId();
+            this.username = user.getUsername();
+            this.roles = user.getRoles();
+        }
     }
+
 }

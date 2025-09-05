@@ -17,7 +17,7 @@ public class PresignController {
     private final PresignService presignService;
     private final HttpSession session;
 
-    @PostMapping("/api/storage/presignedUrl")
+    @PostMapping("/s/api/storage/presignedUrl")
     public ResponseEntity<?> createUploadUrl(@RequestBody PresignRequest.UploadDTO reqDTO, @AuthenticationPrincipal User user) {
         PresignResponse.UploadDTO respDTO = presignService.createUploadUrl(reqDTO, user.getId());
         return Resp.ok(respDTO);

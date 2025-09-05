@@ -19,9 +19,9 @@ public class AuthController {
         return Resp.ok(respDTO);
     }
 
-//    @PostMapping("/api/auth/login")
-//    public ResponseEntity<?> login(@RequestBody UserRequest.LoginDTO reqDTO) {
-//        String accessToken = userService.login(reqDTO);
-//        return Resp.ok(accessToken);
-//    }
+    @PostMapping("/api/auth/login")
+    public ResponseEntity<?> login(@RequestBody UserRequest.LoginDTO reqDTO) {
+        var respDTO = userService.login(reqDTO);
+        return Resp.ok(respDTO);
+    }
 }
