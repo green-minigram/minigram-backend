@@ -12,4 +12,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class StoryService {
     private final StoryRepository storyRepository;
+
+    public StoryResponse.DetailDTO findByStoryId(Integer storyId) {
+        storyRepository.findByStoryId(storyId);
+        return new StoryResponse.DetailDTO();
+    }
 }
