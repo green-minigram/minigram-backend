@@ -49,8 +49,7 @@ public class CommentsControllerTest extends MyRestDoc {
         ResultActions actions = mvc.perform(
                 get("/s/api/posts/{postId}/comments", postId)
                         .header("Authorization", "Bearer " + accessToken)
-                        .param("page", "0")
-                        .param("size", "10")
+
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();

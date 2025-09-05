@@ -20,7 +20,6 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
 
-
     public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer userId) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
