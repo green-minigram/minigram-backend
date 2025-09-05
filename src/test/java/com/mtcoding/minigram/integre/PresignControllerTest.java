@@ -50,7 +50,7 @@ public class PresignControllerTest extends MyRestDoc {
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
-                        .post("/api/storage/presignedUrl")
+                        .post("/s/api/storage/presignedUrl")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .header("Authorization", "Bearer " + accessToken)
