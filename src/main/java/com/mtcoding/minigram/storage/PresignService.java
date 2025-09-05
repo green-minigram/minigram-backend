@@ -1,7 +1,6 @@
 package com.mtcoding.minigram.storage;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
-import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -21,7 +20,7 @@ public class PresignService {
     private final StorageProps props;     // 버킷/TTL 정책
 
     // 업로드용 presign 발급
-    public PresignResponse.UploadDTO createUploadUrl(PresignRequest.UploadDTO reqDTO, User sessionUser) {
+    public PresignResponse.UploadDTO createUploadUrl(PresignRequest.UploadDTO reqDTO, Integer userId) {
         UploadType uploadType = reqDTO.getUploadType();
         String mimeType = reqDTO.getMimeType();
 
@@ -34,7 +33,7 @@ public class PresignService {
         // 2. key 생성: /uploadType/사용자id/UUID.확장자
         String ext = mapExt(mimeType);
         String folder = (uploadType == UploadType.IMAGE) ? "images" : "videos";
-        String key = "%s/%d/%s.%s".formatted(folder, sessionUser.getId(), uuid(), ext);
+        String key = "%s/%d/%s.%s".formatted(folder, userId, uuid(), ext);
 
         // 3. PutObjectRequest
         PutObjectRequest putReq = PutObjectRequest.builder()

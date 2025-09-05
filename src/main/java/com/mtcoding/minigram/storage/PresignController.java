@@ -5,6 +5,7 @@ import com.mtcoding.minigram.users.User;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,9 +18,8 @@ public class PresignController {
     private final HttpSession session;
 
     @PostMapping("/api/storage/presignedUrl")
-    public ResponseEntity<?> createUploadUrl(@RequestBody PresignRequest.UploadDTO reqDTO) {
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        PresignResponse.UploadDTO respDTO = presignService.createUploadUrl(reqDTO, sessionUser);
+    public ResponseEntity<?> createUploadUrl(@RequestBody PresignRequest.UploadDTO reqDTO, @AuthenticationPrincipal User user) {
+        PresignResponse.UploadDTO respDTO = presignService.createUploadUrl(reqDTO, user.getId());
         return Resp.ok(respDTO);
     }
 }
