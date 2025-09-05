@@ -21,10 +21,10 @@ public class StoryRepository {
                                ) then true else false end),
                                (case when exists (
                                    select 1 from Follow f
-                                   where f.follower.id = :viewerId and f.followee = a
+                                   where f.follower.id = :viewerId and f.followee = u
                                ) then true else false end)
                         from Story s
-                        join fetch s.author a
+                        join fetch s.user u
                         where s.id = :storyId
                         """, Object[].class)
                 .setParameter("storyId", storyId)
