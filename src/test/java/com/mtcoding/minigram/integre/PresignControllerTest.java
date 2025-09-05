@@ -2,7 +2,6 @@ package com.mtcoding.minigram.integre;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
-import com.mtcoding.minigram._core.enums.Role;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.storage.PresignRequest;
 import com.mtcoding.minigram.storage.UploadType;
@@ -33,7 +32,7 @@ public class PresignControllerTest extends MyRestDoc {
     @BeforeEach
     public void setUp() {
         // 테스트 시작 전에 실행할 코드
-        User ssar = User.builder().id(2).username("ssar").role(Role.USER).build();
+        User ssar = User.builder().id(2).username("ssar").roles("USER").build();
         accessToken = JwtUtil.create(ssar);
     }
 
@@ -51,9 +50,9 @@ public class PresignControllerTest extends MyRestDoc {
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
-                        .post("/api/storage/presignedUrl")
+                        .post("/s/api/storage/presignedUrl")
                         .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .header("Authorization", "Bearer " + accessToken)
         );
 
