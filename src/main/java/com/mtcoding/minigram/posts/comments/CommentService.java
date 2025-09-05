@@ -3,7 +3,6 @@ package com.mtcoding.minigram.posts.comments;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
-import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
 
-    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, User sessionUser) {
+    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer userId) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
 
@@ -49,18 +48,18 @@ public class CommentService {
         Map<Integer, Integer> countMap = allIds.isEmpty()
                 ? Map.of()
                 : commentLikeRepository.countByCommentIds(allIds);
-        Set<Integer> likedSet = (sessionUser.getId() == null || allIds.isEmpty())
+        Set<Integer> likedSet = (userId == null || allIds.isEmpty())
                 ? Set.of()
-                : commentLikeRepository.findLikedCommentIdsByUser(sessionUser.getId(), allIds);
+                : commentLikeRepository.findLikedCommentIdsByUser(userId, allIds);
 
         // DTO 변환 + children 세팅
         return parents.stream().map(p -> {
             List<CommentResponse.ItemDTO> childDtos = childrenMap.getOrDefault(p.getId(), List.of())
                     .stream()
-                    .map(c -> toItemWithLikes(c, sessionUser.getId(), postAuthorId, countMap, likedSet))
+                    .map(c -> toItemWithLikes(c, userId, postAuthorId, countMap, likedSet))
                     .toList();
 
-            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, sessionUser.getId(), postAuthorId, countMap, likedSet);
+            CommentResponse.ItemDTO parentDto = toItemWithLikes(p, userId, postAuthorId, countMap, likedSet);
             parentDto.setChildren(childDtos);
             return parentDto;
         }).toList();

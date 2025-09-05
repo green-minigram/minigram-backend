@@ -1,9 +1,8 @@
-package com.mtcoding.minigram.integre.post.comments;
+package com.mtcoding.minigram.integre;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
-import com.mtcoding.minigram._core.enums.Role;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,18 +31,13 @@ public class CommentsControllerTest extends MyRestDoc {
     @Autowired
     private ObjectMapper om;
 
-
-    private MockHttpSession session;
-    private User viewer;
-
     private String accessToken;
 
     @BeforeEach
     void setUp() {
-        viewer = User.builder().id(2).username("ssar123").role(Role.USER).build();
-        accessToken = JwtUtil.create(viewer);
-        session = new MockHttpSession();
-        session.setAttribute("sessionUser", viewer);
+
+        User user = User.builder().id(2).username("ssar").roles("USER").build();
+        accessToken = JwtUtil.create(user);
     }
 
 
@@ -58,7 +51,6 @@ public class CommentsControllerTest extends MyRestDoc {
                         .header("Authorization", "Bearer " + accessToken)
                         .param("page", "0")
                         .param("size", "10")
-                        .session(session)
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
