@@ -9,6 +9,7 @@ import com.mtcoding.minigram.reports.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
 
-
+    @Transactional(readOnly = true)
     // 게시글 상세
     public PostResponse.DetailDTO find(Integer postId, Integer userId) {
 
