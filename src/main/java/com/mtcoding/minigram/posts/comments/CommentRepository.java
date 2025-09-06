@@ -13,6 +13,13 @@ import java.util.Map;
 public class CommentRepository {
     private final EntityManager em;
 
+    public long countByPostId(Integer postId) {
+        var jpql = "select count(c) from Comment c where c.post.id = :postId";
+        return em.createQuery(jpql, Long.class)
+                .setParameter("postId", postId)
+                .getSingleResult();
+    }
+
     public Map<Integer, Integer> findPostIdMapByCommentIds(List<Integer> commentIds) {
         if (commentIds == null || commentIds.isEmpty()) return Map.of();
         // Comment 엔티티가 c.post.id 로 접근 가능하다는 가정

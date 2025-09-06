@@ -1,9 +1,8 @@
-package com.mtcoding.minigram.integre.notifications;
+package com.mtcoding.minigram.integre;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
-import com.mtcoding.minigram._core.enums.Role;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,11 +42,8 @@ public class NotificationsControllerTest extends MyRestDoc {
 
     @BeforeEach
     void setUp() {
-        viewer = User.builder().id(8).username("luna").role(Role.USER).build();
-        accessToken = JwtUtil.create(viewer);
-
-        session = new MockHttpSession();
-        session.setAttribute("sessionUser", viewer);
+        User user = User.builder().id(8).username("luna").roles("USER").build();
+        accessToken = JwtUtil.create(user);
     }
 
     @Test
@@ -55,10 +51,8 @@ public class NotificationsControllerTest extends MyRestDoc {
     void findAll_ok() throws Exception {
         // when
         ResultActions actions = mvc.perform(
-                get("/notifications")
-                        .param("viewerId", "8")
-                        .header("Authorization", "Bearer " + accessToken) // JWT 필터 대비
-                        .session(session)                                  // RoleFilter 대비
+                get("s/api/notifications")
+                        .header("Authorization", "Bearer " + accessToken) // JWT 필터 대비                 // RoleFilter 대비
         );
 
         // eye
@@ -67,20 +61,22 @@ public class NotificationsControllerTest extends MyRestDoc {
 
         // then
         actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items", hasSize(greaterThan(0))))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.items").isArray())
+                .andExpect(jsonPath("$.body.items", hasSize(greaterThan(0))))
                 // 공통 필드
-                .andExpect(jsonPath("$.items[0].id").isNumber())
-                .andExpect(jsonPath("$.items[0].type").isString())
-                .andExpect(jsonPath("$.items[0].createdAt").isString())
-                .andExpect(jsonPath("$.items[0].read").isBoolean())
-                .andExpect(jsonPath("$.items[0].actor.userId").isNumber())
-                .andExpect(jsonPath("$.items[0].actor.username").isString())
-                .andExpect(jsonPath("$.items[0].message").isString())
+                .andExpect(jsonPath("$.body.items[0].id").isNumber())
+                .andExpect(jsonPath("$.body.items[0].type").isString())
+                .andExpect(jsonPath("$.body.items[0].createdAt").isString())
+                .andExpect(jsonPath("$.body.items[0].read").isBoolean())
+                .andExpect(jsonPath("$.body.items[0].actor.userId").isNumber())
+                .andExpect(jsonPath("$.body.items[0].actor.username").isString())
+                .andExpect(jsonPath("$.body.items[0].message").isString())
                 // COMMENT 타입이 최소 1개 존재하고, target.commentId 포함
-                .andExpect(jsonPath("$.items[?(@.type=='COMMENT')].target.commentId", not(empty())))
+                .andExpect(jsonPath("$.body.items[?(@.type=='COMMENT')].target.commentId", not(empty())))
                 // POST_LIKE 타입이 최소 1개 존재하고, target.postId 포함
-                .andExpect(jsonPath("$.items[?(@.type=='POST_LIKE')].target.postId", not(empty())));
+                .andExpect(jsonPath("$.body.items[?(@.type=='POST_LIKE')].target.postId", not(empty())));
         // FOLLOW 타입은 target이 없을 수 있으므로 강제 검증 X
 
         actions.andDo(document);

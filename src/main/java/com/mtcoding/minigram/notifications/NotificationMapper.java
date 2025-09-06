@@ -12,19 +12,19 @@ public final class NotificationMapper {
 
     private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    public static NotificationResponse.ItemDTO toItemDTO(Notification n) {
-        return toItemDTO(n, null, null);
+    public static NotificationResponse.ItemDTO toItemDTO(Notification notification) {
+        return toItemDTO(notification, null, null);
     }
 
-    public static NotificationResponse.ItemDTO toItemDTO(Notification n, Long postIdForComment, String snippetFromDb) {
+    public static NotificationResponse.ItemDTO toItemDTO(Notification notification, Long postIdForComment, String snippetFromDb) {
         // createdAt null-safe
-        LocalDateTime created = n.getCreatedAt() != null
-                ? n.getCreatedAt()
-                : (n.getUpdatedAt() != null ? n.getUpdatedAt() : LocalDateTime.now());
+        LocalDateTime created = notification.getCreatedAt() != null
+                ? notification.getCreatedAt()
+                : (notification.getUpdatedAt() != null ? notification.getUpdatedAt() : LocalDateTime.now());
         String createdStr = created.format(ISO);
 
         // 2) actor (sender)
-        User s = n.getSender();
+        User s = notification.getSender();
         Long actorId = s.getId().longValue();
         String username = safeUsername(s, actorId);
         String profile = placeholderProfile(actorId); // 실제 프로필 URL 붙일 때 여기 교체
@@ -36,13 +36,13 @@ public final class NotificationMapper {
         String commentSnippet = null;
 
 
-        switch (n.getType()) {
+        switch (notification.getType()) {
             case POST_LIKED -> {
-                postId = n.getTargetId().longValue();              // post.id
+                postId = notification.getTargetId().longValue();              // post.id
                 postThumb = "https://picsum.photos/seed/p" + postId + "/120";
             }
             case COMMENTED -> {
-                commentId = n.getTargetId().longValue();           // comment.id
+                commentId = notification.getTargetId().longValue();           // comment.id
                 postId = postIdForComment;                         // ⬅ 조회해온 postId 주입
                 if (postId != null) postThumb = "https://picsum.photos/seed/p" + postId + "/120";
                 commentSnippet = truncate(snippetFromDb, 40);
@@ -52,20 +52,20 @@ public final class NotificationMapper {
 
         // 3) FOLLOW만 target=null, 나머지는 new TargetDTO(...)
         NotificationResponse.TargetDTO targetDto =
-                (n.getType() == NotificationType.FOLLOWED)
+                (notification.getType() == NotificationType.FOLLOWED)
                         ? null
                         : new NotificationResponse.TargetDTO(postId, commentId, postThumb, commentSnippet);
 
         // 4) 화면용 타입 + 메시지
-        String clientType = toClientType(n.getType()); // "POST_LIKE" / "COMMENT" / "FOLLOW"
-        String message = buildMessage(n.getType(), username, commentSnippet);
+        String clientType = toClientType(notification.getType()); // "POST_LIKE" / "COMMENT" / "FOLLOW"
+        String message = buildMessage(notification.getType(), username, commentSnippet);
 
         // 5) read 여부
-        boolean read = n.getStatus() == ReadStatus.READ;
+        boolean read = notification.getStatus() == ReadStatus.READ;
 
         // 6) DTO 조립
         return new NotificationResponse.ItemDTO(
-                n.getId().longValue(),
+                notification.getId().longValue(),
                 clientType,
                 createdStr,
                 read,

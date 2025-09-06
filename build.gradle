@@ -49,6 +49,10 @@ dependencies {
 
     // ── SQL/native 쿼리 매핑 보조 ─────────────────────────────────────
     implementation 'org.qlrm:qlrm:4.0.1'                                       // Native Query → DTO 매핑 편의
+    
+    // ── AWS SDK ─────────────────────────────────────────────────────────────
+    implementation "io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.0"
+    // Boot 3.x 호환, AWS SDK v2 기반 (S3Client 자동주입, S3Template 제공, s3:// 리소스 로더 지원)
 
     // ── 유틸 / 롬복 ─────────────────────────────────────────────────────────
     implementation 'org.apache.commons:commons-lang3:3.12.0'                   // 문자열/컬렉션 등 유틸
