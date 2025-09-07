@@ -59,3 +59,6 @@ VALUES
 
 -- post 25 (rain)
 (42, 25, 5, NULL, '첫 글 환영해요!☔', 'ACTIVE', now(), now());
+
+ALTER TABLE comments_tb
+    ALTER COLUMN id RESTART WITH 43;
