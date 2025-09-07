@@ -9,13 +9,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
 import java.util.Optional;
 
 @Import(StoryRepository.class)
 @DataJpaTest
 public class StoryRepositoryTest {
-    @Autowired
-    private EntityManager em;
     @Autowired
     private StoryRepository storyRepository;
 
@@ -48,4 +47,27 @@ public class StoryRepositoryTest {
         }
     }
 
+    @Test
+    public void findMyStories_test() {
+        int currentUserId = 2;
+
+        List<Object[]> obsList = storyRepository.findMyStories(currentUserId);
+        System.out.println("=========== 내 스토리 목록 5개 조회 ============");
+        for (Object[] ob : obsList) {
+            Story story = (Story) ob[0];
+            Boolean isFollowing = (Boolean) ob[1];
+            int likeCount = ((Long) ob[2]).intValue();
+            Boolean isLiked = (Boolean) ob[3];
+
+            System.out.println("storyId     : " + story.getId());
+            System.out.println("ownerId     : " + story.getUser().getId());
+            System.out.println("username    : " + story.getUser().getUsername());
+            System.out.println("videoUrl    : " + story.getVideoUrl());
+            System.out.println("isFollowing : " + isFollowing);
+            System.out.println("likeCount   : " + likeCount);
+            System.out.println("isLiked     : " + isLiked);
+            System.out.println("------------------------------------------");
+        }
+        System.out.println("==========================================");
+    }
 }

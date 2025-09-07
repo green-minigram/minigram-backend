@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -31,5 +32,22 @@ public class StoryService {
                 isLiked,
                 likeCount
         );
+    }
+
+    public StoryResponse.ListDTO findMyStories(Integer currentUserId) {
+        List<Object[]> obsList = storyRepository.findMyStories(currentUserId);
+
+        List<StoryResponse.DetailDTO> detailDTOList = obsList.stream().map(ob -> {
+            Story s = (Story) ob[0];
+            Boolean isFollowing = (Boolean) ob[1];
+            Integer likeCount = ((Long) ob[2]).intValue();
+            Boolean isLiked = (Boolean) ob[3];
+
+            boolean isOwner = true;
+
+            return new StoryResponse.DetailDTO(s, isFollowing, isOwner, isLiked, likeCount);
+        }).toList();
+
+        return new StoryResponse.ListDTO(detailDTOList);
     }
 }

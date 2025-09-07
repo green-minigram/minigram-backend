@@ -18,7 +18,7 @@ public class StoryRepository {
                       SELECT\s
                         s,
                         (CASE WHEN COUNT(f) > 0 THEN true ELSE false END) AS isFollowing,
-                        COUNT(DISTINCT slAll)                             AS likeCount,
+                        COUNT(DISTINCT slAll.id)                             AS likeCount,
                         (CASE WHEN COUNT(slMine) > 0 THEN true ELSE false END) AS isLiked
                       FROM Story s
                       JOIN FETCH s.user u
@@ -41,4 +41,56 @@ public class StoryRepository {
             return Optional.empty();
         }
     }
+
+    public List<Object[]> findMyStories(Integer currentUserId) {
+        List<Object[]> obsList =  em.createQuery("""
+                    SELECT
+                      s,
+                      false AS isFollowing,
+                      COUNT(DISTINCT slAll.id) AS likeCount,
+                      (CASE WHEN COUNT(slMine) > 0 THEN true ELSE false END) AS isLiked
+                    FROM Story s
+                    JOIN FETCH s.user u
+                    LEFT JOIN StoryLike slAll ON slAll.story = s
+                    LEFT JOIN StoryLike slMine ON slMine.story = s AND slMine.user.id = :currentUserId
+                    WHERE u.id = :currentUserId
+                      AND s.status = :status
+                    GROUP BY s, u
+                    ORDER BY s.createdAt DESC
+                """, Object[].class)
+                            .setParameter("currentUserId", currentUserId)
+                            .setParameter("status", StoryStatus.ACTIVE)
+                            .setMaxResults(5)
+                            .getResultList();
+
+        return obsList;
+    }
+
+//    public List<Object[]> findAllByUserId(Integer targetUserId, Integer currentUserId, int limit) {
+//        return em.createQuery("""
+//        SELECT
+//          s,
+//          (CASE WHEN COUNT(f) > 0 THEN true ELSE false END) AS isFollowing,
+//          COUNT(DISTINCT slAll.id) AS likeCount,
+//          (CASE WHEN COUNT(slMine) > 0 THEN true ELSE false END) AS isLiked
+//        FROM Story s
+//        JOIN FETCH s.user u
+//        LEFT JOIN Follow f
+//               ON f.followee = u AND f.follower.id = :currentUserId   -- 팔로우 여부
+//        LEFT JOIN StoryLike slAll
+//               ON slAll.story = s
+//        LEFT JOIN StoryLike slMine
+//               ON slMine.story = s AND slMine.user.id = :currentUserId
+//        WHERE u.id = :targetUserId
+//          AND s.status = :status
+//        GROUP BY s, u
+//        ORDER BY s.createdAt DESC
+//    """, Object[].class)
+//                .setParameter("targetUserId", targetUserId)
+//                .setParameter("currentUserId", currentUserId)
+//                .setParameter("status", StoryStatus.ACTIVE)
+//                .setMaxResults(limit)
+//                .getResultList();
+//    }
+
 }

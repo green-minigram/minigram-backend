@@ -4,6 +4,7 @@ import com.mtcoding.minigram.users.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class StoryResponse {
 
@@ -56,6 +57,10 @@ public class StoryResponse {
 
     @Data
     public static class ListDTO {
+        private List<DetailDTO> storyList;
 
+        public ListDTO(List<DetailDTO> storyList) {
+            this.storyList = storyList;
+        }
     }
 }
