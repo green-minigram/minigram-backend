@@ -38,14 +38,11 @@ public class UserRepository {
         return user;
     }
 
-    public Optional<User>  findById(Integer userId) {
-        try {
-            User userPS = em.createQuery("select u from User u where u.id = :userId", User.class)
-                    .setParameter("userId", userId)
-                    .getSingleResult();
-            return Optional.of(userPS);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+    public Optional<User> findById(Integer userId){
+        return Optional.ofNullable(em.find(User.class, userId));
+    }
+
+    public User getReferenceById(Integer userId) {
+        return em.getReference(User.class, userId);
     }
 }
