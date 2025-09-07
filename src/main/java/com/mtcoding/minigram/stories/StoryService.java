@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.stories;
 
+import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,24 @@ public class StoryService {
         Story story = reqDTO.toEntity(user);
         Story storyPS = storyRepository.save(story);
         // TODO : 썸네일 저장 로직 (비동기 처리?)
+        return new StoryResponse.DTO(storyPS);
+    }
+
+    @Transactional
+    public StoryResponse.DTO delete(Integer storyId, Integer currentUserId) {
+        Story storyPS = storyRepository.findById(storyId)
+                .orElseThrow(() -> new ExceptionApi404("스토리를 찾을 수 없습니다"));
+
+        if (storyPS.getStatus() == StoryStatus.DELETED) {
+            throw new ExceptionApi404("이미 삭제된 스토리입니다");
+        }
+
+        if (!storyPS.getUser().getId().equals(currentUserId)) {
+            throw new ExceptionApi403("권한이 없습니다");
+        }
+
+        storyPS.delete();
+
         return new StoryResponse.DTO(storyPS);
     }
 }

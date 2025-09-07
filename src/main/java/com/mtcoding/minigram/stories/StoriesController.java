@@ -39,4 +39,11 @@ public class StoriesController {
         StoryResponse.DTO respDTO = storyService.create(reqDTO, user);
         return Resp.ok(respDTO);
     }
+
+    // 스토리 삭제
+    @DeleteMapping("/s/api/stories/{storyId}")
+    public ResponseEntity<?> delete(@PathVariable Integer storyId, @AuthenticationPrincipal User user) {
+        StoryResponse.DTO respDTO = storyService.delete(storyId, user.getId());
+        return Resp.ok(respDTO);
+    }
 }
