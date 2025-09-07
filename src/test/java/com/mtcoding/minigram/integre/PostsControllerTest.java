@@ -10,12 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,6 +77,75 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.postedAt").isString())
                 .andExpect(jsonPath("$.body.isReported").value(true));
 
+
+        actions.andDo(document);
+    }
+
+    @Test
+    @DisplayName("게시글 작성 - OK")
+    void create_ok() throws Exception {
+
+        // given
+        MockMultipartFile img1 = new MockMultipartFile(
+                "images", "a.jpg", "image/jpeg", "x".getBytes());
+        MockMultipartFile img2 = new MockMultipartFile(
+                "images", "b.jpg", "image/jpeg", "y".getBytes());
+
+        // when
+        ResultActions actions = mvc.perform(
+                multipart("/s/api/posts")
+                        .file(img1)
+                        .file(img2)
+                        .param("content", "주말 바다 🌊")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        // then
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").isNumber())
+                .andExpect(jsonPath("$.body.author.userId").value(2))
+                .andExpect(jsonPath("$.body.author.username").value("ssar"))
+                .andExpect(jsonPath("$.body.author.isOwner").value(true))
+                .andExpect(jsonPath("$.body.images.length()", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.body.content").value("주말 바다 🌊"))
+                .andExpect(jsonPath("$.body.likes.count").value(0))
+                .andExpect(jsonPath("$.body.likes.isLiked").value(false))
+                .andExpect(jsonPath("$.body.commentCount").value(0))
+                .andExpect(jsonPath("$.body.postedAt").isString())
+                .andExpect(jsonPath("$.body.isReported").value(false));
+
+        actions.andDo(document);
+    }
+
+    // ===============================
+// 게시글 작성 - 이미지 없음 -> 400 (유효성 실패)
+// ===============================
+    @Test
+    @DisplayName("게시글 작성 - 실패(이미지 없음) - 400")
+    void create_fail_no_images() throws Exception {
+
+        // when
+        ResultActions actions = mvc.perform(
+                multipart("/s/api/posts")
+                        .param("content", "이미지 없이 작성")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        // then
+        actions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.msg", containsString("이미지")))
+                .andExpect(jsonPath("$.body").doesNotExist());
 
         actions.andDo(document);
     }

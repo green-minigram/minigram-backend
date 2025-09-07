@@ -27,4 +27,8 @@ public class PostRepository {
                 .setParameter("postId", postId)
                 .getResultList();
     }
+
+    public void save(Post post) {
+        em.persist(post);
+    }
 }
