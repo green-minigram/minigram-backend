@@ -37,4 +37,15 @@ public class UserRepository {
         em.persist(user);
         return user;
     }
+
+    public Optional<User>  findById(Integer userId) {
+        try {
+            User userPS = em.createQuery("select u from User u where u.id = :userId", User.class)
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+            return Optional.of(userPS);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
 }

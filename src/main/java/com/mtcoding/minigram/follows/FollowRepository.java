@@ -23,4 +23,9 @@ public class FollowRepository {
 
         return count != null && count > 0;
     }
+
+    public Follow save(Follow follow) {
+        em.persist(follow);
+        return follow;
+    }
 }
