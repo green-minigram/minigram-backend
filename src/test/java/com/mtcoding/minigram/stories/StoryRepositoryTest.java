@@ -48,10 +48,10 @@ public class StoryRepositoryTest {
     }
 
     @Test
-    public void findMyStories_test() {
+    public void findAllMyStories_test() {
         int currentUserId = 2;
 
-        List<Object[]> obsList = storyRepository.findMyStories(currentUserId);
+        List<Object[]> obsList = storyRepository.findAllMyStories(currentUserId);
         System.out.println("=========== 내 스토리 목록 5개 조회 ============");
         for (Object[] ob : obsList) {
             Story story = (Story) ob[0];
@@ -66,6 +66,31 @@ public class StoryRepositoryTest {
             System.out.println("isFollowing : " + isFollowing);
             System.out.println("likeCount   : " + likeCount);
             System.out.println("isLiked     : " + isLiked);
+            System.out.println("------------------------------------------");
+        }
+        System.out.println("==========================================");
+    }
+
+    @Test
+    public void findAllByUserId_test() {
+        int currentUserId = 2;
+        int userId = 3;
+
+        List<Object[]> obsList = storyRepository.findAllByUserId(userId, currentUserId);
+        System.out.println("=========== 다른 유저 스토리 목록 5개 조회 ============");
+        for (Object[] ob : obsList) {
+            Story story = (Story) ob[0];
+            Boolean isFollowing = (Boolean) ob[1];
+            int likeCount = ((Long) ob[2]).intValue();
+            Boolean isLiked = (Boolean) ob[3];
+
+            System.out.println("storyId       : " + story.getId());
+            System.out.println("ownerId       : " + story.getUser().getId());
+            System.out.println("ownerUsername : " + story.getUser().getUsername());
+            System.out.println("videoUrl      : " + story.getVideoUrl());
+            System.out.println("isFollowing   : " + isFollowing + "  (로그인 유저=" + currentUserId + " → 대상 유저=" + userId + ")");
+            System.out.println("likeCount     : " + likeCount);
+            System.out.println("isLiked       : " + isLiked);
             System.out.println("------------------------------------------");
         }
         System.out.println("==========================================");

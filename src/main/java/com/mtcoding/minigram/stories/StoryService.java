@@ -34,18 +34,35 @@ public class StoryService {
         );
     }
 
-    public StoryResponse.ListDTO findMyStories(Integer currentUserId) {
-        List<Object[]> obsList = storyRepository.findMyStories(currentUserId);
+    public StoryResponse.ListDTO findAllMyStories(Integer currentUserId) {
+        List<Object[]> obsList = storyRepository.findAllMyStories(currentUserId);
 
         List<StoryResponse.DetailDTO> detailDTOList = obsList.stream().map(ob -> {
-            Story s = (Story) ob[0];
+            Story story = (Story) ob[0];
             Boolean isFollowing = (Boolean) ob[1];
             Integer likeCount = ((Long) ob[2]).intValue();
             Boolean isLiked = (Boolean) ob[3];
 
             boolean isOwner = true;
 
-            return new StoryResponse.DetailDTO(s, isFollowing, isOwner, isLiked, likeCount);
+            return new StoryResponse.DetailDTO(story, isFollowing, isOwner, isLiked, likeCount);
+        }).toList();
+
+        return new StoryResponse.ListDTO(detailDTOList);
+    }
+
+    public StoryResponse.ListDTO findAllByUserId(Integer userId, Integer currentUserId) {
+        List<Object[]> obsList = storyRepository.findAllByUserId(userId, currentUserId);
+
+        List<StoryResponse.DetailDTO> detailDTOList = obsList.stream().map(ob -> {
+            Story story = (Story) ob[0];
+            Boolean isFollowing = (Boolean) ob[1];
+            Integer likeCount = ((Long) ob[2]).intValue();
+            Boolean isLiked = (Boolean) ob[3];
+
+            Boolean isOwner = story.getUser().getId().equals(userId);
+
+            return new StoryResponse.DetailDTO(story, isFollowing, isOwner, isLiked, likeCount);
         }).toList();
 
         return new StoryResponse.ListDTO(detailDTOList);
