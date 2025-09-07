@@ -37,4 +37,8 @@ public class UserRepository {
         em.persist(user);
         return user;
     }
+
+    public Optional<User> findUserById(Integer id) {
+        return Optional.ofNullable(em.find(User.class, id));
+    }
 }

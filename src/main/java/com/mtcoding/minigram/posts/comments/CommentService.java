@@ -1,11 +1,18 @@
 package com.mtcoding.minigram.posts.comments;
 
+import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
+import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
+import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -19,6 +26,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
+
 
     //게시글 댓글 조회
     public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer userId) {
@@ -81,5 +90,59 @@ public class CommentService {
         boolean isPostAuthor = Objects.equals(comment.getUser().getId(), postAuthorId);
 
         return CommentResponse.ItemDTO.from(comment, (childrenDtos == null) ? List.of() : childrenDtos, likeCount, liked, owner, isPostAuthor);
+    }
+
+    @Transactional
+    public CommentResponse.ItemDTO create(Integer postId, Integer userId, CommentRequest.CreateDTO req) {
+        if (!StringUtils.hasText(req.getContent())) {
+            throw new ExceptionApi400("댓글 내용을 입력해주세요.");
+        }
+
+        Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
+        if (postAuthorId == null) throw new ExceptionApi404("게시글이 존재하지 않습니다.");
+
+        User author = userRepository.findUserById(userId)
+                .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
+        Post post = new Post(); // 엔티티 로딩을 최소화하고 싶으면 프록시 참조로 대체
+        try {
+            var f = Post.class.getDeclaredField("id");
+            f.setAccessible(true);
+            f.set(post, postId);
+        } catch (Exception ignored) {
+        }
+
+        Comment parent = null;
+        if (req.getParentId() != null) {
+            parent = commentRepository.findCommentById(req.getParentId())
+                    .orElseThrow(() -> new ExceptionApi404("부모 댓글을 찾을 수 없습니다."));
+            if (!Objects.equals(parent.getPost().getId(), postId)) {
+                throw new ExceptionApi400("부모 댓글과 게시글이 일치하지 않습니다.");
+            }
+        }
+
+        Comment comment = Comment.builder()
+                .post(parent == null ? postRepository.findPostById(postId).orElseThrow(() -> new ExceptionApi404("게시글이 존재하지 않습니다.")) : parent.getPost())
+                .user(author)
+                .parent(parent)
+                .content(req.getContent())
+                .status(CommentStatus.ACTIVE)   // ★ 추가
+                .build();
+
+        log.debug("NEW COMMENT status={}", comment.getStatus()); // 반드시 ACTIVE 찍혀야 함
+        commentRepository.save(comment);
+
+        // 작성 직후 기본값
+        var likes = new CommentLikeResponse.LikesDTO(0, false);
+        boolean owner = true;
+        boolean isPostAuthor = Objects.equals(author.getId(), postAuthorId);
+
+        return CommentResponse.ItemDTO.from(
+                comment,
+                List.of(), // children: 작성 직후 빈 리스트
+                likes.getCount(),
+                Boolean.TRUE.equals(likes.getIsLiked()), // ← 여기
+                owner,
+                isPostAuthor
+        );
     }
 }

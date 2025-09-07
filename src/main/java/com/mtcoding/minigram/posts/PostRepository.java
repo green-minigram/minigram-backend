@@ -39,4 +39,8 @@ public class PostRepository {
             return null; // 못 찾으면 null (isPostAuthor 계산시 false 처리됨)
         }
     }
+
+    public java.util.Optional<Post> findPostById(Integer id) {
+        return java.util.Optional.ofNullable(em.find(Post.class, id));
+    }
 }
