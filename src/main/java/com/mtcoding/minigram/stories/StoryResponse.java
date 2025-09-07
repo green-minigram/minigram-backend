@@ -63,4 +63,25 @@ public class StoryResponse {
             this.storyList = storyList;
         }
     }
+
+    @Data
+    public static class DTO {
+        private Integer storyId;
+        private Integer userId;
+        private String videoUrl;
+        private String thumbnailUrl;
+        private StoryStatus status;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+
+        public DTO(Story story) {
+            this.storyId = story.getId();
+            this.userId = story.getUser().getId();
+            this.videoUrl = story.getVideoUrl();
+            this.thumbnailUrl = story.getThumbnailUrl();
+            this.status = story.getStatus();
+            this.createdAt = story.getCreatedAt();
+            this.updatedAt = story.getUpdatedAt();
+        }
+    }
 }
