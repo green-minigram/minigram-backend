@@ -50,4 +50,8 @@ public class Story {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public void delete() {
+        this.status = StoryStatus.DELETED;
+    }
 }

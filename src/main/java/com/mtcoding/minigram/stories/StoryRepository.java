@@ -100,4 +100,8 @@ public class StoryRepository {
         em.persist(story);
         return story;
     }
+
+    public Optional<Story> findById(Integer storyId) {
+        return Optional.ofNullable(em.find(Story.class, storyId));
+    }
 }
