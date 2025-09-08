@@ -3,6 +3,7 @@ package com.mtcoding.minigram.posts;
 import com.mtcoding.minigram.posts.images.PostImage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -38,5 +39,18 @@ public class PostRepository {
         } catch (NoResultException e) {
             return null; // 못 찾으면 null (isPostAuthor 계산시 false 처리됨)
         }
+    }
+
+    public boolean existsById(Integer targetId) {
+        List<Integer> result = em.createQuery("""
+                    select 1
+                    from Post p
+                    where p.id = :postId
+                """, Integer.class)
+                .setParameter("postId", targetId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
     }
 }

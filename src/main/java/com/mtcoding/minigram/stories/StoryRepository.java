@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.stories;
 
 import jakarta.persistence.EntityManager;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -103,5 +104,18 @@ public class StoryRepository {
 
     public Optional<Story> findById(Integer storyId) {
         return Optional.ofNullable(em.find(Story.class, storyId));
+    }
+
+    public boolean existsById(Integer targetId) {
+        List<Integer> result = em.createQuery("""
+                    select 1
+                    from Story s
+                    where s.id = :storyId
+                """, Integer.class)
+                .setParameter("storyId", targetId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
     }
 }

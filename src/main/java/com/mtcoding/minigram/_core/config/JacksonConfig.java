@@ -1,5 +1,6 @@
 package com.mtcoding.minigram._core.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -37,6 +38,9 @@ public class JacksonConfig {
 
         // 날짜를 타임스탬프가 아닌 문자열로 직렬화
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        // 일치하지 않는 enum 값은 null로 처리
+        objectMapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
 
         return objectMapper;
     }
