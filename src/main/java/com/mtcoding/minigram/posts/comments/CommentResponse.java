@@ -1,7 +1,7 @@
 package com.mtcoding.minigram.posts.comments;
 
-import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
-import com.mtcoding.minigram.users.UserResponse.SummaryDTO;
+import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse.LikesDTO;
+import com.mtcoding.minigram.users.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,25 +10,43 @@ import java.util.List;
 public class CommentResponse {
 
     @Data
+    public static class ListDTO {
+        private final List<ItemDTO> items;
+    }
+
+    @Data
     public static class ItemDTO {
         private Integer commentId;
-        private SummaryDTO user;
+        private UserDTO user;
         private String content;
         private LocalDateTime createdAt;
         private Integer parentId;                 // null이면 최상위
-        private List<ItemDTO> children = List.of(); // 대댓글 목록
-        private CommentLikeResponse.LikesDTO likes;
+        private List<ItemDTO> children = List.of();
+        private LikesDTO likes;                   // ← 내부 클래스로 교체
         private boolean isOwner;
         private boolean isPostAuthor;
+
+        @Data
+        public static class UserDTO {
+            private Integer userId;
+            private String username;
+            private String profileImageUrl;
+
+            public UserDTO(User user) {
+                this.userId = user.getId();
+                this.username = user.getUsername();
+                this.profileImageUrl = user.getProfileImageUrl();
+            }
+        }
 
 
         public ItemDTO(Comment comment,
                        List<ItemDTO> children,
-                       CommentLikeResponse.LikesDTO likes,
+                       LikesDTO likes,
                        boolean isOwner,
                        boolean isPostAuthor) {
             this.commentId = comment.getId();
-            this.user = new SummaryDTO(comment.getUser());
+            this.user = new UserDTO(comment.getUser());
             this.content = comment.getContent();
             this.createdAt = comment.getCreatedAt();
             this.parentId = (comment.getParent() == null) ? null : comment.getParent().getId();
@@ -49,7 +67,7 @@ public class CommentResponse {
             return new ItemDTO(
                     comment,
                     (children == null) ? List.of() : children,
-                    new CommentLikeResponse.LikesDTO(likeCount, liked),
+                    new LikesDTO(likeCount, liked),
                     owner,
                     postAuthor
             );

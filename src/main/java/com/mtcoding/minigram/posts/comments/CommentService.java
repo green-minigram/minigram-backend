@@ -21,7 +21,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     //게시글 댓글 조회
-    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer userId) {
+    public CommentResponse.ListDTO findAllByPostId(Integer postId, Integer userId) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
         if (postAuthorId == null) throw new ExceptionApi404("게시글이 존재하지 않습니다"); // [CHANGED] 존재하지 않는 게시글 처리
@@ -29,7 +29,7 @@ public class CommentService {
 
         // 부모/자식 조회
         List<Comment> parents = commentRepository.findParentsByPostId(postId);
-        if (parents.isEmpty()) return List.of();
+        if (parents.isEmpty()) return new CommentResponse.ListDTO(List.of());
 
         List<Integer> parentIds = parents.stream().map(Comment::getId).toList();
         List<Comment> children = commentRepository.findChildrenByParentIds(parentIds);
@@ -55,7 +55,7 @@ public class CommentService {
                 : commentLikeRepository.findLikedCommentIdsByUser(userId, allIds);
 
         // DTO 변환 + children 세팅
-        List<CommentResponse.ItemDTO> result = parents.stream()
+        List<CommentResponse.ItemDTO> items = parents.stream()
                 .map(parent -> {
                     List<CommentResponse.ItemDTO> childDtos = childrenMap
                             .getOrDefault(parent.getId(), List.of())
@@ -68,9 +68,9 @@ public class CommentService {
                 .toList();
 
         log.info("comments.result parents={}, children={}, allIds={}, likedSetSize={}",
-                result.size(), children.size(), allIds.size(), likedSet.size()); // 테스트 확인 로그 추가
+                items.size(), children.size(), allIds.size(), likedSet.size()); // 테스트 확인 로그 추가
 
-        return result;
+        return new CommentResponse.ListDTO(items);
     }
 
     // 단일 댓글에 대해 likeCount/liked 계산 후 DTO로 변환하고 owner/postAuthor 플래그 설정

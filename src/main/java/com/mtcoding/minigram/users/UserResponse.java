@@ -30,18 +30,4 @@ public class UserResponse {
             this.roles = user.getRoles();
         }
     }
-
-
-    @Data
-    public static class SummaryDTO {
-        private Integer userId;
-        private String username;
-        private String profileImageUrl;
-
-        public SummaryDTO(User user) {
-            this.userId = user.getId();
-            this.username = user.getUsername();
-            this.profileImageUrl = user.getProfileImageUrl();
-        }
-    }
 }
