@@ -4,6 +4,7 @@ package com.mtcoding.minigram.integre;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
+import com.mtcoding.minigram.posts.comments.CommentRequest;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,12 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,5 +76,63 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$[0].children[0].parentId").value(1));
 
         actions.andDo(document);
+    }
+
+    @Test
+    @DisplayName("댓글 작성 - 게시글 작성자 - OK (isPostAuthor=true)")
+    void create_as_post_author_ok() throws Exception {
+        int postId = 3; // 더미: post 3의 작성자가 ssar(id=2)라고 가정
+
+        var req = new CommentRequest.CreateDTO();
+        req.setContent("작성자 본인이 남기는 댓글");
+        req.setParentId(null);
+
+
+        ResultActions actions = mvc.perform(
+                post("/s/api/posts/{postId}/comments", postId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(req))
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.body.user.userId").value(2))
+                .andExpect(jsonPath("$.body.postAuthor").value(true))
+                .andExpect(jsonPath("$.body.likes.count").value(0))
+                .andExpect(jsonPath("$.body.likes.isLiked").value(false));
+    }
+
+    @Test
+    @DisplayName("댓글 작성 - 대댓글의 대댓글(중첩) - OK")
+    void create_reply_to_child_ok() throws Exception {
+        int postId = 18;
+        int childCommentId = 11; // 더미: comment 11은 post 18의 대댓글
+
+        var req = new CommentRequest.CreateDTO();
+        req.setContent("대댓글의 대댓글 테스트");
+        req.setParentId(childCommentId);
+
+        ResultActions actions = mvc.perform(
+                post("/s/api/posts/{postId}/comments", postId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(req))
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.body.parentId").value(childCommentId))
+                .andExpect(jsonPath("$.body.likes.count").value(0))
+                .andExpect(jsonPath("$.body.likes.isLiked").value(false));
     }
 }
