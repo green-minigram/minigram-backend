@@ -1,7 +1,8 @@
 package com.mtcoding.minigram.reports;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 public class ReportResponse {
@@ -26,22 +27,22 @@ public class ReportResponse {
         private Integer reportId;
         private ReportType type;
         private Integer targetId;
-        private String targetContent;
+        private String targetContent;         // 필요 없으면 제거 가능
         private String reporterUsername;
-        private String reason;
+        private String reasonLabel;           // label 사용
         private ReportStatus status;
         private LocalDateTime createdAt;
 
-        public static AdminViewDTO from(Report report, String targetContent) {
+        public static AdminViewDTO from(Report report) {
             return AdminViewDTO.builder()
                     .reportId(report.getId())
                     .type(report.getType())
                     .targetId(report.getTargetId())
-                    .targetContent(targetContent)
                     .reporterUsername(report.getReporter().getUsername())
-                    .reason(report.getReason().getReasonText())
+                    .reasonLabel(report.getReason().getLabel())
                     .status(report.getStatus())
                     .createdAt(report.getCreatedAt())
                     .build();
         }
     }
+}

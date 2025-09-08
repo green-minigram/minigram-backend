@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
 public class ReportRepository {
+
     private final EntityManager em;
 
     // 뷰어가 특정 게시글을 신고한 "유효한" 이력이 있는지 (PENDING/APPROVED)
@@ -26,5 +28,14 @@ public class ReportRepository {
                 .getSingleResult();
 
         return cnt != null && cnt > 0;
+    }
+
+    public Report save(Report report) {
+        em.persist(report);
+        return report;
+    }
+
+    public Optional<Report> findById(Integer id) {
+        return Optional.ofNullable(em.find(Report.class, id));
     }
 }

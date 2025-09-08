@@ -1,9 +1,9 @@
 package com.mtcoding.minigram.reports;
 
-import com.mtcoding.minigram.posts.Post;
-import com.mtcoding.minigram.posts.PostRepository;
-import com.mtcoding.minigram.stories.Story;
-import com.mtcoding.minigram.stories.StoryRepository;
+import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.reports.reasons.ReportReason;
+import com.mtcoding.minigram.reports.reasons.ReportReasonRepository;
+import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,51 +17,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportService {
 
     private final ReportRepository reportRepository;
-    private final PostRepository postRepository;
-    private final StoryRepository storyRepository;
     private final UserRepository userRepository;
+    private final ReportReasonRepository reasonRepository;
 
 
     @Transactional
-    public Report createReport(ReportRequest.SaveDTO dto, SessionUser sessionUser) {
-        // 세션 사용자로 User 엔티티 조회
-        var reporter = userRepository.findById(sessionUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("신고자(User) 없음"));
+    public ReportResponse.SaveResultDTO createReport(ReportRequest.SaveDTO reqDTO, SessionUser sessionUser) {
 
-        // 신고 사유 조회
-        var reason = reasonRepository.findById(dto.getReasonId())
-                .orElseThrow(() -> new IllegalArgumentException("신고 사유 없음"));
+        User reporter = userRepository.findById(sessionUser.getId())
+                .orElseThrow();
 
-        Report report = Report.builder()
-                .type(dto.getType())
-                .targetId(dto.getTargetId())
-                .reporter(reporter)  // 세션 사용자 기반
-                .reason(reason)
-                .status(ReportStatus.PENDING)
-                .build();
+        ReportReason reason = reasonRepository.findById(reqDTO.getReasonId())
+                .orElseThrow(() -> new ExceptionApi404("신고 사유 없음"));
 
-        return reportRepository.save(report);
+        Report report = reqDTO.toEntity(reporter, reason);
+
+        reportRepository.save(report);
+
+        return ReportResponse.SaveResultDTO.from(report);
     }
 
-    @Transactional(readOnly = true)
-    public ReportResponse.AdminViewDTO getReportDetail(Integer reportId) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 신고 없음"));
 
-        // 대상 정보 가져오기
-        String targetContent = null;
-        if (report.getType() == ReportType.POST) {
-            Post post = postRepository.findById(report.getTargetId())
-                    .orElseThrow(() -> new IllegalArgumentException("신고 대상 포스트 없음"));
-            targetContent = post.getContent();
-        } else if (report.getType() == ReportType.STORY) {
-            Story story = storyRepository.findById(report.getTargetId())
-                    .orElseThrow(() -> new IllegalArgumentException("신고 대상 스토리 없음"));
-            targetContent = story.getThumbnailUrl(); // 예시로 썸네일
-        }
-
-        return ReportResponse.AdminViewDTO.from(report, targetContent);
-    }
 }
 
 
