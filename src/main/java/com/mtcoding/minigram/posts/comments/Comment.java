@@ -65,4 +65,19 @@ public class Comment {
         this.updatedAt = updatedAt;
         this.children = children;
     }
+
+    // --- 도메인 동작 추가 ---
+    public boolean isDeleted() {
+        return this.status == CommentStatus.DELETED;
+    }
+
+    /**
+     * 소프트 삭제 전용 메서드 (세터 없이 더티체킹 유도)
+     */
+    public void markDeleted() {
+        if (isDeleted()) return;
+        this.status = CommentStatus.DELETED;
+        // 필요하면 표시용 컨텐츠 변경도 여기서 함께
+        // this.content = "(삭제된 댓글)";
+    }
 }

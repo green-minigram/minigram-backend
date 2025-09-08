@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,4 +80,24 @@ public class CommentsControllerTest extends MyRestDoc {
 
         actions.andDo(document);
     }
+
+    @Test
+    @DisplayName("댓글 삭제 - 작성자 본인 → 204 & 목록에서 제외")
+    void delete_byAuthor_200_with_message() throws Exception {
+        int commentId = 1; // ssar(2번)의 댓글
+
+        ResultActions actions = mvc.perform(delete("/s/api/comments/{commentId}", commentId)
+                .header("Authorization", "Bearer " + accessToken));
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.commentId").value(commentId))
+                .andExpect(jsonPath("$.body.message").value("댓글을 삭제했습니다."));
+    }
+
+
 }
