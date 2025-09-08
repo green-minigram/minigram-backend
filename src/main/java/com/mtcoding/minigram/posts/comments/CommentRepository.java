@@ -66,4 +66,8 @@ public class CommentRepository {
                 .setParameter("pids", parentIds)
                 .getResultList();
     }
+
+    public java.util.Optional<Comment> findCommentById(Integer id) {
+        return java.util.Optional.ofNullable(em.find(Comment.class, id));
+    }
 }
