@@ -2,7 +2,6 @@ package com.mtcoding.minigram.storage;
 
 import com.mtcoding.minigram._core.util.Resp;
 import com.mtcoding.minigram.users.User;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PresignController {
 
     private final PresignService presignService;
-    private final HttpSession session;
 
     @PostMapping("/s/api/storage/presignedUrl")
     public ResponseEntity<?> createUploadUrl(@RequestBody PresignRequest.UploadDTO reqDTO, @AuthenticationPrincipal User user) {
