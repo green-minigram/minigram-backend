@@ -101,7 +101,22 @@ public class CommentRepository {
         return map;
     }
 
-    // 필요한 값만 담는 작은 DTO
-    public record CommentBrief(Integer postId, String content) {
-    } //todo : record 수정
+    //레포지토리 조회 전용 프로젝션 (record → class)
+    public static class CommentBrief {
+        private final Integer postId;
+        private final String content;
+
+        public CommentBrief(Integer postId, String content) {
+            this.postId = postId;
+            this.content = content;
+        }
+
+        public Integer getPostId() {
+            return postId;
+        }
+
+        public String getContent() {
+            return content;
+        }
+    }
 }

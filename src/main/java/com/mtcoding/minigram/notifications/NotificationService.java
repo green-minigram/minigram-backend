@@ -39,8 +39,8 @@ public class NotificationService {
                 .map(n -> {
                     if (n.getType() == NotificationType.COMMENTED) {
                         CommentBrief b = briefMap.get(n.getTargetId());
-                        Long postId = (b == null) ? null : b.postId().longValue();
-                        String snippet = (b == null) ? null : b.content();
+                        Long postId = (b == null) ? null : b.getPostId().longValue();
+                        String snippet = (b == null) ? null : b.getContent();
                         return NotificationMapper.toItemDTO(n, postId, snippet);
                     }
                     return NotificationMapper.toItemDTO(n);
