@@ -1,7 +1,7 @@
 package com.mtcoding.minigram.posts.comments;
 
-import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse.LikesDTO;
 import com.mtcoding.minigram.users.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -23,8 +23,8 @@ public class CommentResponse {
         private Integer parentId;                 // null이면 최상위
         private List<ItemDTO> children = List.of();
         private LikesDTO likes;                   // ← 내부 클래스로 교체
-        private boolean isOwner;
-        private boolean isPostAuthor;
+        private Boolean isOwner;
+        private Boolean isPostAuthor;
 
         @Data
         public static class UserDTO {
@@ -39,6 +39,17 @@ public class CommentResponse {
             }
         }
 
+        @Data
+        @AllArgsConstructor
+        public static class LikesDTO {
+            private Integer count;
+            private Boolean isLiked;
+
+            public LikesDTO(int count, boolean liked) {
+                this.count = count;
+                this.isLiked = liked;
+            }
+        }
 
         public ItemDTO(Comment comment,
                        List<ItemDTO> children,

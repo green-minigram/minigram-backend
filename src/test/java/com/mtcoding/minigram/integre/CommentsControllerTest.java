@@ -62,8 +62,8 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.items").isArray())
                 .andExpect(jsonPath("$.body.items[0].commentId").value(1))
                 .andExpect(jsonPath("$.body.items[0].user.userId").value(2))
-                .andExpect(jsonPath("$.body.items[0].owner").value(true))
-                .andExpect(jsonPath("$.body.items[0].postAuthor").value(false))
+                .andExpect(jsonPath("$.body.items[0].isOwner").value(true))
+                .andExpect(jsonPath("$.body.items[0].isPostAuthor").value(false))
                 // 좋아요 (시드: (1,3),(1,4),(1,5) → 3개, viewer=2는 좋아요 안함)
                 .andExpect(jsonPath("$.body.items[0].likes.count").value(3))
                 .andExpect(jsonPath("$.body.items[0].likes.isLiked").value(false))
@@ -75,7 +75,7 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.items[0].children", hasSize(2)))
                 .andExpect(jsonPath("$.body.items[0].children[0].commentId").value(6))
                 .andExpect(jsonPath("$.body.items[0].children[0].user.userId").value(8)) // luna
-                .andExpect(jsonPath("$.body.items[0].children[0].postAuthor").value(true));
+                .andExpect(jsonPath("$.body.items[0].children[0].isPostAuthor").value(true));
 
         actions.andDo(document);
     }
