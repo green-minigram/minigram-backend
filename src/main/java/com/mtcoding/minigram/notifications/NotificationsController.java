@@ -15,9 +15,9 @@ public class NotificationsController {
     private final NotificationService notificationService;
     private final HttpSession session;
 
-    @GetMapping("/s/api/notifications")
+    @GetMapping("s/api/notifications")
     public ResponseEntity<?> findAll(@AuthenticationPrincipal User user) {
-        var respDTO = notificationService.findAll(user.getId());
+        NotificationResponse.ListDTO respDTO = notificationService.findAll(user.getId());
         return Resp.ok(respDTO);
     }
 }
