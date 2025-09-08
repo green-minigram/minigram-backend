@@ -18,7 +18,7 @@ public class StoryService {
 
     public StoryResponse.DetailDTO findByStoryId(Integer storyId, Integer currentUserId) {
         Object[] objects = storyRepository.findByStoryId(storyId, currentUserId)
-                .orElseThrow(()-> new ExceptionApi404("스토리를 찾을 수 없습니다"));
+                .orElseThrow(() -> new ExceptionApi404("스토리를 찾을 수 없습니다"));
 
         Story story = (Story) objects[0];
         Boolean isFollowing = (Boolean) objects[1];
@@ -62,7 +62,7 @@ public class StoryService {
             Integer likeCount = ((Long) ob[2]).intValue();
             Boolean isLiked = (Boolean) ob[3];
 
-            Boolean isOwner = story.getUser().getId().equals(userId);
+            Boolean isOwner = story.getUser().getId().equals(currentUserId);
 
             return new StoryResponse.DetailDTO(story, isFollowing, isOwner, isLiked, likeCount);
         }).toList();
