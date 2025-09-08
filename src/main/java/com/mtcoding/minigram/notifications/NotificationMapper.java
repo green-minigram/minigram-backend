@@ -5,36 +5,39 @@ import com.mtcoding.minigram.users.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+
 public final class NotificationMapper {
 
+    // 인스턴스화 방지
     private NotificationMapper() {
     }
 
     private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
+    // 편의 오버로드: 댓글이 아닌 알림(POST_LIKED/FOLLOWED) 변환
     public static NotificationResponse.ItemDTO toItemDTO(Notification n) {
         return toItemDTO(n, null, null);
     }
 
+    // 핵심 변환: COMMENTED일 땐 postId/snippet 주입하여 DTO 조립
     public static NotificationResponse.ItemDTO toItemDTO(Notification n, Long postIdForComment, String snippetFromDb) {
-        // createdAt null-safe
+        // createdAt null-safe 포맷
         LocalDateTime created = n.getCreatedAt() != null
                 ? n.getCreatedAt()
                 : (n.getUpdatedAt() != null ? n.getUpdatedAt() : LocalDateTime.now());
         String createdStr = created.format(ISO);
 
-        // 2) actor (sender)
+        // user(보낸 사람) DTO 구성
         User s = n.getSender();
         Long actorId = s.getId().longValue();
         String username = safeUsername(s, actorId);
         String profile = placeholderProfile(actorId); // 실제 프로필 URL 붙일 때 여기 교체
 
-        // 3) target (알림 타입별로 targetId 해석)
+        // post(타겟) 해석: 타입별로 postId/commentId/썸네일/스니펫 계산
         Long postId = null;
         Long commentId = null;
         String postThumb = null;
         String commentSnippet = null;
-
 
         switch (n.getType()) {
             case POST_LIKED -> {
@@ -77,6 +80,7 @@ public final class NotificationMapper {
 
     // ===== helpers =====
 
+    // DB enum → 클라이언트 노출 문자열 매핑
     private static String toClientType(NotificationType t) {
         return switch (t) {
             case POST_LIKED -> "POST_LIKE";
@@ -85,6 +89,7 @@ public final class NotificationMapper {
         };
     }
 
+    // 타입별 메시지 카피 생성
     private static String buildMessage(NotificationType t, String username, String snippet) {
         String nick = (username == null || username.isBlank()) ? "사용자" : username;
         return switch (t) {
@@ -94,17 +99,20 @@ public final class NotificationMapper {
         };
     }
 
+    // 스니펫 최대 길이 제한(말줄임)
     private static String truncate(String s, int max) {
         if (s == null) return "";
         s = s.trim().replaceAll("\\s+", " ");
         return s.length() > max ? s.substring(0, max) + "…" : s;
     }
 
+    // 프로필 URL 플레이스홀더 생성
     private static String placeholderProfile(Long actorId) {
         // User에 프로필 이미지 필드가 준비되면 여기서 교체해서 반환해줘.
         return "https://picsum.photos/seed/u" + actorId + "/80";
     }
 
+    // 비어있는 사용자명 방어(대체 닉네임 생성)
     private static String safeUsername(User s, Long actorId) {
         String u = s.getUsername(); // User 엔티티 필드명에 맞게
         return (u == null || u.isBlank()) ? ("user" + actorId) : u;

@@ -28,32 +28,25 @@ public class NotificationService {
         // COMMENT 알림의 commentId 수집
         List<Integer> commentIds = rows.stream()
                 .filter(n -> n.getType() == NotificationType.COMMENTED)
-                .map(Notification::getTargetId) // = commentId
+                .map(Notification::getTargetId)
                 .toList();
 
-        // commentId -> postId 매핑 조회
-        Map<Integer, Integer> commentToPost = commentRepository.findPostIdMapByCommentIds(commentIds);
+        // commentId -> (postId, content) 요약 조회
+        Map<Integer, CommentBrief> briefMap = commentRepository.findBriefByIds(commentIds);
 
-        Map<Integer, CommentBrief> cBrief = commentRepository.findBriefByIds(commentIds);
-
-
-        // DTO 변환 (댓글이면 postId 주입)
+        // DTO 변환
         List<NotificationResponse.ItemDTO> items = rows.stream()
                 .map(n -> {
                     if (n.getType() == NotificationType.COMMENTED) {
-                        CommentBrief b = cBrief.get(n.getTargetId());
-                        Long postId = b == null ? null : asLong(b.postId());
-                        String snippet = b == null ? null : b.content();
+                        CommentBrief b = briefMap.get(n.getTargetId());
+                        Long postId = (b == null) ? null : b.postId().longValue();
+                        String snippet = (b == null) ? null : b.content();
                         return NotificationMapper.toItemDTO(n, postId, snippet);
                     }
-                    return NotificationMapper.toItemDTO(n); // 좋아요/팔로우
+                    return NotificationMapper.toItemDTO(n);
                 })
                 .toList();
 
         return new NotificationResponse.ListDTO(items);
-    }
-
-    private static Long asLong(Integer i) {
-        return i == null ? null : i.longValue();
     }
 }
