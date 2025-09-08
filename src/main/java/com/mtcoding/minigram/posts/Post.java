@@ -43,6 +43,10 @@ public class Post {
     @OrderBy("id ASC") // 업로드 순서 보장
     private List<PostImage> images = new ArrayList<>();
 
+    public void setStatus(PostStatus status) {
+        this.status = status;
+    }
+
     @Builder
     public Post(Integer id, User user, String content, PostStatus status, LocalDateTime createdAt, LocalDateTime updatedAt, List<PostImage> images) {
         this.id = id;

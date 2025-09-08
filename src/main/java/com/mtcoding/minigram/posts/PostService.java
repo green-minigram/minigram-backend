@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts;
 
+import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
@@ -33,6 +34,10 @@ public class PostService {
         // 1) 엔티티 로드
         Post postPS = postRepository.findById(postId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+        // 삭제된 글은 404
+        if (postPS.getStatus() == PostStatus.DELETED) {
+            throw new ExceptionApi404("존재하지 않는 게시글입니다.");
+        }
 
         List<PostImage> images = postRepository.findImagesByPostId(postId);
 
@@ -64,4 +69,26 @@ public class PostService {
         // 3) 생성자 주입으로 한 번에 완성
         return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
     }
+
+    @Transactional
+    // 게시글 삭제(소프트)
+    public PostResponse.DeleteDTO delete(Integer postId, Integer requesterId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+
+        // 이미 삭제된 글이면 멱등 성공
+        if (post.getStatus() == PostStatus.DELETED) {
+            return new PostResponse.DeleteDTO(post.getId(), true);
+        }
+
+        // 권한 체크(소유자만)
+        Integer ownerId = post.getUser().getId();
+        if (!ownerId.equals(requesterId)) {
+            throw new ExceptionApi403("본인 게시글만 삭제할 수 있습니다.");
+        }
+
+        post.setStatus(PostStatus.DELETED); // 소프트 삭제
+        return new PostResponse.DeleteDTO(post.getId(), true);
+    }
+
 }

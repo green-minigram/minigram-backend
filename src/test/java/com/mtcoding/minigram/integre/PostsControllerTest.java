@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,4 +79,50 @@ public class PostsControllerTest extends MyRestDoc {
 
         actions.andDo(document);
     }
+
+    @Test
+    @DisplayName("게시글 삭제 - OK (소유자, 멱등 + 이후 조회 404)")
+    void delete_ok_owner_idempotent() throws Exception {
+        int postId = 3; // ssar(id=2)가 소유한 게시글이라고 가정
+
+        // 1) 최초 삭제
+        ResultActions actions = mvc.perform(
+                delete("/s/api/posts/{postId}", postId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").value(postId))
+                .andExpect(jsonPath("$.body.deleted").value(true))
+                .andDo(document);
+
+        // 2) 삭제 후 상세 조회 → 404
+        mvc.perform(
+                        get("/s/api/posts/{postId}", postId)
+                                .header("Authorization", "Bearer " + accessToken)
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+
+        // 3) 다시 삭제(멱등)
+        mvc.perform(
+                        delete("/s/api/posts/{postId}", postId)
+                                .header("Authorization", "Bearer " + accessToken)
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").value(postId))
+                .andExpect(jsonPath("$.body.deleted").value(true));
+    }
+
+
 }

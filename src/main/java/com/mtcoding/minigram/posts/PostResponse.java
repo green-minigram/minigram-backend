@@ -2,6 +2,7 @@ package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.posts.likes.PostLikeResponse.LikesDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -81,5 +82,12 @@ public class PostResponse {
             this.id = id;
             this.url = url;
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class DeleteDTO {
+        private Integer postId;
+        private Boolean deleted; // 항상 true로 반환 (멱등)
     }
 }
