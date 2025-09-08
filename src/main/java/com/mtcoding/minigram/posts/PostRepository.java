@@ -27,4 +27,8 @@ public class PostRepository {
                 .setParameter("postId", postId)
                 .getResultList();
     }
+
+    public java.util.Optional<Post> findPostById(Integer id) {
+        return java.util.Optional.ofNullable(em.find(Post.class, id));
+    }
 }

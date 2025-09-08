@@ -25,4 +25,37 @@ public class PostLikeRepository {
         return count > 0;
     }
 
+    public void save(PostLike like) {
+        em.persist(like);
+    }
+
+    public void delete(PostLike like) {
+        em.remove(like);
+    }
+
+    // ✅ 취소용: 엔티티 조회
+    public java.util.Optional<PostLike> findByPostIdAndUserId(Integer postId, Integer userId) {
+        var q = """
+                select pl from PostLike pl
+                where pl.post.id = :postId and pl.user.id = :userId
+                """;
+        return em.createQuery(q, PostLike.class)
+                .setParameter("postId", postId)
+                .setParameter("userId", userId)
+                .getResultStream()
+                .findFirst();
+    }
+
+    // (선택) 벌크 삭제 버전
+    public int deleteByPostIdAndUserId(Integer postId, Integer userId) {
+        var q = """
+                delete from PostLike pl
+                where pl.post.id = :postId and pl.user.id = :userId
+                """;
+        return em.createQuery(q)
+                .setParameter("postId", postId)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
+
 }
