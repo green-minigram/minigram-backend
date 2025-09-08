@@ -132,12 +132,16 @@ public class PostsControllerTest extends MyRestDoc {
     @Test
     @DisplayName("게시글 작성 - 실패(이미지 없음) - 400")
     void create_fail_no_images() throws Exception {
+        var req = new PostRequest.CreateDTO();
+        req.setContent("이미지 없이 작성");
+        req.setImageUrls(java.util.List.of());
 
         // when
         ResultActions actions = mvc.perform(post("/s/api/posts")
-                .param("content", "이미지 없이 작성")
-                .header("Authorization", "Bearer " + accessToken)
-                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .header("Authorization", accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(req))
+                .accept(MediaType.APPLICATION_JSON)
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();

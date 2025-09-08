@@ -2,7 +2,6 @@ package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
-import com.mtcoding.minigram._core.storage.ImageStorage;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
@@ -34,8 +33,6 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
-    private final ImageStorage imageStorage;
-
 
     @Transactional(readOnly = true)
     // 게시글 상세
@@ -83,6 +80,7 @@ public class PostService {
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
+        // 이미지 URL 목록을 null-세이프하게 정제(trim)한 뒤 빈 값 제거·중복 제거한 리스트 생성
         List<String> cleanedUrls = Optional.ofNullable(req.getImageUrls())
                 .orElse(List.of())
                 .stream()
@@ -108,10 +106,16 @@ public class PostService {
                 .build();
         postRepository.save(post);
 
-        // 2) PostImage 저장 (URL 그대로)
+        // 2) PostImage 저장 (정렬 부여 + 필요시 post.images 동기화)
         List<PostImage> savedImages = new ArrayList<>(req.getImageUrls().size());
+        
+        int sort = 0;
         for (String url : req.getImageUrls()) {
-            PostImage pi = PostImage.builder().post(post).url(url).build();
+            PostImage pi = PostImage.builder()
+                    .post(post)
+                    .url(url)
+                    .sort(sort++)      // ← 순서 보장용
+                    .build();
             postImageRepository.save(pi);
             savedImages.add(pi);
         }
@@ -127,3 +131,4 @@ public class PostService {
         );
     }
 }
+

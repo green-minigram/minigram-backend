@@ -11,6 +11,6 @@ public class PostRequest {
     @NoArgsConstructor
     public static class CreateDTO {   // JSON 전용 (파일 업로드 없음)
         private String content;       // 캡션
-        private List<String> imageUrls; // 이미 업로드된 이미지의 URL 목록(최소 1개)
+        private List<String> imageUrls; // Presign 업로드 후 최종 URL들
     }
 }

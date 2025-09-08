@@ -1,7 +1,7 @@
 package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram.posts.images.PostImage;
-import com.mtcoding.minigram.posts.likes.PostLikeResponse.LikesDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -19,6 +19,18 @@ public class PostResponse {
         private Integer commentCount;
         private LocalDateTime postedAt;
         private Boolean isReported;
+
+        @Data
+        @AllArgsConstructor
+        public static class LikesDTO {
+            private Integer count;
+            private Boolean isLiked;
+
+            public LikesDTO(int count, boolean liked) {
+                this.count = count;
+                this.isLiked = liked;
+            }
+        }
 
         public DetailDTO(Post post,
                          java.util.List<PostImage> images,
