@@ -23,11 +23,9 @@ public class PostsController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> create(
-            @AuthenticationPrincipal User user,
-            @RequestBody @Validated PostRequest.CreateDTO req
-    ) {
-        return Resp.ok(postService.create(req, user.getId())); // DetailDTO 반환
+    public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody @Validated PostRequest.CreateDTO reqDTO) {
+        PostResponse.DetailDTO respDTO = postService.create(reqDTO, user.getId());
+        return Resp.ok(respDTO); // DetailDTO 반환
     }
 
 }

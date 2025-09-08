@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 // @Slf4j
 // - Lombok이 자동으로 Logger 필드를 추가해주는 어노테이션
@@ -79,12 +80,25 @@ public class PostService {
     @Transactional
     public PostResponse.DetailDTO create(PostRequest.CreateDTO req, Integer authorId) {
 
-        User author = userRepository.findUserById(authorId)
+        User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
-        if (req.getImageUrls() == null || req.getImageUrls().isEmpty()) {
+        List<String> cleanedUrls = Optional.ofNullable(req.getImageUrls())
+                .orElse(List.of())
+                .stream()
+                .map(s -> s == null ? "" : s.trim())
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+
+
+        if (cleanedUrls.isEmpty()) {
             throw new ExceptionApi400("이미지 최소 1장은 필요합니다.");
         }
+        if (cleanedUrls.size() > 10) {
+            throw new ExceptionApi400("이미지는 최대 10장까지 가능합니다.");
+        }
+
 
         // 1) Post 저장 (status NOT NULL 주의)
         Post post = Post.builder()

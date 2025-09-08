@@ -1,7 +1,9 @@
 package com.mtcoding.minigram.integre;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
+import com.mtcoding.minigram.posts.PostRequest;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,14 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,6 +32,9 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper om;
 
     private String accessToken;
 
@@ -82,31 +88,28 @@ public class PostsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("게시글 작성 - OK")
+    @DisplayName("게시글 작성 - OK (JSON)")
     void create_ok() throws Exception {
+        var req = new PostRequest.CreateDTO();
+        req.setContent("주말 바다 🌊");
+        req.setImageUrls(List.of(
+                "https://picsum.photos/seed/a/800",
+                "https://picsum.photos/seed/b/800"
+        ));
 
-        // given
-        MockMultipartFile img1 = new MockMultipartFile(
-                "images", "a.jpg", "image/jpeg", "x".getBytes());
-        MockMultipartFile img2 = new MockMultipartFile(
-                "images", "b.jpg", "image/jpeg", "y".getBytes());
-
-        // when
-        ResultActions actions = mvc.perform(
-                multipart("/s/api/posts")
-                        .file(img1)
-                        .file(img2)
-                        .param("content", "주말 바다 🌊")
+        ResultActions actions = mvc.perform(post("/s/api/posts")
                         .header("Authorization", "Bearer " + accessToken)
-                        .accept(MediaType.APPLICATION_JSON_VALUE)
-        );
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(req))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200));
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
         System.out.println(responseBody);
 
         // then
-        actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
+        actions.andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.postId").isNumber())
                 .andExpect(jsonPath("$.body.author.userId").value(2))
@@ -131,11 +134,10 @@ public class PostsControllerTest extends MyRestDoc {
     void create_fail_no_images() throws Exception {
 
         // when
-        ResultActions actions = mvc.perform(
-                multipart("/s/api/posts")
-                        .param("content", "이미지 없이 작성")
-                        .header("Authorization", "Bearer " + accessToken)
-                        .accept(MediaType.APPLICATION_JSON_VALUE)
+        ResultActions actions = mvc.perform(post("/s/api/posts")
+                .param("content", "이미지 없이 작성")
+                .header("Authorization", "Bearer " + accessToken)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
