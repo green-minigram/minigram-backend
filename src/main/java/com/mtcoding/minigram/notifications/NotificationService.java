@@ -22,8 +22,8 @@ public class NotificationService {
     private final CommentRepository commentRepository;
 
     @Transactional(readOnly = true)
-    public NotificationResponse.ListDTO findAll(Integer viewerId) {
-        var rows = notificationRepository.findRecent20ByRecipientId(viewerId.longValue());
+    public NotificationResponse.ListDTO findAll(Integer userId) {
+        var rows = notificationRepository.findRecentByRecipientId(userId);
 
         // COMMENT 알림의 commentId 수집
         List<Integer> commentIds = rows.stream()
