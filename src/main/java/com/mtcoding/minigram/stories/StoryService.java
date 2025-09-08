@@ -1,12 +1,13 @@
 package com.mtcoding.minigram.stories;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -66,5 +67,13 @@ public class StoryService {
         }).toList();
 
         return new StoryResponse.ListDTO(detailDTOList);
+    }
+
+    @Transactional
+    public StoryResponse.DTO create(StoryRequest.CreateDTO reqDTO, User user) {
+        Story story = reqDTO.toEntity(user);
+        Story storyPS = storyRepository.save(story);
+        // TODO : 썸네일 저장 로직 (비동기 처리?)
+        return new StoryResponse.DTO(storyPS);
     }
 }

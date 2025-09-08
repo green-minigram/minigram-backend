@@ -5,9 +5,7 @@ import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -32,6 +30,13 @@ public class StoriesController {
     @GetMapping("/s/api/users/{userId}/stories")
     public ResponseEntity<?> findAllByUserId(@PathVariable Integer userId, @AuthenticationPrincipal User user) {
         StoryResponse.ListDTO respDTO = storyService.findAllByUserId(userId, user.getId());
+        return Resp.ok(respDTO);
+    }
+
+    // 스토리 등록
+    @PostMapping("/s/api/stories")
+    public ResponseEntity<?> create(@RequestBody StoryRequest.CreateDTO reqDTO, @AuthenticationPrincipal User user) {
+        StoryResponse.DTO respDTO = storyService.create(reqDTO, user);
         return Resp.ok(respDTO);
     }
 }

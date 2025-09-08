@@ -96,4 +96,8 @@ public class StoryRepository {
     }
 
 
+    public Story save(Story story) {
+        em.persist(story);
+        return story;
+    }
 }
