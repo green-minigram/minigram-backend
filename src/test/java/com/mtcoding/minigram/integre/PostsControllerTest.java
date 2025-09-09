@@ -1,7 +1,9 @@
 package com.mtcoding.minigram.integre;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
+import com.mtcoding.minigram.posts.PostRequest;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,10 +16,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -27,6 +31,9 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper om;
 
     private String accessToken;
 
@@ -39,18 +46,18 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("게시글 단건 조회 - OK")
-    void find_ok() throws Exception {
+    void find_test() throws Exception {
 
         int postId = 18;
 
         ResultActions actions = mvc.perform(
                 get("/s/api/posts/{postId}", postId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", accessToken)
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
-        // System.out.println(responseBody);
+        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
@@ -75,6 +82,71 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.postedAt").isString())
                 .andExpect(jsonPath("$.body.isReported").value(true));
 
+
+        actions.andDo(document);
+    }
+
+    @Test
+    @DisplayName("게시글 작성 - OK (JSON)")
+    void create_test() throws Exception {
+        var req = new PostRequest.CreateDTO();
+        req.setContent("주말 바다 🌊");
+        req.setImageUrls(List.of(
+                "https://picsum.photos/seed/a/800",
+                "https://picsum.photos/seed/b/800"
+        ));
+
+        ResultActions actions = mvc.perform(post("/s/api/posts")
+                .header("Authorization", accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(req))
+                .accept(MediaType.APPLICATION_JSON));
+
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+        // then
+        actions.andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").isNumber())
+                .andExpect(jsonPath("$.body.userId").value(2))
+                .andExpect(jsonPath("$.body.images", hasSize(2)))
+                .andExpect(jsonPath("$.body.images[0].id").isNumber())
+                .andExpect(jsonPath("$.body.images[0].url").value("https://picsum.photos/seed/a/800"))
+                .andExpect(jsonPath("$.body.images[1].url").value("https://picsum.photos/seed/b/800"))
+                .andExpect(jsonPath("$.body.content").value("주말 바다 🌊"))
+                .andExpect(jsonPath("$.body.postedAt").isString())
+                .andExpect(jsonPath("$.body.updatedAt").isString());
+
+        actions.andDo(document);
+    }
+
+
+    @Test
+    @DisplayName("게시글 작성 - 실패(이미지 없음) - 400")
+    void create_fail_test() throws Exception {
+        var req = new PostRequest.CreateDTO();
+        req.setContent("이미지 없이 작성");
+        req.setImageUrls(java.util.List.of());
+
+        // when
+        ResultActions actions = mvc.perform(post("/s/api/posts")
+                .header("Authorization", accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(req))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+        // then
+        actions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.msg", containsString("이미지")))
+                .andExpect(jsonPath("$.body").doesNotExist());
 
         actions.andDo(document);
     }

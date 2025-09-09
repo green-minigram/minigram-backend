@@ -1,17 +1,23 @@
 package com.mtcoding.minigram.posts;
 
+import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
+import com.mtcoding.minigram.posts.images.PostImageRepository;
 import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.ReportRepository;
+import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 // @Slf4j
 // - Lombok이 자동으로 Logger 필드를 추가해주는 어노테이션
@@ -21,10 +27,12 @@ import java.util.List;
 @Service
 public class PostService {
     private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     // 게시글 상세
@@ -64,4 +72,54 @@ public class PostService {
         // 3) 생성자 주입으로 한 번에 완성
         return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
     }
+
+
+    @Transactional
+    public PostResponse.SavedDTO create(PostRequest.CreateDTO req, Integer authorId) {
+
+        User author = userRepository.findById(authorId)
+                .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
+
+        // 이미지 URL 목록을 null-세이프하게 정제(trim)한 뒤 빈 값 제거·중복 제거한 리스트 생성
+        List<String> cleanedUrls = Optional.ofNullable(req.getImageUrls())
+                .orElse(List.of())
+                .stream()
+                .map(s -> s == null ? "" : s.trim())
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+
+
+        if (cleanedUrls.isEmpty()) {
+            throw new ExceptionApi400("이미지 최소 1장은 필요합니다.");
+        }
+        if (cleanedUrls.size() > 10) {
+            throw new ExceptionApi400("이미지는 최대 10장까지 가능합니다.");
+        }
+
+
+        // 1) Post 저장 (status NOT NULL 주의)
+        Post post = Post.builder()
+                .user(author)
+                .content(req.getContent())
+                .status(PostStatus.ACTIVE)
+                .build();
+        postRepository.save(post);
+
+        // 2) PostImage 저장 (정렬 부여 + 필요시 post.images 동기화)
+        List<PostImage> savedImages = new ArrayList<>(req.getImageUrls().size());
+
+        for (String url : req.getImageUrls()) {
+            PostImage pi = PostImage.builder()
+                    .post(post)
+                    .url(url)
+                    .build();
+            postImageRepository.save(pi);
+            savedImages.add(pi);
+        }
+
+        // 3) 상세 DTO 반환
+        return PostResponse.SavedDTO.from(post, savedImages);
+    }
 }
+
