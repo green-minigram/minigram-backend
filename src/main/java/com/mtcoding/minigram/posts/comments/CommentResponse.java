@@ -26,31 +26,6 @@ public class CommentResponse {
         private Boolean isOwner;
         private Boolean isPostAuthor;
 
-        @Data
-        public static class UserDTO {
-            private Integer userId;
-            private String username;
-            private String profileImageUrl;
-
-            public UserDTO(User user) {
-                this.userId = user.getId();
-                this.username = user.getUsername();
-                this.profileImageUrl = user.getProfileImageUrl();
-            }
-        }
-
-        @Data
-        @AllArgsConstructor
-        public static class LikesDTO {
-            private Integer count;
-            private Boolean isLiked;
-
-            public LikesDTO(int count, boolean liked) {
-                this.count = count;
-                this.isLiked = liked;
-            }
-        }
-
         public ItemDTO(Comment comment,
                        List<ItemDTO> children,
                        LikesDTO likes,
@@ -82,6 +57,56 @@ public class CommentResponse {
                     owner,
                     postAuthor
             );
+        }
+    }
+
+    @Data
+    public static class SavedDTO {
+        private Integer commentId;
+        private Integer postId;
+        private Integer userId;
+        private Integer parentId;      // null이면 최상위
+        private String content;
+        private com.mtcoding.minigram.posts.comments.CommentStatus status;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+
+        public static SavedDTO from(com.mtcoding.minigram.posts.comments.Comment c) {
+            SavedDTO dto = new SavedDTO();
+            dto.commentId = c.getId();
+            dto.postId = c.getPost().getId();
+            dto.userId = c.getUser().getId();
+            dto.parentId = (c.getParent() == null) ? null : c.getParent().getId();
+            dto.content = c.getContent();
+            dto.status = c.getStatus();
+            dto.createdAt = c.getCreatedAt();
+            dto.updatedAt = c.getUpdatedAt();
+            return dto;
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class LikesDTO {
+        private Integer count;
+        private Boolean isLiked;
+
+        public LikesDTO(int count, boolean liked) {
+            this.count = count;
+            this.isLiked = liked;
+        }
+    }
+
+    @Data
+    public static class UserDTO {
+        private Integer userId;
+        private String username;
+        private String profileImageUrl;
+
+        public UserDTO(User user) {
+            this.userId = user.getId();
+            this.username = user.getUsername();
+            this.profileImageUrl = user.getProfileImageUrl();
         }
     }
 }

@@ -91,7 +91,7 @@ public class CommentService {
 
 
     @Transactional
-    public CommentResponse.ItemDTO create(Integer postId, Integer userId, CommentRequest.CreateDTO reqDTO) {
+    public CommentResponse.SavedDTO create(Integer postId, Integer userId, CommentRequest.CreateDTO reqDTO) {
 
         // 0) 입력 검증
         String content = (reqDTO.getContent() == null) ? "" : reqDTO.getContent().trim();
@@ -117,33 +117,24 @@ public class CommentService {
             if (!Objects.equals(parent.getPost().getId(), postId)) {
                 throw new ExceptionApi400("부모 댓글과 게시글이 일치하지 않습니다.");
             }
+            if (parent.getParent() != null) {
+                throw new ExceptionApi400("대댓글에 대한 대댓글은 허용되지 않습니다.");
+            }
         }
 
         // 5) 저장
         Comment comment = Comment.builder()
-                .post(parent == null ? postRepository.findPostById(postId).orElseThrow(() -> new ExceptionApi404("게시글이 존재하지 않습니다.")) : parent.getPost())
+                .post(parent == null ? postRef : parent.getPost())
                 .user(author)
                 .parent(parent)
-                .content(reqDTO.getContent())
-                .status(CommentStatus.ACTIVE)   // ★ 추가
+                .content(content)
+                .status(CommentStatus.ACTIVE)
                 .build();
 
         log.debug("NEW COMMENT status={}", comment.getStatus()); // 반드시 ACTIVE 찍혀야 함
         commentRepository.save(comment);
 
-        // 6) 작성 직후 기본값으로 응답 구성
-        boolean owner = true;
-        boolean isPostAuthor = Objects.equals(author.getId(), postAuthorId);
-        int likeCount = 0;
-        boolean liked = false;
-
-        return CommentResponse.ItemDTO.from(
-                comment,
-                List.of(), // children: 작성 직후엔 비어 있음
-                likeCount,
-                liked,
-                owner,
-                isPostAuthor
-        );
+        // 6) 생성 직후에는 스냅샷만 반환
+        return CommentResponse.SavedDTO.from(comment);
     }
 }

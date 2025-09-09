@@ -23,7 +23,7 @@ public class CommentsController {
 
     @PostMapping("s/api/posts/{postId}/comments")
     public ResponseEntity<?> create(@PathVariable Integer postId, @AuthenticationPrincipal User user, @RequestBody CommentRequest.CreateDTO reqDTO) {
-        CommentResponse.ItemDTO respDTO = commentService.create(postId, user.getId(), reqDTO);
+        CommentResponse.SavedDTO respDTO = commentService.create(postId, user.getId(), reqDTO);
         return Resp.ok(respDTO); // ItemDTO 반환
     }
 }
