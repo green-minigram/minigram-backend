@@ -21,8 +21,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -98,24 +97,27 @@ public class PostsControllerTest extends MyRestDoc {
         ));
 
         ResultActions actions = mvc.perform(post("/s/api/posts")
-                        .header("Authorization", "Bearer " + accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(req))
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200));
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(req))
+                .accept(MediaType.APPLICATION_JSON));
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         // then
-        actions.andExpect(jsonPath("$.status").value(200))
+        actions.andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.postId").isNumber())
                 .andExpect(jsonPath("$.body.author.userId").value(2))
                 .andExpect(jsonPath("$.body.author.username").value("ssar"))
                 .andExpect(jsonPath("$.body.author.isOwner").value(true))
-                .andExpect(jsonPath("$.body.images.length()", greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.body.images", hasSize(2)))
+                .andExpect(jsonPath("$.body.images[0].id").isNumber())
+                .andExpect(jsonPath("$.body.images[0].url").value("https://picsum.photos/seed/a/800"))
+                .andExpect(jsonPath("$.body.images[1].url").value("https://picsum.photos/seed/b/800"))
                 .andExpect(jsonPath("$.body.content").value("주말 바다 🌊"))
                 .andExpect(jsonPath("$.body.likes.count").value(0))
                 .andExpect(jsonPath("$.body.likes.isLiked").value(false))
@@ -126,9 +128,7 @@ public class PostsControllerTest extends MyRestDoc {
         actions.andDo(document);
     }
 
-    // ===============================
-// 게시글 작성 - 이미지 없음 -> 400 (유효성 실패)
-// ===============================
+
     @Test
     @DisplayName("게시글 작성 - 실패(이미지 없음) - 400")
     void create_fail_no_images() throws Exception {
@@ -144,8 +144,8 @@ public class PostsControllerTest extends MyRestDoc {
                 .accept(MediaType.APPLICATION_JSON)
         );
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         // then
         actions.andExpect(status().isBadRequest())

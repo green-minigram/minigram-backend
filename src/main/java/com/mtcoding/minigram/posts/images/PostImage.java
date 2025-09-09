@@ -23,7 +23,7 @@ public class PostImage {
     private String url;
 
     @Column(nullable = false)
-    private Integer sort;
+    private Integer sort;  // 표시 순서 보장
 
     @Builder
     public PostImage(Integer id, Post post, String url, Integer sort) {
