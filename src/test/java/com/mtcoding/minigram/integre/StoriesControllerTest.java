@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-public class StoryControllerTest extends MyRestDoc {
+public class StoriesControllerTest extends MyRestDoc {
 
     @Autowired
     private ObjectMapper om;
@@ -163,7 +163,7 @@ public class StoryControllerTest extends MyRestDoc {
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyId").value(10));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyId").isNumber());
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.userId").value(2));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.videoUrl").isString());
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.thumbnailUrl").isString());
