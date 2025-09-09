@@ -52,7 +52,6 @@ public class Comment {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private List<Comment> children = new ArrayList<>();
-
     
     @Builder
     public Comment(Integer id, Post post, User user, Comment parent, String content, CommentStatus status, LocalDateTime createdAt, LocalDateTime updatedAt, List<Comment> children) {

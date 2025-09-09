@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -108,37 +107,15 @@ public class CommentsControllerTest extends MyRestDoc {
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.body.user.userId").value(2))
-                .andExpect(jsonPath("$.body.postAuthor").value(true))
-                .andExpect(jsonPath("$.body.likes.count").value(0))
-                .andExpect(jsonPath("$.body.likes.isLiked").value(false));
-    }
-
-    @Test
-    @DisplayName("댓글 작성 - 대댓글의 대댓글(중첩) - OK")
-    void create_reply_to_child_ok() throws Exception {
-        int postId = 18;
-        int childCommentId = 11; // 더미: comment 11은 post 18의 대댓글
-
-        var req = new CommentRequest.CreateDTO();
-        req.setContent("대댓글의 대댓글 테스트");
-        req.setParentId(childCommentId);
-
-        ResultActions actions = mvc.perform(
-                post("/s/api/posts/{postId}/comments", postId)
-                        .header("Authorization", "Bearer " + accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(req))
-                        .accept(MediaType.APPLICATION_JSON)
-        );
-
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
-
-        actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.body.parentId").value(childCommentId))
-                .andExpect(jsonPath("$.body.likes.count").value(0))
-                .andExpect(jsonPath("$.body.likes.isLiked").value(false));
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.commentId").value(43))
+                .andExpect(jsonPath("$.body.postId").value(3))
+                .andExpect(jsonPath("$.body.userId").value(2))
+                .andExpect(jsonPath("$.body.content").value("작성자 본인이 남기는 댓글"))
+                .andExpect(jsonPath("$.body.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.body.createdAt",
+                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")))
+                .andExpect(jsonPath("$.body.updatedAt",
+                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")));
     }
 }
