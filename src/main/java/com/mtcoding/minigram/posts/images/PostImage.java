@@ -22,14 +22,10 @@ public class PostImage {
     @Column(nullable = false)
     private String url;
 
-    @Column(nullable = false)
-    private Integer sort;  // 표시 순서 보장
-
     @Builder
-    public PostImage(Integer id, Post post, String url, Integer sort) {
+    public PostImage(Integer id, Post post, String url) {
         this.id = id;
         this.post = post;
         this.url = url;
-        this.sort = sort;
     }
 }

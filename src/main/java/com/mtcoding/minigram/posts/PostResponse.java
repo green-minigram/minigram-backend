@@ -20,18 +20,6 @@ public class PostResponse {
         private LocalDateTime postedAt;
         private Boolean isReported;
 
-        @Data
-        @AllArgsConstructor
-        public static class LikesDTO {
-            private Integer count;
-            private Boolean isLiked;
-
-            public LikesDTO(int count, boolean liked) {
-                this.count = count;
-                this.isLiked = liked;
-            }
-        }
-
         public DetailDTO(Post post,
                          java.util.List<PostImage> images,
                          int likeCount, boolean isLiked,
@@ -61,6 +49,43 @@ public class PostResponse {
             this.likes = new LikesDTO(likeCount, isLiked);
             this.commentCount = commentCount;
             this.isReported = isReported;
+        }
+    }
+
+    @Data
+    public static class SavedDTO {
+        private Integer postId;
+        private Integer userId;
+        private String content;
+        private PostStatus status;
+        private LocalDateTime postedAt;
+        private LocalDateTime updatedAt;
+        private List<ImageDTO> images;
+
+        public static SavedDTO from(Post post, List<PostImage> images) {
+            SavedDTO dto = new SavedDTO();
+            dto.postId = post.getId();
+            dto.userId = post.getUser().getId();
+            dto.content = post.getContent();
+            dto.status = post.getStatus();
+            dto.postedAt = post.getCreatedAt();
+            dto.updatedAt = post.getUpdatedAt();
+            dto.images = images.stream()
+                    .map(pi -> new ImageDTO(pi.getId(), pi.getUrl()))
+                    .toList();
+            return dto;
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class LikesDTO {
+        private Integer count;
+        private Boolean isLiked;
+
+        public LikesDTO(int count, boolean liked) {
+            this.count = count;
+            this.isLiked = liked;
         }
     }
 

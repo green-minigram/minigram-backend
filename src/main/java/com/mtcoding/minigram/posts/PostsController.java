@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -23,8 +22,8 @@ public class PostsController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody @Validated PostRequest.CreateDTO reqDTO) {
-        PostResponse.DetailDTO respDTO = postService.create(reqDTO, user.getId());
+    public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody PostRequest.CreateDTO reqDTO) {
+        var respDTO = postService.create(reqDTO, user.getId());
         return Resp.ok(respDTO); // DetailDTO 반환
     }
 

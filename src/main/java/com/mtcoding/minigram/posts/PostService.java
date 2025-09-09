@@ -75,7 +75,7 @@ public class PostService {
 
 
     @Transactional
-    public PostResponse.DetailDTO create(PostRequest.CreateDTO req, Integer authorId) {
+    public PostResponse.SavedDTO create(PostRequest.CreateDTO req, Integer authorId) {
 
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
@@ -108,27 +108,18 @@ public class PostService {
 
         // 2) PostImage 저장 (정렬 부여 + 필요시 post.images 동기화)
         List<PostImage> savedImages = new ArrayList<>(req.getImageUrls().size());
-        
-        int sort = 0;
+
         for (String url : req.getImageUrls()) {
             PostImage pi = PostImage.builder()
                     .post(post)
                     .url(url)
-                    .sort(sort++)      // ← 순서 보장용
                     .build();
             postImageRepository.save(pi);
             savedImages.add(pi);
         }
 
         // 3) 상세 DTO 반환
-        return new PostResponse.DetailDTO(
-                post,
-                savedImages,
-                0, false,    // likeCount, isLiked
-                0,           // commentCount
-                true, false, // isOwner, isFollowing
-                false        // isReported
-        );
+        return PostResponse.SavedDTO.from(post, savedImages);
     }
 }
 

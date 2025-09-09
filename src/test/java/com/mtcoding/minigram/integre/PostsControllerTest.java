@@ -46,18 +46,18 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("게시글 단건 조회 - OK")
-    void find_ok() throws Exception {
+    void find_test() throws Exception {
 
         int postId = 18;
 
         ResultActions actions = mvc.perform(
                 get("/s/api/posts/{postId}", postId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", accessToken)
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
-        // System.out.println(responseBody);
+        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
@@ -88,7 +88,7 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("게시글 작성 - OK (JSON)")
-    void create_ok() throws Exception {
+    void create_test() throws Exception {
         var req = new PostRequest.CreateDTO();
         req.setContent("주말 바다 🌊");
         req.setImageUrls(List.of(
@@ -97,7 +97,7 @@ public class PostsControllerTest extends MyRestDoc {
         ));
 
         ResultActions actions = mvc.perform(post("/s/api/posts")
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(req))
                 .accept(MediaType.APPLICATION_JSON));
@@ -111,19 +111,14 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.postId").isNumber())
-                .andExpect(jsonPath("$.body.author.userId").value(2))
-                .andExpect(jsonPath("$.body.author.username").value("ssar"))
-                .andExpect(jsonPath("$.body.author.isOwner").value(true))
+                .andExpect(jsonPath("$.body.userId").value(2))
                 .andExpect(jsonPath("$.body.images", hasSize(2)))
                 .andExpect(jsonPath("$.body.images[0].id").isNumber())
                 .andExpect(jsonPath("$.body.images[0].url").value("https://picsum.photos/seed/a/800"))
                 .andExpect(jsonPath("$.body.images[1].url").value("https://picsum.photos/seed/b/800"))
                 .andExpect(jsonPath("$.body.content").value("주말 바다 🌊"))
-                .andExpect(jsonPath("$.body.likes.count").value(0))
-                .andExpect(jsonPath("$.body.likes.isLiked").value(false))
-                .andExpect(jsonPath("$.body.commentCount").value(0))
                 .andExpect(jsonPath("$.body.postedAt").isString())
-                .andExpect(jsonPath("$.body.isReported").value(false));
+                .andExpect(jsonPath("$.body.updatedAt").isString());
 
         actions.andDo(document);
     }
@@ -131,7 +126,7 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("게시글 작성 - 실패(이미지 없음) - 400")
-    void create_fail_no_images() throws Exception {
+    void create_fail_test() throws Exception {
         var req = new PostRequest.CreateDTO();
         req.setContent("이미지 없이 작성");
         req.setImageUrls(java.util.List.of());
