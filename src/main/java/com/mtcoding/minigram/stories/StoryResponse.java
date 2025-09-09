@@ -18,7 +18,7 @@ public class StoryResponse {
         private Integer likeCount;
 
         @Data
-        public static class UserDTO {
+        public class UserDTO {
             private Integer userId;
             private String username;
             private String profileImageUrl;
