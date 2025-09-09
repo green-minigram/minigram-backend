@@ -39,4 +39,8 @@ public class PostRepository {
             return null; // 못 찾으면 null (isPostAuthor 계산시 false 처리됨)
         }
     }
+
+    public void save(Post post) {
+        em.persist(post);
+    }
 }
