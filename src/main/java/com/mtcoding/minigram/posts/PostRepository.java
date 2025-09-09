@@ -43,4 +43,8 @@ public class PostRepository {
     public java.util.Optional<Post> findPostById(Integer id) {
         return java.util.Optional.ofNullable(em.find(Post.class, id));
     }
+
+    public Post getReferenceById(Integer id) {
+        return em.getReference(Post.class, id); // SELECT 없이 프록시
+    }
 }

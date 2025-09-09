@@ -5,14 +5,12 @@ import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
-import com.mtcoding.minigram.posts.comments.likes.CommentLikeResponse;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -28,9 +26,8 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-
     //게시글 댓글 조회
-    public List<CommentResponse.ItemDTO> findAllByPostId(Integer postId, Integer userId) {
+    public CommentResponse.ListDTO findAllByPostId(Integer postId, Integer userId) {
 
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
         if (postAuthorId == null) throw new ExceptionApi404("게시글이 존재하지 않습니다"); // [CHANGED] 존재하지 않는 게시글 처리
@@ -38,7 +35,7 @@ public class CommentService {
 
         // 부모/자식 조회
         List<Comment> parents = commentRepository.findParentsByPostId(postId);
-        if (parents.isEmpty()) return List.of();
+        if (parents.isEmpty()) return new CommentResponse.ListDTO(List.of());
 
         List<Integer> parentIds = parents.stream().map(Comment::getId).toList();
         List<Comment> children = commentRepository.findChildrenByParentIds(parentIds);
@@ -64,7 +61,7 @@ public class CommentService {
                 : commentLikeRepository.findLikedCommentIdsByUser(userId, allIds);
 
         // DTO 변환 + children 세팅
-        List<CommentResponse.ItemDTO> result = parents.stream()
+        List<CommentResponse.ItemDTO> items = parents.stream()
                 .map(parent -> {
                     List<CommentResponse.ItemDTO> childDtos = childrenMap
                             .getOrDefault(parent.getId(), List.of())
@@ -77,9 +74,9 @@ public class CommentService {
                 .toList();
 
         log.info("comments.result parents={}, children={}, allIds={}, likedSetSize={}",
-                result.size(), children.size(), allIds.size(), likedSet.size()); // 테스트 확인 로그 추가
+                items.size(), children.size(), allIds.size(), likedSet.size()); // 테스트 확인 로그 추가
 
-        return result;
+        return new CommentResponse.ListDTO(items);
     }
 
     // 단일 댓글에 대해 likeCount/liked 계산 후 DTO로 변환하고 owner/postAuthor 플래그 설정
@@ -92,55 +89,59 @@ public class CommentService {
         return CommentResponse.ItemDTO.from(comment, (childrenDtos == null) ? List.of() : childrenDtos, likeCount, liked, owner, isPostAuthor);
     }
 
-    @Transactional
-    public CommentResponse.ItemDTO create(Integer postId, Integer userId, CommentRequest.CreateDTO req) {
-        if (!StringUtils.hasText(req.getContent())) {
-            throw new ExceptionApi400("댓글 내용을 입력해주세요.");
-        }
 
+    @Transactional
+    public CommentResponse.ItemDTO create(Integer postId, Integer userId, CommentRequest.CreateDTO reqDTO) {
+
+        // 0) 입력 검증
+        String content = (reqDTO.getContent() == null) ? "" : reqDTO.getContent().trim();
+        if (content.isEmpty()) throw new ExceptionApi400("댓글 내용을 입력해주세요.");
+
+        // 1) 게시글 존재/작성자 확인 (존재 체크 용도)
         Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
         if (postAuthorId == null) throw new ExceptionApi404("게시글이 존재하지 않습니다.");
 
-        User author = userRepository.findUserById(userId)
+        // 2) 작성자 로딩
+        User author = userRepository.findById(userId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
-        Post post = new Post(); // 엔티티 로딩을 최소화하고 싶으면 프록시 참조로 대체
-        try {
-            var f = Post.class.getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(post, postId);
-        } catch (Exception ignored) {
-        }
 
+
+        // 3) Post 참조 (SELECT 회피용 프록시)
+        Post postRef = postRepository.getReferenceById(postId);
+
+        // 4) 부모 댓글 검증 (대댓글만 허용, 대대댓글 금지)
         Comment parent = null;
-        if (req.getParentId() != null) {
-            parent = commentRepository.findCommentById(req.getParentId())
+        if (reqDTO.getParentId() != null) {
+            parent = commentRepository.findCommentById(reqDTO.getParentId())
                     .orElseThrow(() -> new ExceptionApi404("부모 댓글을 찾을 수 없습니다."));
             if (!Objects.equals(parent.getPost().getId(), postId)) {
                 throw new ExceptionApi400("부모 댓글과 게시글이 일치하지 않습니다.");
             }
         }
 
+        // 5) 저장
         Comment comment = Comment.builder()
                 .post(parent == null ? postRepository.findPostById(postId).orElseThrow(() -> new ExceptionApi404("게시글이 존재하지 않습니다.")) : parent.getPost())
                 .user(author)
                 .parent(parent)
-                .content(req.getContent())
+                .content(reqDTO.getContent())
                 .status(CommentStatus.ACTIVE)   // ★ 추가
                 .build();
 
         log.debug("NEW COMMENT status={}", comment.getStatus()); // 반드시 ACTIVE 찍혀야 함
         commentRepository.save(comment);
 
-        // 작성 직후 기본값
-        var likes = new CommentLikeResponse.LikesDTO(0, false);
+        // 6) 작성 직후 기본값으로 응답 구성
         boolean owner = true;
         boolean isPostAuthor = Objects.equals(author.getId(), postAuthorId);
+        int likeCount = 0;
+        boolean liked = false;
 
         return CommentResponse.ItemDTO.from(
                 comment,
-                List.of(), // children: 작성 직후 빈 리스트
-                likes.getCount(),
-                Boolean.TRUE.equals(likes.getIsLiked()), // ← 여기
+                List.of(), // children: 작성 직후엔 비어 있음
+                likeCount,
+                liked,
                 owner,
                 isPostAuthor
         );

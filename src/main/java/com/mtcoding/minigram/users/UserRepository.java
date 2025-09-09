@@ -38,7 +38,11 @@ public class UserRepository {
         return user;
     }
 
-    public Optional<User> findUserById(Integer id) {
-        return Optional.ofNullable(em.find(User.class, id));
+    public Optional<User> findById(Integer userId){
+        return Optional.ofNullable(em.find(User.class, userId));
+    }
+
+    public User getReferenceById(Integer userId) {
+        return em.getReference(User.class, userId);
     }
 }
