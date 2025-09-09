@@ -37,7 +37,7 @@ public class PresignControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void create_upload_url_test() throws Exception {
+    public void createUploadUrl_test() throws Exception {
         // given
         PresignRequest.UploadDTO reqDTO = new PresignRequest.UploadDTO();
         reqDTO.setUploadType(UploadType.IMAGE);
@@ -53,7 +53,7 @@ public class PresignControllerTest extends MyRestDoc {
                         .post("/s/api/storage/presignedUrl")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", accessToken)
         );
 
         // eye
