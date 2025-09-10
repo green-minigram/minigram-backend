@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class PostImageRepository {
@@ -12,5 +14,15 @@ public class PostImageRepository {
 
     public void save(PostImage postImage) {
         em.persist(postImage);
+    }
+
+    public List<PostImage> findAllByPostIdIn(List<Integer> postIdList) {
+        return em.createQuery("""
+                select pi
+                from PostImage pi
+                where pi.post.id in :postIdList
+            """, PostImage.class)
+                .setParameter("postIdList", postIdList)
+                .getResultList();
     }
 }

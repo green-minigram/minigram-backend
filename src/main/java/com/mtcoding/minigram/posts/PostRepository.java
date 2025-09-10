@@ -57,7 +57,7 @@ public class PostRepository {
                                     THEN true ELSE false END,
                                COUNT(DISTINCT c.id)
                         FROM Post p
-                        JOIN p.author u
+                        JOIN p.user u
                         LEFT JOIN PostLike pl ON pl.post = p
                         LEFT JOIN Comment  c  ON c.post  = p
                         WHERE EXISTS (

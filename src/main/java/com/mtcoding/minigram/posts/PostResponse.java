@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram.posts.images.PostImage;
+import com.mtcoding.minigram.users.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -126,5 +127,63 @@ public class PostResponse {
     public static class DeleteDTO {
         private Integer postId;
         private Boolean deleted; // 항상 true로 반환 (멱등)
+    }
+
+
+    @Data
+    public static class FeedDTO {
+        private List<ItemDTO> postList;
+
+        public FeedDTO(List<ItemDTO> postList) {
+            this.postList = postList;
+        }
+    }
+
+    @Data
+    public static class ItemDTO{
+        private UserDTO user;
+        private List<PostImageDTO> postImageList;
+        private Integer postId;
+        private String content;
+        private Boolean isLiked;
+        private Integer likesCount;
+        private Integer commentCount;
+        private LocalDateTime createdAt;
+
+
+        @Data
+        public class UserDTO{
+            private Integer userId;
+            private String username;
+            private String profileImageUrl;
+
+            public UserDTO(User user) {
+                this.userId = user.getId();
+                this.username = user.getUsername();
+                this.profileImageUrl = user.getProfileImageUrl();
+            }
+        }
+
+        @Data
+        public class PostImageDTO{
+            private Integer postImageId;
+            private String url;
+
+            public PostImageDTO(PostImage postImage) {
+                this.postImageId = postImage.getId();
+                this.url = postImage.getUrl();
+            }
+        }
+
+        public ItemDTO(Post post, Boolean isLiked, Integer likesCount, Integer commentCount, List<PostImage> postImageList) {
+            this.user = new UserDTO(post.getUser());
+            this.postImageList = postImageList.stream().map(postImage -> new PostImageDTO(postImage)).toList();
+            this.postId = post.getId();
+            this.content = post.getContent();
+            this.isLiked = isLiked;
+            this.likesCount = likesCount;
+            this.commentCount = commentCount;
+            this.createdAt = post.getCreatedAt();
+        }
     }
 }
