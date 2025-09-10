@@ -1,11 +1,16 @@
 package com.mtcoding.minigram.posts.comments;
 
+import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
+import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -19,6 +24,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     //게시글 댓글 조회
     public CommentResponse.ListDTO findAllByPostId(Integer postId, Integer userId) {
@@ -81,5 +87,54 @@ public class CommentService {
         boolean isPostAuthor = Objects.equals(comment.getUser().getId(), postAuthorId);
 
         return CommentResponse.ItemDTO.from(comment, (childrenDtos == null) ? List.of() : childrenDtos, likeCount, liked, owner, isPostAuthor);
+    }
+
+
+    @Transactional
+    public CommentResponse.SavedDTO create(Integer postId, Integer userId, CommentRequest.CreateDTO reqDTO) {
+
+        // 0) 입력 검증
+        String content = (reqDTO.getContent() == null) ? "" : reqDTO.getContent().trim();
+        if (content.isEmpty()) throw new ExceptionApi400("댓글 내용을 입력해주세요.");
+
+        // 1) 게시글 존재/작성자 확인 (존재 체크 용도)
+        Integer postAuthorId = postRepository.findAuthorIdByPostId(postId);
+        if (postAuthorId == null) throw new ExceptionApi404("게시글이 존재하지 않습니다.");
+
+        // 2) 작성자 로딩
+        User author = userRepository.findById(userId)
+                .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
+
+
+        // 3) Post 참조 (SELECT 회피용 프록시)
+        Post postRef = postRepository.getReferenceById(postId);
+
+        // 4) 부모 댓글 검증 (대댓글만 허용, 대대댓글 금지)
+        Comment parent = null;
+        if (reqDTO.getParentId() != null) {
+            parent = commentRepository.findCommentById(reqDTO.getParentId())
+                    .orElseThrow(() -> new ExceptionApi404("부모 댓글을 찾을 수 없습니다."));
+            if (!Objects.equals(parent.getPost().getId(), postId)) {
+                throw new ExceptionApi400("부모 댓글과 게시글이 일치하지 않습니다.");
+            }
+            if (parent.getParent() != null) {
+                throw new ExceptionApi400("대댓글에 대한 대댓글은 허용되지 않습니다.");
+            }
+        }
+
+        // 5) 저장
+        Comment comment = Comment.builder()
+                .post(parent == null ? postRef : parent.getPost())
+                .user(author)
+                .parent(parent)
+                .content(content)
+                .status(CommentStatus.ACTIVE)
+                .build();
+
+        log.debug("NEW COMMENT status={}", comment.getStatus()); // 반드시 ACTIVE 찍혀야 함
+        commentRepository.save(comment);
+
+        // 6) 생성 직후에는 스냅샷만 반환
+        return CommentResponse.SavedDTO.from(comment);
     }
 }

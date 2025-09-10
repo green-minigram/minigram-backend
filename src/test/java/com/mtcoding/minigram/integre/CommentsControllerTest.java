@@ -4,6 +4,7 @@ package com.mtcoding.minigram.integre;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
+import com.mtcoding.minigram.posts.comments.CommentRequest;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,5 +81,41 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.items[0].children[0].isPostAuthor").value(true));
 
         actions.andDo(document);
+    }
+
+    @Test
+    @DisplayName("댓글 작성 - 게시글 작성자 - OK (isPostAuthor=true)")
+    void create_as_post_author_ok() throws Exception {
+        int postId = 3; // 더미: post 3의 작성자가 ssar(id=2)라고 가정
+
+        var req = new CommentRequest.CreateDTO();
+        req.setContent("작성자 본인이 남기는 댓글");
+        req.setParentId(null);
+
+
+        ResultActions actions = mvc.perform(
+                post("/s/api/posts/{postId}/comments", postId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(req))
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.commentId").value(43))
+                .andExpect(jsonPath("$.body.postId").value(3))
+                .andExpect(jsonPath("$.body.userId").value(2))
+                .andExpect(jsonPath("$.body.content").value("작성자 본인이 남기는 댓글"))
+                .andExpect(jsonPath("$.body.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.body.createdAt",
+                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")))
+                .andExpect(jsonPath("$.body.updatedAt",
+                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")));
     }
 }
