@@ -32,29 +32,17 @@ public class PostLikeRepository {
     public void delete(PostLike like) {
         em.remove(like);
     }
-    
+
     public java.util.Optional<PostLike> findByPostIdAndUserId(Integer postId, Integer userId) {
-        var q = """
+        var query = """
                 select pl from PostLike pl
                 where pl.post.id = :postId and pl.user.id = :userId
                 """;
-        return em.createQuery(q, PostLike.class)
+        return em.createQuery(query, PostLike.class)
                 .setParameter("postId", postId)
                 .setParameter("userId", userId)
                 .getResultStream()
                 .findFirst();
-    }
-
-    // (선택) 벌크 삭제 버전
-    public int deleteByPostIdAndUserId(Integer postId, Integer userId) {
-        var q = """
-                delete from PostLike pl
-                where pl.post.id = :postId and pl.user.id = :userId
-                """;
-        return em.createQuery(q)
-                .setParameter("postId", postId)
-                .setParameter("userId", userId)
-                .executeUpdate();
     }
 
 }
