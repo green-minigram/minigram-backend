@@ -158,7 +158,7 @@ public class PostsControllerTest extends MyRestDoc {
         // 1) 최초 삭제
         ResultActions actions = mvc.perform(
                 delete("/s/api/posts/{postId}", postId)
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", accessToken)
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
@@ -184,10 +184,10 @@ public class PostsControllerTest extends MyRestDoc {
 //        String notFoundBody = notFound.andReturn().getResponse().getContentAsString();
 //        System.out.println(notFoundBody);
 
-        // 3) 다시 삭제(멱등)
+        // 3) 다시 삭제
         mvc.perform(
                         delete("/s/api/posts/{postId}", postId)
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", accessToken)
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 )
                 .andExpect(status().isOk())
@@ -196,4 +196,6 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.postId").value(postId))
                 .andExpect(jsonPath("$.body.deleted").value(true));
     }
+
+    
 }

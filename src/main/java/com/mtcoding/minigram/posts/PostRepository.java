@@ -43,4 +43,8 @@ public class PostRepository {
     public void save(Post post) {
         em.persist(post);
     }
+
+    public Optional<Post> findPostById(Integer id) {
+        return Optional.ofNullable(em.find(Post.class, id));
+    }
 }
