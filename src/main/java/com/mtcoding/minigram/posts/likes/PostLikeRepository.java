@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Repository
 public class PostLikeRepository {
@@ -33,7 +35,7 @@ public class PostLikeRepository {
         em.remove(like);
     }
 
-    public java.util.Optional<PostLike> findByPostIdAndUserId(Integer postId, Integer userId) {
+    public Optional<PostLike> findByPostIdAndUserId(Integer postId, Integer userId) {
         var query = """
                 select pl from PostLike pl
                 where pl.post.id = :postId and pl.user.id = :userId
