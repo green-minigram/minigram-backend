@@ -63,7 +63,8 @@ public class CommentRepository {
 
     public Optional<Comment> findCommentById(Integer id) {
         return Optional.ofNullable(em.find(Comment.class, id));
-  
+    }
+
     // 삭제 권한 판단용 단건 조회 (댓글 + 작성자 + 게시글 + 게시글 작성자)
     public Optional<Comment> findWithPostAndUsersById(Integer commentId) {
         return em.createQuery(
