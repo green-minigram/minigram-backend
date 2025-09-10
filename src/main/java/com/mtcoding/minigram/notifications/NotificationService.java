@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,64 +16,79 @@ public class NotificationService {
 
         // 1. notification 조회
         List<Object[]> obsList = notificationRepository.findAllByRecipientIdWithinOneMonth(userId);
+        if (obsList.isEmpty()) return new NotificationResponse.ListDTO(List.of());
 
-        // 2. notification, isFollowing으로 itemDTO 1차 조립
-        List<NotificationResponse.ItemDTO> itemDTOList = obsList.stream()
-                .map(ob -> new NotificationResponse.ItemDTO((Notification) ob[0], (Boolean) ob[1], null, null, null))
-                .toList();
-
-        if (itemDTOList.isEmpty()) return new NotificationResponse.ListDTO(itemDTOList);
-
-        // 3. type 별 targetId 리스트 생성 (FOLLOWED 타입일 경우 추가 조회 필요 X)
-        List<Integer> postLikeIdList = itemDTOList.stream()
-                .filter(dto -> dto.getType() == NotificationType.POST_LIKED)
-                .map(dto -> dto.getTargetId())
-                .toList();
-
-        List<Integer> commentIdList = itemDTOList.stream()
-                .filter(dto -> dto.getType() == NotificationType.COMMENTED)
-                .map(dto -> dto.getTargetId())
-                .toList();
-
-        // 4. targetId 기반 추가 정보 조회
-        // 4-1. type = POST_LIKED
-        record PostLikeTargetDetail(Integer postId, String postImageUrl) {
+        record NotificationRow(Notification notification, Boolean isFollowing) {
         }
 
-        Map<Integer, PostLikeTargetDetail> postLikeDetailsByTargetId = new HashMap<>();
-        if (!postLikeIdList.isEmpty()) {
-            for (Object[] obs : notificationRepository.findPostLikeTargetDetailsByIds(postLikeIdList)) {
-                Integer targetId = (Integer) obs[0];
-                Integer postId = (Integer) obs[1];
-                String postImageUrl = (String) obs[2];
-                postLikeDetailsByTargetId.put(targetId, new PostLikeTargetDetail(postId, postImageUrl));
+        List<NotificationRow> rows = new ArrayList<>(obsList.size());
+        Set<Integer> postLikeIdSet = new HashSet<>();
+        Set<Integer> commentIdSet = new HashSet<>();
+
+        // 2. notification, isFollowing -> NotificationRow 조립
+        for (Object[] obs : obsList) {
+            Notification notification = (Notification) obs[0];
+            Boolean isFollowing = (Boolean) obs[1];
+            rows.add(new NotificationRow(notification, isFollowing));
+
+            if (notification.getType() == NotificationType.POST_LIKED) {
+                postLikeIdSet.add(notification.getTargetId());
+            } else if (notification.getType() == NotificationType.COMMENTED) {
+                commentIdSet.add(notification.getTargetId());
             }
         }
 
-        // 4-2. type = COMMENTED
-        record CommentTargetDetail(Integer postId, String postImageUrl, String commentContent) {
+        // 3. targetId 기반 타입별 추가 정보 조회
+        // 3-1. type = POST_LIKED
+        record PostLikeTargetDetail(Integer postId, String postImageUrl) {
+        }
+        Map<Integer, PostLikeTargetDetail> postLikeDetailMap = new HashMap<>();
+        if (!postLikeIdSet.isEmpty()) {
+            for (Object[] obs : notificationRepository.findPostLikeTargetDetailsByIds(postLikeIdSet)) {
+                Integer targetId = (Integer) obs[0];
+                Integer postId = (Integer) obs[1];
+                String postImageUrl = (String) obs[2];
+                postLikeDetailMap.put(targetId, new PostLikeTargetDetail(postId, postImageUrl));
+            }
         }
 
-        Map<Integer, CommentTargetDetail> commentDetailsByTargetId = new HashMap<>();
-        if (!commentIdList.isEmpty()) {
-            for (Object[] obs : notificationRepository.findCommentTargetDetailsByIds(commentIdList)) {
+        // 3-2. type = COMMENTED
+        record CommentTargetDetail(Integer postId, String postImageUrl, String commentContent) {
+        }
+        Map<Integer, CommentTargetDetail> commentDetailMap = new HashMap<>();
+        if (!commentIdSet.isEmpty()) {
+            for (Object[] obs : notificationRepository.findCommentTargetDetailsByIds(commentIdSet)) {
                 Integer targetId = (Integer) obs[0];
                 Integer postId = (Integer) obs[1];
                 String postImageUrl = (String) obs[2];
                 String commentContent = (String) obs[3];
-                commentDetailsByTargetId.put(targetId, new CommentTargetDetail(postId, postImageUrl, commentContent));
+                commentDetailMap.put(targetId, new CommentTargetDetail(postId, postImageUrl, commentContent));
             }
         }
 
-        // 5. 추가 정보로 itemDTO 2차 조립
-        for (NotificationResponse.ItemDTO itemDTO : itemDTOList) {
-            if (itemDTO.getType() == NotificationType.POST_LIKED) {
-                PostLikeTargetDetail detail = postLikeDetailsByTargetId.get(itemDTO.getTargetId());
-                if (detail != null) itemDTO.fillPostLikeDetail(detail.postId(), detail.postImageUrl());
-            } else if (itemDTO.getType() == NotificationType.COMMENTED) {
-                CommentTargetDetail detail = commentDetailsByTargetId.get(itemDTO.getTargetId());
-                if (detail != null)
-                    itemDTO.fillCommentDetail(detail.postId(), detail.postImageUrl(), detail.commentContent());
+        // 4. ItemDTO 조립
+        List<NotificationResponse.ItemDTO> itemDTOList = new ArrayList<>(rows.size());
+        for (NotificationRow row : rows) {
+            Notification notification = row.notification();
+            Boolean isFollowing = row.isFollowing();
+            if (notification.getType() == NotificationType.POST_LIKED) {
+                PostLikeTargetDetail detail = postLikeDetailMap.get(notification.getTargetId());
+                itemDTOList.add(new NotificationResponse.ItemDTO(
+                        notification,
+                        isFollowing,
+                        detail != null ? detail.postId() : null,
+                        detail != null ? detail.postImageUrl() : null,
+                        null
+                ));
+            } else if (notification.getType() == NotificationType.COMMENTED) {
+                CommentTargetDetail detail = commentDetailMap.get(notification.getTargetId());
+                itemDTOList.add(new NotificationResponse.ItemDTO(
+                        notification,
+                        isFollowing,
+                        detail != null ? detail.postId() : null,
+                        detail != null ? detail.postImageUrl() : null,
+                        detail != null ? detail.commentContent() : null
+                ));
             }
         }
 

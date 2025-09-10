@@ -54,16 +54,5 @@ public class NotificationResponse {
             this.createdAt = notification.getCreatedAt();
             this.readStatus = notification.getStatus();
         }
-
-        public void fillPostLikeDetail(Integer postId, String postImageUrl) {
-            this.postId = postId;
-            this.postImageUrl = postImageUrl;
-        }
-
-        public void fillCommentDetail(Integer postId, String postImageUrl, String commentContent) {
-            this.postId = postId;
-            this.postImageUrl = postImageUrl;
-            this.commentContent = commentContent;
-        }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Repository
@@ -34,7 +35,7 @@ public class NotificationRepository {
     }
 
     // targetId == postLikeId 추가 정보 조회 (post.id, post_image.url)
-    public List<Object[]> findPostLikeTargetDetailsByIds(List<Integer> postLikeIdList) {
+    public List<Object[]> findPostLikeTargetDetailsByIds(Set<Integer> postLikeIdList) {
         if (postLikeIdList == null || postLikeIdList.isEmpty()) return Collections.emptyList();
 
         return em.createQuery("""
@@ -58,7 +59,7 @@ public class NotificationRepository {
     }
 
     // targetId == commentId 추가 정보 조회 (post.id, post_image.url, commentContent)
-    public List<Object[]> findCommentTargetDetailsByIds(List<Integer> commentIdList) {
+    public List<Object[]> findCommentTargetDetailsByIds(Set<Integer> commentIdList) {
         if (commentIdList == null || commentIdList.isEmpty()) return Collections.emptyList();
 
         return em.createQuery("""
