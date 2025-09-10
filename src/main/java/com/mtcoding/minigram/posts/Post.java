@@ -43,8 +43,14 @@ public class Post {
     @OrderBy("id ASC") // 업로드 순서 보장
     private List<PostImage> images = new ArrayList<>();
 
-    public void setStatus(PostStatus status) {
-        this.status = status;
+    public boolean isDeleted() {
+        return this.status == PostStatus.DELETED;
+    }
+
+    public void markDeleted() {
+        if (!isDeleted()) {
+            this.status = PostStatus.DELETED; // @UpdateTimestamp 있으면 updatedAt 자동 갱신
+        }
     }
 
     @Builder

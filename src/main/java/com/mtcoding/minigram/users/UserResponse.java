@@ -30,5 +30,4 @@ public class UserResponse {
             this.roles = user.getRoles();
         }
     }
-
 }
