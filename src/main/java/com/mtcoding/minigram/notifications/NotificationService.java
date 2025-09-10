@@ -71,24 +71,31 @@ public class NotificationService {
         for (NotificationRow row : rows) {
             Notification notification = row.notification();
             Boolean isFollowing = row.isFollowing();
-            if (notification.getType() == NotificationType.POST_LIKED) {
-                PostLikeTargetDetail detail = postLikeDetailMap.get(notification.getTargetId());
-                itemDTOList.add(new NotificationResponse.ItemDTO(
-                        notification,
-                        isFollowing,
-                        detail != null ? detail.postId() : null,
-                        detail != null ? detail.postImageUrl() : null,
-                        null
-                ));
-            } else if (notification.getType() == NotificationType.COMMENTED) {
-                CommentTargetDetail detail = commentDetailMap.get(notification.getTargetId());
-                itemDTOList.add(new NotificationResponse.ItemDTO(
-                        notification,
-                        isFollowing,
-                        detail != null ? detail.postId() : null,
-                        detail != null ? detail.postImageUrl() : null,
-                        detail != null ? detail.commentContent() : null
-                ));
+            
+            switch (notification.getType()) {
+                case POST_LIKED -> {
+                    PostLikeTargetDetail detail = postLikeDetailMap.get(notification.getTargetId());
+                    itemDTOList.add(new NotificationResponse.ItemDTO(
+                            notification,
+                            isFollowing,
+                            detail != null ? detail.postId() : null,
+                            detail != null ? detail.postImageUrl() : null,
+                            null
+                    ));
+                }
+                case COMMENTED -> {
+                    CommentTargetDetail detail = commentDetailMap.get(notification.getTargetId());
+                    itemDTOList.add(new NotificationResponse.ItemDTO(
+                            notification,
+                            isFollowing,
+                            detail != null ? detail.postId() : null,
+                            detail != null ? detail.postImageUrl() : null,
+                            detail != null ? detail.commentContent() : null
+                    ));
+                }
+                case FOLLOWED -> {
+                    itemDTOList.add(new NotificationResponse.ItemDTO(notification, isFollowing, null, null, null));
+                }
             }
         }
 
