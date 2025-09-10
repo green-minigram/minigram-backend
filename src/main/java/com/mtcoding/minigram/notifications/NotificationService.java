@@ -14,7 +14,7 @@ import java.util.Map;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
-    public NotificationResponse.ListDTO findWithinOneMonth(Integer userId) {
+    public NotificationResponse.ListDTO findAllWithinOneMonth(Integer userId) {
 
         // 1. notification 조회
         List<Object[]> obsList = notificationRepository.findAllByRecipientIdWithinOneMonth(userId);
