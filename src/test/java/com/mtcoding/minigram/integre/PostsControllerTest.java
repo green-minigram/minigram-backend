@@ -20,7 +20,6 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
@@ -153,7 +152,7 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("게시글 삭제 - OK (소유자, 멱등 + 이후 조회 404)")
-    void delete_ok_owner_idempotent() throws Exception {
+    void delete_test() throws Exception {
         int postId = 3; // ssar(id=2)가 소유한 게시글이라고 가정
 
         // 1) 최초 삭제
