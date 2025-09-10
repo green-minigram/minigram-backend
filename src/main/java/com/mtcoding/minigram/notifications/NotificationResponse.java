@@ -24,7 +24,7 @@ public class NotificationResponse {
         private Integer targetId; // post_like.id / comment.id / follow.id
         private Integer postId; // 댓글/좋아요일 때만
         private String postImageUrl;
-        private String comment; // 댓글일 때만
+        private String commentContent; // 댓글일 때만
         private LocalDateTime createdAt;
         private ReadStatus readStatus;
 
@@ -43,16 +43,27 @@ public class NotificationResponse {
             }
         }
 
-        public ItemDTO(Notification notification, Boolean isFollowing, Integer postId, String postImageUrl, String comment) {
+        public ItemDTO(Notification notification, Boolean isFollowing, Integer postId, String postImageUrl, String commentContent) {
             this.notificationId = notification.getId();
             this.type = notification.getType();
             this.sender = new UserDTO(notification.getSender(), isFollowing);
             this.targetId = notification.getTargetId();
             this.postId = postId;
             this.postImageUrl = postImageUrl;
-            this.comment = comment;
+            this.commentContent = commentContent;
             this.createdAt = notification.getCreatedAt();
             this.readStatus = notification.getStatus();
+        }
+
+        public void fillPostLikeDetail(Integer postId, String postImageUrl) {
+            this.postId = postId;
+            this.postImageUrl = postImageUrl;
+        }
+
+        public void fillCommentDetail(Integer postId, String postImageUrl, String commentContent) {
+            this.postId = postId;
+            this.postImageUrl = postImageUrl;
+            this.commentContent = commentContent;
         }
     }
 }
