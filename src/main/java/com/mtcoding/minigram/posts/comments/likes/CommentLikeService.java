@@ -24,9 +24,11 @@ public class CommentLikeService {
 
     @Transactional
     public CommentLikeResponse.LikesDTO like(Integer commentId, Integer userId) {
+
+
         Comment comment = commentRepository.findCommentById(commentId)
                 .orElseThrow(() -> new ExceptionApi404("댓글이 존재하지 않습니다."));
-        User user = userRepository.findUserById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
         // 이미 눌렀으면 멱등 반환
@@ -49,20 +51,25 @@ public class CommentLikeService {
         }
 
         int count = commentLikeRepository.countByCommentId(commentId);
+
         return new CommentLikeResponse.LikesDTO(count, true);
     }
 
     @Transactional
     public CommentLikeResponse.LikesDTO unlike(Integer commentId, Integer userId) {
+
+
         commentRepository.findCommentById(commentId)
                 .orElseThrow(() -> new ExceptionApi404("댓글이 존재하지 않습니다."));
-        userRepository.findUserById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
         // 있으면 삭제, 없으면 noop (멱등)
         commentLikeRepository.deleteByCommentIdAndUserId(commentId, userId);
 
         int count = commentLikeRepository.countByCommentId(commentId);
+
+
         return new CommentLikeResponse.LikesDTO(count, false);
     }
 }

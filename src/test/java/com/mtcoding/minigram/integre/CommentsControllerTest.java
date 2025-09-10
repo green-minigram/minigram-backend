@@ -15,7 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,21 +57,25 @@ public class CommentsControllerTest extends MyRestDoc {
 //        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].commentId").isNumber())
-                .andExpect(jsonPath("$[0].user.userId").isNumber())
-                .andExpect(jsonPath("$[0].content").isString())
-                .andExpect(jsonPath("$[0].createdAt").isString())
-                .andExpect(jsonPath("$[0].parentId").value(nullValue()))
-                .andExpect(jsonPath("$[0].children").isArray())
-                .andExpect(jsonPath("$[0].likes.count").isNumber())
-                .andExpect(jsonPath("$[0].likes.isLiked").isBoolean())
-                .andExpect(jsonPath("$[0].owner").isBoolean())
-                .andExpect(jsonPath("$[0].postAuthor").isBoolean());
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.items").isArray())
+                .andExpect(jsonPath("$.body.items[0].commentId").value(1))
+                .andExpect(jsonPath("$.body.items[0].user.userId").value(2))
+                .andExpect(jsonPath("$.body.items[0].isOwner").value(true))
+                .andExpect(jsonPath("$.body.items[0].isPostAuthor").value(false))
+                // 좋아요 (시드: (1,3),(1,4),(1,5) → 3개, viewer=2는 좋아요 안함)
+                .andExpect(jsonPath("$.body.items[0].likes.count").value(3))
+                .andExpect(jsonPath("$.body.items[0].likes.isLiked").value(false))
+                // createdAt은 값 패턴으로 검증
+                .andExpect(jsonPath("$.body.items[0].createdAt",
+                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")))
 
-        // 대댓글 한 건 샘플 체크 (상황에 맞게 index 조정)
-        actions.andExpect(jsonPath("$[0].children[0].commentId").isNumber())
-                .andExpect(jsonPath("$[0].children[0].parentId").value(1));
+                // 첫 부모의 자식 댓글들(정렬: id asc → [6, 9])
+                .andExpect(jsonPath("$.body.items[0].children", hasSize(2)))
+                .andExpect(jsonPath("$.body.items[0].children[0].commentId").value(6))
+                .andExpect(jsonPath("$.body.items[0].children[0].user.userId").value(8)) // luna
+                .andExpect(jsonPath("$.body.items[0].children[0].isPostAuthor").value(true));
 
         actions.andDo(document);
     }

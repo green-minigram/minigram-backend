@@ -16,16 +16,14 @@ public class CommentLikesController {
     private final HttpSession session;
 
     @PostMapping
-    public ResponseEntity<?> like(@PathVariable Integer commentId,
-                                  @AuthenticationPrincipal User user) {
-        var dto = commentLikeService.like(commentId, user.getId());
-        return Resp.ok(dto);
+    public ResponseEntity<?> like(@PathVariable Integer commentId, @AuthenticationPrincipal User user) {
+        CommentLikeResponse.LikesDTO respDTO = commentLikeService.like(commentId, user.getId());
+        return Resp.ok(respDTO);
     }
 
     @DeleteMapping
-    public ResponseEntity<?> unlike(@PathVariable Integer commentId,
-                                    @AuthenticationPrincipal User user) {
-        var dto = commentLikeService.unlike(commentId, user.getId());
-        return Resp.ok(dto);
+    public ResponseEntity<?> unlike(@PathVariable Integer commentId, @AuthenticationPrincipal User user) {
+        CommentLikeResponse.LikesDTO respDTO = commentLikeService.unlike(commentId, user.getId());
+        return Resp.ok(respDTO);
     }
 }

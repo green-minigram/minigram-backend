@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -67,7 +68,7 @@ public class CommentRepository {
                 .getResultList();
     }
 
-    public java.util.Optional<Comment> findCommentById(Integer id) {
-        return java.util.Optional.ofNullable(em.find(Comment.class, id));
+    public Optional<Comment> findCommentById(Integer id) {
+        return Optional.ofNullable(em.find(Comment.class, id));
     }
 }

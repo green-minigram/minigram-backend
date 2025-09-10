@@ -1,7 +1,7 @@
 package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram.posts.images.PostImage;
-import com.mtcoding.minigram.posts.likes.PostLikeResponse.LikesDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -53,6 +53,43 @@ public class PostResponse {
     }
 
     @Data
+    public static class SavedDTO {
+        private Integer postId;
+        private Integer userId;
+        private String content;
+        private PostStatus status;
+        private LocalDateTime postedAt;
+        private LocalDateTime updatedAt;
+        private List<ImageDTO> images;
+
+        public static SavedDTO from(Post post, List<PostImage> images) {
+            SavedDTO dto = new SavedDTO();
+            dto.postId = post.getId();
+            dto.userId = post.getUser().getId();
+            dto.content = post.getContent();
+            dto.status = post.getStatus();
+            dto.postedAt = post.getCreatedAt();
+            dto.updatedAt = post.getUpdatedAt();
+            dto.images = images.stream()
+                    .map(pi -> new ImageDTO(pi.getId(), pi.getUrl()))
+                    .toList();
+            return dto;
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class LikesDTO {
+        private Integer count;
+        private Boolean isLiked;
+
+        public LikesDTO(int count, boolean liked) {
+            this.count = count;
+            this.isLiked = liked;
+        }
+    }
+
+    @Data
     public static class AuthorDTO {
         private Integer userId;
         private String username;
@@ -81,5 +118,12 @@ public class PostResponse {
             this.id = id;
             this.url = url;
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class DeleteDTO {
+        private Integer postId;
+        private Boolean deleted; // 항상 true로 반환 (멱등)
     }
 }
