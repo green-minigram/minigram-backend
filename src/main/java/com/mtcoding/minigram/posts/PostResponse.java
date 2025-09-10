@@ -141,14 +141,14 @@ public class PostResponse {
 
     @Data
     public static class ItemDTO{
-        private UserDTO user;
-        private List<PostImageDTO> postImageList;
         private Integer postId;
         private String content;
         private Boolean isLiked;
         private Integer likesCount;
         private Integer commentCount;
         private LocalDateTime createdAt;
+        private UserDTO user;
+        private List<PostImageDTO> postImageList;
 
 
         @Data

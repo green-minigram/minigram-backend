@@ -163,8 +163,8 @@ public class PostService {
 
         for (Object[] obs : obsList) {
             Post post  = (Post) obs[0];
-            Boolean isLiked = (Boolean) obs[1];
-            int likesCount = Math.toIntExact((Long) obs[2]);
+            int likesCount = Math.toIntExact((Long) obs[1]);
+            Boolean isLiked = (Boolean) obs[2];
             int commentCount = Math.toIntExact((Long) obs[3]);
 
             rows.add(new PostRow(post, isLiked, likesCount, commentCount));

@@ -52,12 +52,12 @@ public class PostRepository {
         return em.createQuery("""
                             SELECT p,
                                COUNT(DISTINCT pl.id),
-                               CASE WHEN EXISTS (SELECT 1 FROM PostLike plm
-                                                  WHERE plm.post = p AND plm.user.id = :me)
+                               CASE WHEN EXISTS (SELECT 1 FROM PostLike pl2
+                                                  WHERE pl2.post = p AND pl2.user.id = :currentUserId)
                                     THEN true ELSE false END,
                                COUNT(DISTINCT c.id)
                         FROM Post p
-                        JOIN p.user u
+                        JOIN FETCH p.user u
                         LEFT JOIN PostLike pl ON pl.post = p
                         LEFT JOIN Comment  c  ON c.post  = p
                         WHERE EXISTS (
