@@ -84,4 +84,12 @@ public class CommentResponse {
             );
         }
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class DeleteDTO {
+        private Integer commentId;
+        private String message;
+    }
 }
+
