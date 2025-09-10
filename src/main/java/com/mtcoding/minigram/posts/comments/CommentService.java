@@ -102,7 +102,7 @@ public class CommentService {
             return new CommentResponse.DeleteDTO(commentId, "이미 삭제된 댓글입니다.");
         }
 
-        comment.markDeleted(); // ← 엔티티 도메인 메서드 (세터 없이 더티체킹)
+        comment.markDeleted(); // 엔티티 도메인 메서드
         String msg = isAdmin
                 ? "관리자 권한으로 댓글을 삭제했습니다."
                 : isPostAuthor

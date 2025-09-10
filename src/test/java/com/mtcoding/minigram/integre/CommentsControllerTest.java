@@ -83,11 +83,11 @@ public class CommentsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("댓글 삭제 - 작성자 본인 → 204 & 목록에서 제외")
-    void delete_byAuthor_200_with_message() throws Exception {
+    void delete_test() throws Exception {
         int commentId = 1; // ssar(2번)의 댓글
 
         ResultActions actions = mvc.perform(delete("/s/api/comments/{commentId}", commentId)
-                .header("Authorization", "Bearer " + accessToken));
+                .header("Authorization", accessToken));
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
         System.out.println(responseBody);
@@ -96,7 +96,8 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.commentId").value(commentId))
-                .andExpect(jsonPath("$.body.message").value("댓글을 삭제했습니다."));
+                .andExpect(jsonPath("$.body.message").value("댓글을 삭제했습니다."))
+                .andDo(document);
     }
 
 
