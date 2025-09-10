@@ -46,12 +46,12 @@ class PostsLikeControllerTest {
 
         // 초기화: 혹시 이미 좋아요 상태면 한 번 취소 (없어도 무시됨)
         mvc.perform(delete("/s/api/posts/{postId}/likes", postId)
-                .header("Authorization", "Bearer " + accessToken));
+                .header("Authorization", accessToken));
 
         // 요청
         ResultActions actions = mvc.perform(
                         post("/s/api/posts/{postId}/likes", postId)
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", accessToken)
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -60,8 +60,8 @@ class PostsLikeControllerTest {
                 .andExpect(jsonPath("$.body.count").isNumber());
 
         // 응답 바디 출력
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
     }
 
     @Test
@@ -71,12 +71,12 @@ class PostsLikeControllerTest {
 
         // 선행: 좋아요 상태 만들기
         mvc.perform(post("/s/api/posts/{postId}/likes", postId)
-                .header("Authorization", "Bearer " + accessToken));
+                .header("Authorization", accessToken));
 
         // 요청
         ResultActions actions = mvc.perform(
                         delete("/s/api/posts/{postId}/likes", postId)
-                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Authorization", accessToken)
                                 .accept(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -85,7 +85,7 @@ class PostsLikeControllerTest {
                 .andExpect(jsonPath("$.body.count").isNumber());
 
         // 응답 바디 출력
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
     }
 }
