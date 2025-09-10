@@ -23,10 +23,10 @@ public class PostLikeService {
     public PostLikeResponse.LikesDTO like(Integer postId, Integer userId) {
         var post = postRepository.findPostById(postId)
                 .orElseThrow(() -> new ExceptionApi404("게시글이 존재하지 않습니다."));
-        var user = userRepository.findUserById(userId)
+        var user = userRepository.findById(userId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
-        // 이미 눌렀으면 현재 상태 반환 (멱등)
+        // 이미 눌렀으면 현재 상태 반환
         if (postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
             int count = (int) postLikeRepository.countByPostId(postId);
             return new PostLikeResponse.LikesDTO(count, true);
@@ -47,7 +47,7 @@ public class PostLikeService {
     public PostLikeResponse.LikesDTO unlike(Integer postId, Integer userId) {
         postRepository.findPostById(postId)
                 .orElseThrow(() -> new ExceptionApi404("게시글이 존재하지 않습니다."));
-        userRepository.findUserById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
         // 있으면 삭제, 없으면 noop (멱등)

@@ -32,8 +32,7 @@ public class PostLikeRepository {
     public void delete(PostLike like) {
         em.remove(like);
     }
-
-    // ✅ 취소용: 엔티티 조회
+    
     public java.util.Optional<PostLike> findByPostIdAndUserId(Integer postId, Integer userId) {
         var q = """
                 select pl from PostLike pl

@@ -18,14 +18,14 @@ public class PostLikesController {
     @PostMapping
     public ResponseEntity<?> like(@PathVariable Integer postId,
                                   @AuthenticationPrincipal User user) {
-        var dto = postLikeService.like(postId, user.getId());
-        return Resp.ok(dto);
+        PostLikeResponse.LikesDTO respDTO = postLikeService.like(postId, user.getId());
+        return Resp.ok(respDTO);
     }
 
     @DeleteMapping
     public ResponseEntity<?> unlike(@PathVariable Integer postId,
                                     @AuthenticationPrincipal User user) {
-        var dto = postLikeService.unlike(postId, user.getId());
-        return Resp.ok(dto);
+        PostLikeResponse.LikesDTO respDTO = postLikeService.unlike(postId, user.getId());
+        return Resp.ok(respDTO);
     }
 }
