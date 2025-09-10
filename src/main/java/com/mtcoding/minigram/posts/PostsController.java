@@ -27,4 +27,10 @@ public class PostsController {
         return Resp.ok(respDTO); // DetailDTO 반환
     }
 
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> delete(@PathVariable Integer postId, @AuthenticationPrincipal User user) {
+        PostResponse.DeleteDTO respDTO = postService.delete(postId, user.getId());
+        return Resp.ok(respDTO);
+    }
+
 }

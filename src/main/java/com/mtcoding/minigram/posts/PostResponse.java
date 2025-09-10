@@ -119,4 +119,11 @@ public class PostResponse {
             this.url = url;
         }
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class DeleteDTO {
+        private Integer postId;
+        private Boolean deleted; // 항상 true로 반환 (멱등)
+    }
 }
