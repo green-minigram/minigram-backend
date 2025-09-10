@@ -14,8 +14,8 @@ public class NotificationsController {
     private final NotificationService notificationService;
 
     @GetMapping("/s/api/notifications")
-    public ResponseEntity<?> findAll(@AuthenticationPrincipal User user) {
-        NotificationResponse.ListDTO respDTO = notificationService.findAll(user.getId());
+    public ResponseEntity<?> findWithinOneMonth(@AuthenticationPrincipal User user) {
+        NotificationResponse.ListDTO respDTO = notificationService.findWithinOneMonth(user.getId());
         return Resp.ok(respDTO);
     }
 }
