@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostResponse {
 
@@ -21,7 +22,7 @@ public class PostResponse {
         private Boolean isReported;
 
         public DetailDTO(Post post,
-                         java.util.List<PostImage> images,
+                         List<PostImage> images,
                          int likeCount, boolean isLiked,
                          int commentCount,
                          boolean isOwner, boolean isFollowing,
@@ -43,7 +44,7 @@ public class PostResponse {
             // images 매핑
             this.images = images.stream()
                     .map(i -> new ImageDTO(i.getId(), i.getUrl()))
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             // likes / comments / report
             this.likes = new LikesDTO(likeCount, isLiked);

@@ -47,4 +47,27 @@ public class PostRepository {
     public Optional<Post> findPostById(Integer id) {
         return Optional.ofNullable(em.find(Post.class, id));
     }
+
+    public List<Object[]> findFromFollowees(Integer currentUserId) {
+        return em.createQuery("""
+                            SELECT p,
+                               COUNT(DISTINCT pl.id),
+                               CASE WHEN EXISTS (SELECT 1 FROM PostLike plm
+                                                  WHERE plm.post = p AND plm.user.id = :me)
+                                    THEN true ELSE false END,
+                               COUNT(DISTINCT c.id)
+                        FROM Post p
+                        JOIN p.author u
+                        LEFT JOIN PostLike pl ON pl.post = p
+                        LEFT JOIN Comment  c  ON c.post  = p
+                        WHERE EXISTS (
+                          SELECT 1 FROM Follow f
+                           WHERE f.follower.id = :currentUserId AND f.followee = u
+                        )
+                        GROUP BY p
+                        ORDER BY p.createdAt DESC, p.id DESC
+                        """, Object[].class)
+                .setParameter("currentUserId", currentUserId)
+                .getResultList();
+    }
 }

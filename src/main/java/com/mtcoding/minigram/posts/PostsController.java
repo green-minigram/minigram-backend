@@ -10,27 +10,31 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/s/api/posts")
 public class PostsController {
     private final PostService postService;
     private final HttpSession session;
 
-    @GetMapping("/{postId}")
+    @GetMapping("/s/api/posts/{postId}")
     public ResponseEntity<?> find(@PathVariable Integer postId, @AuthenticationPrincipal User user) {
         PostResponse.DetailDTO respDTO = postService.find(postId, user.getId());
         return Resp.ok(respDTO);
     }
 
-    @PostMapping()
+    @PostMapping("/s/api/posts")
     public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody PostRequest.CreateDTO reqDTO) {
         var respDTO = postService.create(reqDTO, user.getId());
         return Resp.ok(respDTO); // DetailDTO 반환
     }
 
-    @DeleteMapping("/{postId}")
+    @DeleteMapping("/s/api/posts/{postId}")
     public ResponseEntity<?> delete(@PathVariable Integer postId, @AuthenticationPrincipal User user) {
         PostResponse.DeleteDTO respDTO = postService.delete(postId, user.getId());
         return Resp.ok(respDTO);
     }
 
+    @GetMapping("/s/api/feed")
+    public ResponseEntity<?> getFeed(@AuthenticationPrincipal User user) {
+        PostResponse.FeedDTO respDTO = postService.getFeed(user.getId());
+        return Resp.ok(respDTO);
+    }
 }

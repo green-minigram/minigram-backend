@@ -149,5 +149,10 @@ public class PostService {
         return new PostResponse.DeleteDTO(post.getId(), true);
     }
 
+    public PostResponse.FeedDTO getFeed(Integer currentUserId) {
+        List<Object[]> obsList = postRepository.findFromFollowees(currentUserId);
+
+        return new PostResponse.FeedDTO();
+    }
 }
 
