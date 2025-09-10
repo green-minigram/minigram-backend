@@ -7,6 +7,7 @@ import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,7 @@ public class PostLikeService {
         // 3) 신규 좋아요 (동시 삽입 경합은 UNIQUE 제약으로 방지)
         try {
             postLikeRepository.save(new PostLike(post, user));
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             // 레이스 컨디션: 동시에 같은 (postId,userId) 삽입 → 이미 좋아요로 간주
         }
 
