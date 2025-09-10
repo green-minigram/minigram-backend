@@ -162,8 +162,8 @@ public class PostsControllerTest extends MyRestDoc {
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
@@ -173,13 +173,16 @@ public class PostsControllerTest extends MyRestDoc {
                 .andDo(document);
 
         // 2) 삭제 후 상세 조회 → 404
-        mvc.perform(
+        ResultActions notFound = mvc.perform(
                         get("/s/api/posts/{postId}", postId)
                                 .header("Authorization", "Bearer " + accessToken)
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
+
+//        String notFoundBody = notFound.andReturn().getResponse().getContentAsString();
+//        System.out.println(notFoundBody);
 
         // 3) 다시 삭제(멱등)
         mvc.perform(
