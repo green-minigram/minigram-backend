@@ -84,4 +84,21 @@ public class StoryResponse {
             this.updatedAt = story.getUpdatedAt();
         }
     }
+
+    @Data
+    public static class FeedDTO {
+        private List<ItemDTO>  storyHead;
+
+        public FeedDTO(List<ItemDTO> storyHead) {
+            this.storyHead = storyHead;
+        }
+    }
+
+    @Data
+    public static class ItemDTO {
+        private Integer userId;
+        private String username;
+        private String ProfileImageUrl;
+        // userId의 최신 스토리 읽음 여부
+    }
 }

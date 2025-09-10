@@ -95,4 +95,10 @@ public class StoryService {
 
         return new StoryResponse.DTO(storyPS);
     }
+
+    public StoryResponse.FeedDTO getFeedStories(Integer page, Integer currentUserId) {
+
+
+        return null;
+    }
 }

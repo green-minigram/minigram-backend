@@ -32,6 +32,7 @@ public class PostsController {
         return Resp.ok(respDTO);
     }
 
+    // 피드 게시글 조회
     @GetMapping("/s/api/feed/posts")
     public ResponseEntity<?> getFeedPosts(@RequestParam(required = false, value = "page", defaultValue = "0") Integer page, @AuthenticationPrincipal User user) {
         PostResponse.FeedDTO respDTO = postService.getFeedPosts(page, user.getId());
