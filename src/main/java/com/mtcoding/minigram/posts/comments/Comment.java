@@ -65,4 +65,13 @@ public class Comment {
         this.updatedAt = updatedAt;
         this.children = children;
     }
+
+    public boolean isDeleted() {
+        return this.status == CommentStatus.DELETED;
+    }
+
+    public void markDeleted() {
+        if (isDeleted()) return;
+        this.status = CommentStatus.DELETED;
+    }
 }
