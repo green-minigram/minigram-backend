@@ -151,10 +151,15 @@ public class PostService {
         return new PostResponse.DeleteDTO(post.getId(), true);
     }
 
-    public PostResponse.FeedDTO getFeedPosts(Integer currentUserId) {
-        // 1. Post, likesCount, isLiked, commentCount 조회
-        List<Object[]> obsList = postRepository.findFromFollowees(currentUserId);
-        if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of());
+    public PostResponse.FeedDTO getFeedPosts(Integer page, Integer currentUserId) {
+        // 1. PostRow, postIdList 조립
+        // 1-1. Post, likesCount, isLiked, commentCount 조회
+        List<Object[]> obsList = postRepository.findFromFollowees(page, currentUserId);
+
+        // 1-2. totalCount 조회
+        Integer totalCount = Math.toIntExact(postRepository.totalCountFromFollowees(currentUserId));
+
+        if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, totalCount);
 
         record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {}
 
@@ -189,7 +194,7 @@ public class PostService {
                 ))
                 .toList();
 
-        return new PostResponse.FeedDTO(itemDTOList);
+        return new PostResponse.FeedDTO(itemDTOList, page, totalCount);
     }
 }
 

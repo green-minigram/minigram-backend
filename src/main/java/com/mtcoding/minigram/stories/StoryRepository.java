@@ -56,7 +56,7 @@ public class StoryRepository {
                     WHERE u.id = :currentUserId
                       AND s.status = :status
                     GROUP BY s, u
-                    ORDER BY s.createdAt DESC
+                    ORDER BY s.createdAt ASC, s.id ASC
                 """, Object[].class)
                             .setParameter("currentUserId", currentUserId)
                             .setParameter("status", StoryStatus.ACTIVE)
@@ -84,7 +84,7 @@ public class StoryRepository {
                     WHERE u.id = :userId
                       AND s.status = :status
                     GROUP BY s, u
-                    ORDER BY s.createdAt DESC
+                    ORDER BY s.createdAt ASC, s.id ASC
                  """, Object[].class)
                 .setParameter("userId", userId)
                 .setParameter("currentUserId", currentUserId)

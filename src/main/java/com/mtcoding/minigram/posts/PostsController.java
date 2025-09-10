@@ -33,8 +33,8 @@ public class PostsController {
     }
 
     @GetMapping("/s/api/feed/posts")
-    public ResponseEntity<?> getFeedPosts(@AuthenticationPrincipal User user) {
-        PostResponse.FeedDTO respDTO = postService.getFeedPosts(user.getId());
+    public ResponseEntity<?> getFeedPosts(@RequestParam(required = false, value = "page", defaultValue = "0") Integer page, @AuthenticationPrincipal User user) {
+        PostResponse.FeedDTO respDTO = postService.getFeedPosts(page, user.getId());
         return Resp.ok(respDTO);
     }
 }

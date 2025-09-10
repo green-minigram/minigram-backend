@@ -21,6 +21,7 @@ public class PostImageRepository {
                 select pi
                 from PostImage pi
                 where pi.post.id in :postIdList
+                ORDER BY pi.post.id ASC, pi.id ASC
             """, PostImage.class)
                 .setParameter("postIdList", postIdList)
                 .getResultList();

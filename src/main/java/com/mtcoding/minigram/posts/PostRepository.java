@@ -48,26 +48,39 @@ public class PostRepository {
         return Optional.ofNullable(em.find(Post.class, id));
     }
 
-    public List<Object[]> findFromFollowees(Integer currentUserId) {
+    public List<Object[]> findFromFollowees(Integer page, Integer currentUserId) {
         return em.createQuery("""
                             SELECT p,
-                               COUNT(DISTINCT pl.id),
+                               (SELECT COUNT(pl1.id) FROM PostLike pl1 WHERE pl1.post = p),
                                CASE WHEN EXISTS (SELECT 1 FROM PostLike pl2
                                                   WHERE pl2.post = p AND pl2.user.id = :currentUserId)
                                     THEN true ELSE false END,
-                               COUNT(DISTINCT c.id)
+                               (SELECT COUNT(c1.id) FROM Comment c1 WHERE c1.post = p)
                         FROM Post p
                         JOIN FETCH p.user u
-                        LEFT JOIN PostLike pl ON pl.post = p
-                        LEFT JOIN Comment  c  ON c.post  = p
                         WHERE EXISTS (
                           SELECT 1 FROM Follow f
                            WHERE f.follower.id = :currentUserId AND f.followee = u
                         )
-                        GROUP BY p
                         ORDER BY p.createdAt DESC, p.id DESC
                         """, Object[].class)
                 .setParameter("currentUserId", currentUserId)
+                .setFirstResult(page * 10)
+                .setMaxResults(10)
                 .getResultList();
+    }
+
+    public Long totalCountFromFollowees(Integer currentUserId) {
+        return em.createQuery("""
+                  select count(p)
+                  from Post p
+                  join p.user u
+                  where exists (
+                    select 1 from Follow f
+                    where f.follower.id = :currentUserId and f.followee = u
+                  )
+                """, Long.class)
+                .setParameter("currentUserId",  currentUserId)
+                .getSingleResult();
     }
 }
