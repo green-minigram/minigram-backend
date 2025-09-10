@@ -82,7 +82,7 @@ public class CommentsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("댓글 삭제 - 작성자 본인 → 204 & 목록에서 제외")
+    @DisplayName("댓글 삭제")
     void delete_test() throws Exception {
         int commentId = 1; // ssar(2번)의 댓글
 

@@ -91,10 +91,9 @@ public class CommentService {
                 .orElseThrow(() -> new ExceptionApi404("댓글이 존재하지 않습니다."));
 
         boolean isAuthor = comment.getUser().getId().equals(requesterId);
-        boolean isPostAuthor = comment.getPost().getUser().getId().equals(requesterId);
         boolean isAdmin = roles != null && roles.contains("ADMIN");
 
-        if (!(isAuthor || isPostAuthor || isAdmin)) {
+        if (!(isAuthor || isAdmin)) {
             throw new ExceptionApi403("삭제 권한이 없습니다.");
         }
 
@@ -103,12 +102,7 @@ public class CommentService {
         }
 
         comment.markDeleted(); // 엔티티 도메인 메서드
-        String msg = isAdmin
-                ? "관리자 권한으로 댓글을 삭제했습니다."
-                : isPostAuthor
-                ? "게시글 작성자 권한으로 댓글을 삭제했습니다."
-                : "댓글을 삭제했습니다.";
-
+        String msg = isAdmin ? "관리자 권한으로 댓글을 삭제했습니다." : "댓글을 삭제했습니다.";
         return new CommentResponse.DeleteDTO(commentId, msg);
     }
 }
