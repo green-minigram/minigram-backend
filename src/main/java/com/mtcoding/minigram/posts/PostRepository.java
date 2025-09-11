@@ -43,6 +43,18 @@ public class PostRepository {
         }
     }
 
+    public boolean existsById(Integer targerId) {
+        List<Integer> result = em.createQuery("""
+                        select 1
+                        from Post p
+                        where p.id = :postId
+                        """, Integer.class)
+                .setParameter("postId", targerId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
+
     public void save(Post post) {
         em.persist(post);
     }
@@ -164,3 +176,5 @@ public class PostRepository {
         return query.getSingleResult();
     }
 }
+
+
