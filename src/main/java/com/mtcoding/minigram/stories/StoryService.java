@@ -97,8 +97,19 @@ public class StoryService {
     }
 
     public StoryResponse.FeedDTO getFeedStories(Integer page, Integer currentUserId) {
+        // 1. userId, username, profileImageUrl, hasUnseen 조회
+        List<Object[]> obsList = storyRepository.findFromFollowees(currentUserId);
 
+        // 2. ItemDTO 조립
+        List<StoryResponse.ItemDTO> itemDTOList = obsList.stream()
+                .map(obs -> new StoryResponse.ItemDTO(
+                        (Integer) obs[0],
+                        (String) obs[1],
+                        (String) obs[2],
+                        (Boolean) obs[3]
+                ))
+                .toList();
 
-        return null;
+        return new StoryResponse.FeedDTO(itemDTOList);
     }
 }
