@@ -34,7 +34,7 @@ public class Notification {
     @JoinColumn(name = "recipient_user_id", nullable = false)
     private User recipient;
 
-    // 대상 엔티티 ID (post.id / comment.id / follow.id)
+    // 대상 엔티티 ID (post_like.id / comment.id / follow.id)
     @Column(name = "target_id", nullable = false)
     private Integer targetId;
 

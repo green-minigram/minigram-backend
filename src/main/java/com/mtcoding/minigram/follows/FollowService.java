@@ -3,9 +3,6 @@ package com.mtcoding.minigram.follows;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
-import com.mtcoding.minigram.stories.Story;
-import com.mtcoding.minigram.stories.StoryResponse;
-import com.mtcoding.minigram.stories.StoryStatus;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -61,5 +60,35 @@ public class FollowService {
         followRepository.deleteById(followPS.getId());
 
         return new FollowResponse.DeleteDTO(followeeId);
+    }
+
+    public FollowResponse.ListDTO findFollowers(Integer currentUserId, Integer followeeId) {
+        List<Object[]> obsList = followRepository.findFollowersByFolloweeId(currentUserId, followeeId);
+
+        List<FollowResponse.ItemDTO> itemDTOList = obsList.stream().map(ob -> {
+            User user = (User) ob[0];
+            Boolean isFollowing = (Boolean) ob[1];
+
+            Boolean isMe = user.getId().equals(currentUserId);
+
+            return new FollowResponse.ItemDTO(user, isFollowing, isMe);
+        }).toList();
+
+        return new FollowResponse.ListDTO(itemDTOList);
+    }
+
+    public FollowResponse.ListDTO findFollowing(Integer currentUserId, Integer followerId) {
+        List<Object[]> obsList = followRepository.findFollowingByFollowerId(currentUserId, followerId);
+
+        List<FollowResponse.ItemDTO> itemDTOList = obsList.stream().map(ob -> {
+            User user = (User) ob[0];
+            Boolean isFollowing = (Boolean) ob[1];
+
+            Boolean isMe = user.getId().equals(currentUserId);
+
+            return new FollowResponse.ItemDTO(user, isFollowing, isMe);
+        }).toList();
+
+        return new FollowResponse.ListDTO(itemDTOList);
     }
 }

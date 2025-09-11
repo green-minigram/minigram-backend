@@ -3,8 +3,6 @@ package com.mtcoding.minigram.integre;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
-import com.mtcoding.minigram.storage.PresignRequest;
-import com.mtcoding.minigram.storage.UploadType;
 import com.mtcoding.minigram.users.User;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -22,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-public class PresignControllerTest extends MyRestDoc {
+public class NotificationControllerTest extends MyRestDoc {
 
     @Autowired
     private ObjectMapper om;
@@ -37,37 +34,36 @@ public class PresignControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void createUploadUrl_test() throws Exception {
+    public void findAllWithinOneMonth_test() throws Exception {
         // given
-        PresignRequest.UploadDTO reqDTO = new PresignRequest.UploadDTO();
-        reqDTO.setUploadType(UploadType.IMAGE);
-        reqDTO.setMimeType("image/png");
-
-
-        String requestBody = om.writeValueAsString(reqDTO);
-        // System.out.println(requestBody);
 
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
-                        .post("/s/api/storage/presignedUrl")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .get("/s/api/notifications")
                         .header("Authorization", accessToken)
         );
 
         // eye
         String responseBody = actions.andReturn().getResponse().getContentAsString();
-        // System.out.println(responseBody);
+        System.out.println(responseBody);
 
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.key").value(Matchers.matchesPattern("^images/\\d+/[0-9a-f]{32}\\.png$")));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.presignedUrl").value(Matchers.matchesPattern("^https://.+\\.s3\\.ap-northeast-2\\.amazonaws\\.com/images/\\d+/[0-9a-f]{32}\\.png\\?.*$")));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.expiresIn").value(900));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.mimeType").value("image/png"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList").isArray());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].notificationId").value(10));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].type").value("FOLLOWED"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.userId").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.username").value("cos"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.profileImageUrl").value("https://picsum.photos/seed/cos/200"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.isFollowing").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].targetId").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postId").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postImageUrl").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].commentContent").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].createdAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].readStatus").value("READ"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
-
 }

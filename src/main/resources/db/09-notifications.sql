@@ -3,11 +3,10 @@
 INSERT INTO notifications_tb (type, sender_user_id, recipient_user_id, target_id, status, created_at, updated_at)
 VALUES
 -- POST_LIKED: 게시글 좋아요 알림
-('POST_LIKED', 3, 2, 3, 'UNREAD', now(), now()),  -- cos가 ssar의 post(3)를 좋아요
-('POST_LIKED', 4, 2, 3, 'READ', now(), now()),    -- love → ssar
-('POST_LIKED', 5, 3, 5, 'UNREAD', now(), now()),  -- mango가 cos의 post(5)를 좋아요
-('POST_LIKED', 7, 8, 18, 'UNREAD', now(), now()), -- neo가 luna 인기글(18)을 좋아요
-('POST_LIKED', 10, 8, 18, 'READ', now(), now()),  -- rain → luna
+('POST_LIKED', 3, 2, 7, 'UNREAD', NOW(), NOW()),  -- cos → ssar (post 3)
+('POST_LIKED', 4, 2, 8, 'READ', NOW(), NOW()),    -- love → ssar (post 3)
+('POST_LIKED', 7, 8, 41, 'UNREAD', NOW(), NOW()), -- neo → luna  (post 18)
+('POST_LIKED', 10, 8, 43, 'READ', NOW(), NOW()),  -- rain → luna (post 18)
 
 -- COMMENTED: 게시글에 댓글 작성 알림
 ('COMMENTED', 2, 8, 1, 'UNREAD', now(), now()),   -- ssar가 luna의 post(18)에 댓글(id=1)
