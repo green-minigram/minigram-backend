@@ -32,7 +32,7 @@ public class AdvertisementService {
     private final UserRepository userRepository;
 
     @Transactional
-    public AdvertisementResponse.DetailDTO create(AdvertisementRequest.CreateDTO req, Integer adminUserId) {
+    public AdvertisementResponse.SavedDTO create(AdvertisementRequest.CreateDTO req, Integer adminUserId) {
 
         if (req.getStartAt().isAfter(req.getEndAt())) {
             throw new ExceptionApi400("startAt은 endAt보다 이후일 수 없습니다.");
@@ -87,6 +87,6 @@ public class AdvertisementService {
         advertisementRepository.save(ad);
 
         // 6) 응답 (공유 PK라 adId == postId)
-        return AdvertisementResponse.DetailDTO.from(ad);
+        return AdvertisementResponse.SavedDTO.from(ad);
     }
 }

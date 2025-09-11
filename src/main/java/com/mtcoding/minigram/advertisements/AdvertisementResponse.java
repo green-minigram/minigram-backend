@@ -9,7 +9,7 @@ public class AdvertisementResponse {
 
     @Data
     @AllArgsConstructor
-    public static class DetailDTO {
+    public static class SavedDTO {
         private final Integer adId;
         private final Integer postId;
         private final Integer userId;
@@ -19,8 +19,8 @@ public class AdvertisementResponse {
         private final LocalDateTime createdAt;
         private final LocalDateTime updatedAt;
 
-        public static DetailDTO from(Advertisement ad) {
-            return new DetailDTO(
+        public static SavedDTO from(Advertisement ad) {
+            return new SavedDTO(
                     ad.getPostId(),
                     ad.getPost().getId(),
                     ad.getUser().getId(),

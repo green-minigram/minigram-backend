@@ -64,11 +64,17 @@ public class Advertisement {
         this.updatedAt = updatedAt;
     }
 
-    public static Advertisement create(Post post, User admin, LocalDateTime startAt, LocalDateTime endAt, AdvertisementStatus status) {
 
-        var now = LocalDateTime.now();
+    // @MapsId로 INSERT가 flush까지 지연될 수 있어 save 직후에도 타임스탬프가 null 되지 않도록 라이프사이클에서 직접 세팅.
+    @PrePersist
+    void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
 
-        return new Advertisement(null, post, admin, (status == null ? AdvertisementStatus.ACTIVE : status), startAt, endAt, now, now);
-
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }
