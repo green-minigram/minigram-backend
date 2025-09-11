@@ -38,4 +38,21 @@ public class ReportRepository {
     public Optional<Report> findById(Integer id) {
         return Optional.ofNullable(em.find(Report.class, id));
     }
+
+    public boolean existsByTypeAndTargetIdAndReporterId(ReportType type, Integer targetId, Integer reporterId) {
+        List<Integer> result = em.createQuery("""
+                            select 1
+                            from Report r
+                            where r.type = :type
+                              and r.targetId = :targetId
+                              and r.reporter.id = :reporterId
+                        """, Integer.class)
+                .setParameter("type", type)
+                .setParameter("targetId", targetId)
+                .setParameter("reporterId", reporterId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
+    }
 }

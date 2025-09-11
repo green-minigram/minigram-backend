@@ -1,9 +1,11 @@
 package com.mtcoding.minigram.reports;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.mtcoding.minigram._core.util.Resp;
+import com.mtcoding.minigram.users.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,19 +19,12 @@ public class ReportController {
     private final ReportService reportService;
 
     // 1. 신고 접수
-    @PostMapping("/api/reports")
-    public ResponseEntity<?> createReport(HttpServletRequest request, @Valid @RequestBody ReportRequest.SaveDTO reqDto, Errors errors) {
+    @PostMapping("/s/api/reports")
+    public ResponseEntity<?> create(@AuthenticationPrincipal User user, @Valid @RequestBody ReportRequest.SaveDTO reqDTO, Errors errors) {
 
-        if (errors.hasErrors()) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiUtil<>(errors.getAllErrors()));
-        }
+        ReportResponse.DTO respDTO = reportService.create(reqDTO, user);
 
-        SessionUser sessionUser = (SessionUser) request.getAttribute("sessionUser");
-
-        ReportResponse.SaveResultDTO respDTO = reportService.createReport(reqDto, sessionUser);
-
-        return ResponseEntity.ok(new ApiUtil<>(respDTO));
+        return Resp.ok(respDTO);
     }
 }
 

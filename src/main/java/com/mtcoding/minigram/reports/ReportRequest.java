@@ -10,21 +10,21 @@ public class ReportRequest {
 
     @Data
     public static class SaveDTO {
-        @NotNull(message = "신고 대상 유형은 필수입니다.")
-        private ReportType type;   // POST / STORY
+        @NotNull(message = "신고 대상 유형은 필수이며, POST 또는 STORY만 가능합니다.")
+        private ReportType reportType;   // POST / STORY
 
         @NotNull(message = "대상 ID는 필수입니다.")
         private Integer targetId;  // 신고 대상 PK
 
         @NotNull(message = "신고 사유는 필수입니다.")
-        private Integer reasonId;  // 신고 사유 PK
+        private Integer reportReasonId;  // 신고 사유 PK
 
-        public Report toEntity(User reporter, ReportReason reason) {
+        public Report toEntity(User reporter, ReportReason reportReason) {
             return Report.builder()
-                    .type(this.getType())
-                    .targetId(this.getTargetId())
+                    .type(reportType)
+                    .targetId(targetId)
                     .reporter(reporter)  // 세션 사용자 기반
-                    .reason(reason)
+                    .reason(reportReason)
                     .status(ReportStatus.PENDING)
                     .build();
         }

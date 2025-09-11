@@ -39,4 +39,20 @@ public class PostRepository {
             return null; // 못 찾으면 null (isPostAuthor 계산시 false 처리됨)
         }
     }
+
+    public boolean existsById(Integer targerId) {
+        List<Integer> result = em.createQuery("""
+                        select 1
+                        from Post p
+                        where p.id = :postId
+                        """, Integer.class)
+                .setParameter("postId", targerId)
+                .setMaxResults(1)
+                .getResultList();
+
+        return !result.isEmpty();
+
+    }
 }
+
+
