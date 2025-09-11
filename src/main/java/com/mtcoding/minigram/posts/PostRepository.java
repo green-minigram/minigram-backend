@@ -58,7 +58,7 @@ public class PostRepository {
                                (SELECT COUNT(c1.id) FROM Comment c1 WHERE c1.post = p)
                         FROM Post p
                         JOIN FETCH p.user u
-                        WHERE p.status = 'ACTIVE'
+                        WHERE p.status = :status
                           AND EXISTS (
                             SELECT 1 FROM Follow f
                              WHERE f.follower.id = :currentUserId AND f.followee = u
@@ -66,6 +66,7 @@ public class PostRepository {
                         ORDER BY p.createdAt DESC, p.id DESC
                         """, Object[].class)
                 .setParameter("currentUserId", currentUserId)
+                .setParameter("status", PostStatus.ACTIVE)
                 .setFirstResult(page * 10)
                 .setMaxResults(10)
                 .getResultList();
@@ -75,13 +76,14 @@ public class PostRepository {
         return em.createQuery("""
                         SELECT COUNT(p)
                         FROM Post p
-                        WHERE p.status = 'ACTIVE'
+                        WHERE p.status = :status
                           AND EXISTS (
                               SELECT 1 FROM Follow f
                               WHERE f.follower.id = :currentUserId AND f.followee = p.user
                           )
                         """, Long.class)
                 .setParameter("currentUserId", currentUserId)
+                .setParameter("status", PostStatus.ACTIVE)
                 .getSingleResult();
     }
 }
