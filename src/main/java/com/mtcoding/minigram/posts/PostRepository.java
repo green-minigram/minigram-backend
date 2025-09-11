@@ -54,6 +54,7 @@ public class PostRepository {
                 .getResultList();
 
         return !result.isEmpty();
+    }
 
     public void save(Post post) {
         em.persist(post);
