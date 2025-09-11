@@ -161,13 +161,14 @@ public class PostService {
 
         if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, totalCount);
 
-        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {}
+        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {
+        }
 
         List<PostRow> rows = new ArrayList<>(obsList.size());
-        List<Integer> postIdList  = new ArrayList<>(obsList.size());
+        List<Integer> postIdList = new ArrayList<>(obsList.size());
 
         for (Object[] obs : obsList) {
-            Post post  = (Post) obs[0];
+            Post post = (Post) obs[0];
             int likesCount = Math.toIntExact((Long) obs[1]);
             Boolean isLiked = (Boolean) obs[2];
             int commentCount = Math.toIntExact((Long) obs[3]);
@@ -195,6 +196,16 @@ public class PostService {
                 .toList();
 
         return new PostResponse.FeedDTO(itemDTOList, page, totalCount);
+    }
+
+    public PostResponse.SearchDTO search(Integer page, String keyword) {
+        // 1. 게시글 조회
+        List<PostResponse.SearchItemDTO> searchItemDTOList = postRepository.findAllByKeyword(page, keyword);
+
+        // 2. totalCount 조회
+        Integer totalCount = Math.toIntExact(postRepository.totalCountByKeyword(keyword));
+
+        return new PostResponse.SearchDTO(searchItemDTOList, page, totalCount);
     }
 }
 
