@@ -8,4 +8,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AdvertisementRepository {
     private final EntityManager em;
+
+    public Advertisement save(Advertisement ad) {
+        em.persist(ad);
+        return ad;
+    }
 }

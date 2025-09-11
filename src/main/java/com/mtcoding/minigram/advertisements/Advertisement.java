@@ -63,4 +63,12 @@ public class Advertisement {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public static Advertisement create(Post post, User admin, LocalDateTime startAt, LocalDateTime endAt, AdvertisementStatus status) {
+
+        var now = LocalDateTime.now();
+
+        return new Advertisement(null, post, admin, (status == null ? AdvertisementStatus.ACTIVE : status), startAt, endAt, now, now);
+
+    }
 }
