@@ -87,10 +87,10 @@ public class StoryResponse {
 
     @Data
     public static class FeedDTO {
-        private List<ItemDTO>  storyHead;
+        private List<ItemDTO> storyHeadList;
 
-        public FeedDTO(List<ItemDTO> storyHead) {
-            this.storyHead = storyHead;
+        public FeedDTO(List<ItemDTO> storyHeadList) {
+            this.storyHeadList = storyHeadList;
         }
     }
 
@@ -99,6 +99,13 @@ public class StoryResponse {
         private Integer userId;
         private String username;
         private String ProfileImageUrl;
-        // userId의 최신 스토리 읽음 여부
+        private Boolean hasUnseen; // 최근 5개의 스토리 중 한 개라도 안읽은 스토리가 있는지 여부
+
+        public ItemDTO(Integer userId, String username, String profileImageUrl, Boolean hasUnseen) {
+            this.userId = userId;
+            this.username = username;
+            ProfileImageUrl = profileImageUrl;
+            this.hasUnseen = hasUnseen;
+        }
     }
 }
