@@ -3,6 +3,7 @@ package com.mtcoding.minigram.posts;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.advertisements.AdvertisementRepository;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
@@ -36,6 +37,7 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final AdvertisementRepository advertisementRepository;
 
     @Transactional(readOnly = true)
     // 게시글 상세
@@ -73,12 +75,13 @@ public class PostService {
         boolean reported = userId != null
                 && reportRepository.existsActivePostReportByUser(postId, userId);
 
+        boolean isAd = advertisementRepository.findActiveNowByPostId(postId).isPresent();
 
         log.info("[POST_FIND] out: likes(count={}, liked={}), comments={}, owner={}, following={}, reported={}",
                 likeCount, liked, commentCount, owner, following, reported);
 
         // 3) 생성자 주입으로 한 번에 완성
-        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
+        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported, isAd);
     }
 
 
@@ -161,13 +164,14 @@ public class PostService {
 
         if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, totalCount);
 
-        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {}
+        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {
+        }
 
         List<PostRow> rows = new ArrayList<>(obsList.size());
-        List<Integer> postIdList  = new ArrayList<>(obsList.size());
+        List<Integer> postIdList = new ArrayList<>(obsList.size());
 
         for (Object[] obs : obsList) {
-            Post post  = (Post) obs[0];
+            Post post = (Post) obs[0];
             int likesCount = Math.toIntExact((Long) obs[1]);
             Boolean isLiked = (Boolean) obs[2];
             int commentCount = Math.toIntExact((Long) obs[3]);
