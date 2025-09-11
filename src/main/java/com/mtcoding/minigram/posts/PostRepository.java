@@ -47,4 +47,43 @@ public class PostRepository {
     public Optional<Post> findPostById(Integer id) {
         return Optional.ofNullable(em.find(Post.class, id));
     }
+
+    public List<Object[]> findFromFollowees(Integer page, Integer currentUserId) {
+        return em.createQuery("""
+                            SELECT p,
+                               (SELECT COUNT(pl1.id) FROM PostLike pl1 WHERE pl1.post = p),
+                               CASE WHEN EXISTS (SELECT 1 FROM PostLike pl2
+                                                  WHERE pl2.post = p AND pl2.user.id = :currentUserId)
+                                    THEN true ELSE false END,
+                               (SELECT COUNT(c1.id) FROM Comment c1 WHERE c1.post = p)
+                        FROM Post p
+                        JOIN FETCH p.user u
+                        WHERE p.status = :status
+                          AND EXISTS (
+                            SELECT 1 FROM Follow f
+                             WHERE f.follower.id = :currentUserId AND f.followee = u
+                        )
+                        ORDER BY p.createdAt DESC, p.id DESC
+                        """, Object[].class)
+                .setParameter("currentUserId", currentUserId)
+                .setParameter("status", PostStatus.ACTIVE)
+                .setFirstResult(page * 10)
+                .setMaxResults(10)
+                .getResultList();
+    }
+
+    public Long totalCountFromFollowees(Integer currentUserId) {
+        return em.createQuery("""
+                        SELECT COUNT(p)
+                        FROM Post p
+                        WHERE p.status = :status
+                          AND EXISTS (
+                              SELECT 1 FROM Follow f
+                              WHERE f.follower.id = :currentUserId AND f.followee = p.user
+                          )
+                        """, Long.class)
+                .setParameter("currentUserId", currentUserId)
+                .setParameter("status", PostStatus.ACTIVE)
+                .getSingleResult();
+    }
 }

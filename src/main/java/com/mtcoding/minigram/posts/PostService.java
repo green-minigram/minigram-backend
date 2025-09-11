@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 // @Slf4j
 // - Lombok이 자동으로 Logger 필드를 추가해주는 어노테이션
@@ -149,5 +151,50 @@ public class PostService {
         return new PostResponse.DeleteDTO(post.getId(), true);
     }
 
+    public PostResponse.FeedDTO getFeedPosts(Integer page, Integer currentUserId) {
+        // 1. PostRow, postIdList 조립
+        // 1-1. Post, likesCount, isLiked, commentCount 조회
+        List<Object[]> obsList = postRepository.findFromFollowees(page, currentUserId);
+
+        // 1-2. totalCount 조회
+        Integer totalCount = Math.toIntExact(postRepository.totalCountFromFollowees(currentUserId));
+
+        if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, totalCount);
+
+        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {}
+
+        List<PostRow> rows = new ArrayList<>(obsList.size());
+        List<Integer> postIdList  = new ArrayList<>(obsList.size());
+
+        for (Object[] obs : obsList) {
+            Post post  = (Post) obs[0];
+            int likesCount = Math.toIntExact((Long) obs[1]);
+            Boolean isLiked = (Boolean) obs[2];
+            int commentCount = Math.toIntExact((Long) obs[3]);
+
+            rows.add(new PostRow(post, isLiked, likesCount, commentCount));
+
+            postIdList.add(post.getId());
+        }
+
+        // 2. postId 기반 postImage 조회
+        List<PostImage> postImageList = postImageRepository.findAllByPostIdIn(postIdList);
+
+        // 3. postImageList를 postId 기준으로 그룹핑
+        Map<Integer, List<PostImage>> postImageMap = postImageList.stream().collect(Collectors.groupingBy(postImage -> postImage.getPost().getId()));
+
+        // 4. PostRow, PostImageMap -> ItemDTO 조립
+        List<PostResponse.ItemDTO> itemDTOList = rows.stream()
+                .map(row -> new PostResponse.ItemDTO(
+                        row.post(),
+                        row.isLiked(),
+                        row.likesCount(),
+                        row.commentCount(),
+                        postImageMap.getOrDefault(row.post().getId(), List.of())
+                ))
+                .toList();
+
+        return new PostResponse.FeedDTO(itemDTOList, page, totalCount);
+    }
 }
 

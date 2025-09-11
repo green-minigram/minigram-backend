@@ -18,8 +18,7 @@ public class NotificationService {
         List<Object[]> obsList = notificationRepository.findAllByRecipientIdWithinOneMonth(userId);
         if (obsList.isEmpty()) return new NotificationResponse.ListDTO(List.of());
 
-        record NotificationRow(Notification notification, Boolean isFollowing) {
-        }
+        record NotificationRow(Notification notification, Boolean isFollowing) {}
 
         List<NotificationRow> rows = new ArrayList<>(obsList.size());
         Set<Integer> postLikeIdSet = new HashSet<>();
@@ -40,8 +39,7 @@ public class NotificationService {
 
         // 3. targetId 기반 타입별 추가 정보 조회
         // 3-1. type = POST_LIKED
-        record PostLikeTargetDetail(Integer postId, String postImageUrl) {
-        }
+        record PostLikeTargetDetail(Integer postId, String postImageUrl) {}
         Map<Integer, PostLikeTargetDetail> postLikeDetailMap = new HashMap<>();
         if (!postLikeIdSet.isEmpty()) {
             for (Object[] obs : notificationRepository.findPostLikeTargetDetailsByIds(postLikeIdSet)) {
@@ -53,8 +51,7 @@ public class NotificationService {
         }
 
         // 3-2. type = COMMENTED
-        record CommentTargetDetail(Integer postId, String postImageUrl, String commentContent) {
-        }
+        record CommentTargetDetail(Integer postId, String postImageUrl, String commentContent) {}
         Map<Integer, CommentTargetDetail> commentDetailMap = new HashMap<>();
         if (!commentIdSet.isEmpty()) {
             for (Object[] obs : notificationRepository.findCommentTargetDetailsByIds(commentIdSet)) {
