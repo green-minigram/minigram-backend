@@ -244,4 +244,41 @@ public class PostsControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList[0].url").isString());
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
+    @Test
+    public void search_test() throws Exception {
+        // given
+        Integer page = 0;
+        String keyword = "오늘";
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/posts/search")
+                        .param("page", page.toString())
+                        .param("keyword", keyword)
+                        .header("Authorization", accessToken)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(12));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList").isArray());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(21));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageUrl").isString());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].content").value("오늘의 추천 음악 \uD83C\uDFB6"));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }
