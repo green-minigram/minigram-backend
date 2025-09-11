@@ -94,9 +94,10 @@ public class StoryRepositoryTest {
 
     @Test
     public void findFromFollowees_test() {
-        int currentUserId = 2;
+        Integer currentUserId = 2;
+        Integer page = 0;
 
-        List<Object[]> obsList = storyRepository.findFromFollowees(currentUserId);
+        List<Object[]> obsList = storyRepository.findFromFollowees(page, currentUserId);
         System.out.println("=========== 팔로잉 유저의 최신 스토리 보유 여부 조회 ============");
         for (Object[] obs : obsList) {
             Integer followeeId = (Integer) obs[0];
