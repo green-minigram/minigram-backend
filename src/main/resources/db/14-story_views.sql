@@ -13,20 +13,20 @@ VALUES
 (2, 7, now()),  -- neo
 
 -- love(4)의 첫 번째 스토리(HIDDEN은 무시)
--- 대신 love의 ACTIVE 스토리(id=11) 기준
-(11, 2, now()), -- ssar
-(11, 5, now()), -- mango
-(11, 9, now()), -- zero
+-- 대신 love의 ACTIVE 스토리(id=19) 기준
+(19, 2, now()), -- ssar
+(19, 5, now()), -- mango
+(19, 9, now()), -- zero
 
 -- mango(5)의 첫 번째 스토리
 (4, 2, now()),  -- ssar
 (4, 3, now()),  -- cos
 (4, 6, now()),  -- hana
 
--- hana(6)의 ACTIVE 스토리(id=21)
-(21, 2, now()), -- ssar
-(21, 5, now()), -- mango
-(21, 9, now()), -- zero
+-- hana(6)의 ACTIVE 스토리(id=8)
+(28, 2, now()), -- ssar
+(28, 5, now()), -- mango
+(28, 9, now()), -- zero
 
 -- neo(7)의 ACTIVE 스토리(id=6)
 (6, 2, now()),  -- ssar

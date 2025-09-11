@@ -1,13 +1,9 @@
 package com.mtcoding.minigram.stories;
 
-import com.mtcoding.minigram.users.User;
-import com.mtcoding.minigram.users.UserRepository;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,6 +87,27 @@ public class StoryRepositoryTest {
             System.out.println("isFollowing   : " + isFollowing + "  (로그인 유저=" + currentUserId + " → 대상 유저=" + userId + ")");
             System.out.println("likeCount     : " + likeCount);
             System.out.println("isLiked       : " + isLiked);
+            System.out.println("------------------------------------------");
+        }
+        System.out.println("==========================================");
+    }
+
+    @Test
+    public void findFromFollowees_test() {
+        int currentUserId = 2;
+
+        List<Object[]> obsList = storyRepository.findFromFollowees(currentUserId);
+        System.out.println("=========== 팔로잉 유저의 최신 스토리 보유 여부 조회 ============");
+        for (Object[] obs : obsList) {
+            Integer followeeId = (Integer) obs[0];
+            String username = (String) obs[1];
+            String profileImageUrl = (String) obs[2];   // null 허용
+            Boolean hasUnseen = (Boolean) obs[3];   // 내가 아직 안 본 활성 스토리가 하나라도 있으면 true
+
+            System.out.println("followeeId     : " + followeeId);
+            System.out.println("username       : " + username);
+            System.out.println("profileImageUrl: " + profileImageUrl);
+            System.out.println("hasUnseen    : " + hasUnseen + "  (viewer=" + currentUserId + ")");
             System.out.println("------------------------------------------");
         }
         System.out.println("==========================================");
