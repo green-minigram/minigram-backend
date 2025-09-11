@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.greaterThan;
@@ -79,7 +80,8 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.userId").value(1))
                 .andExpect(jsonPath("$.body.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.body.createdAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T.*")))
-                .andExpect(jsonPath("$.body.updatedAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T.*")));
+                .andExpect(jsonPath("$.body.updatedAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T.*")))
+                .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
 }
