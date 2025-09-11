@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Repository
 public class PostLikeRepository {
@@ -23,6 +25,26 @@ public class PostLikeRepository {
                 .setParameter("userId", userId)
                 .getSingleResult();
         return count > 0;
+    }
+
+    public void save(PostLike like) {
+        em.persist(like);
+    }
+
+    public void delete(PostLike like) {
+        em.remove(like);
+    }
+
+    public Optional<PostLike> findByPostIdAndUserId(Integer postId, Integer userId) {
+        var query = """
+                select pl from PostLike pl
+                where pl.post.id = :postId and pl.user.id = :userId
+                """;
+        return em.createQuery(query, PostLike.class)
+                .setParameter("postId", postId)
+                .setParameter("userId", userId)
+                .getResultStream()
+                .findFirst();
     }
 
 }
