@@ -37,7 +37,7 @@ public class Report {
 
     // 신고 사유 코드 (report_reasons.id)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "report_reasons_id", nullable = false)
+    @JoinColumn(nullable = false)
     private ReportReason reason;
 
     // 처리 상태
