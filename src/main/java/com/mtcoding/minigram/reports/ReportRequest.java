@@ -23,7 +23,7 @@ public class ReportRequest {
             return Report.builder()
                     .type(reportType)
                     .targetId(targetId)
-                    .reporter(reporter)  // 세션 사용자 기반
+                    .reporter(reporter)  // 로그인 사용자(@AuthenticationPrincipal)
                     .reason(reportReason)
                     .status(ReportStatus.PENDING)
                     .build();
