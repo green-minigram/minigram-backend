@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.users.User;
 import lombok.AllArgsConstructor;
@@ -99,6 +100,7 @@ public class PostResponse {
         private String username;
         private String profileImageUrl;
 
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private Boolean isFollowing;
 
         private Boolean isOwner;
