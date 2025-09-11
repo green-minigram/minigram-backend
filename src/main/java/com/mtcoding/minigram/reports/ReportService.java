@@ -28,13 +28,15 @@ public class ReportService {
 
         //1. targer 존재 확인
         if (reqDTO.getReportType() == ReportType.POST) {
-            if (!postRepository.exitsById(reqDTO.getTargetId())) {
+            if (!postRepository.existsById(reqDTO.getTargetId())) {
                 throw new ExceptionApi404("대상 게시글을 찾을 수 없습니다.");
             }
         } else if (reqDTO.getReportType() == ReportType.STORY) {
             if (!storyRepository.existsById(reqDTO.getTargetId())) {
                 throw new ExceptionApi404("대상 스토리를 찾을 수 없습니다.");
             }
+        } else {
+            throw new ExceptionApi400("지원하지 않는 신고 유형입니다.");
         }
 
         //2. reason 존재확인
