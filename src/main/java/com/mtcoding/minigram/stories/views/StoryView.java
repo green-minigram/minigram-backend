@@ -1,6 +1,6 @@
-package com.mtcoding.minigram.posts.likes;
+package com.mtcoding.minigram.stories.views;
 
-import com.mtcoding.minigram.posts.Post;
+import com.mtcoding.minigram.stories.Story;
 import com.mtcoding.minigram.users.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -13,21 +13,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Table(
-        name = "post_likes_tb",
+        name = "story_views_tb",
         uniqueConstraints = {
-                // 한 유저가 같은 글에 두 번 좋아요 금지
-                @UniqueConstraint(columnNames = {"post_id", "user_id"})
+                // 같은 유저가 같은 스토리를 여러 번 봐도 행은 1개만 유지
+                @UniqueConstraint(columnNames = {"story_id", "user_id"})
         }
 )
 @Entity
-public class PostLike {
+public class StoryView {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(nullable = false)
-    private Post post;
+    @JoinColumn(name = "story_id", nullable = false)
+    private Story story;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false)
@@ -37,15 +37,10 @@ public class PostLike {
     private LocalDateTime createdAt;
 
     @Builder
-    public PostLike(Integer id, Post post, User user, LocalDateTime createdAt) {
+    public StoryView(Integer id, Story story, User user, LocalDateTime createdAt) {
         this.id = id;
-        this.post = post;
+        this.story = story;
         this.user = user;
         this.createdAt = createdAt;
-    }
-
-    public PostLike(Post post, User user) {
-        this.post = post;
-        this.user = user;
     }
 }
