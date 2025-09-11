@@ -200,5 +200,15 @@ public class PostService {
 
         return new PostResponse.FeedDTO(itemDTOList, page, totalCount);
     }
+
+    public PostResponse.SearchDTO search(Integer page, String keyword) {
+        // 1. 게시글 조회
+        List<PostResponse.SearchItemDTO> searchItemDTOList = postRepository.findAllByKeyword(page, keyword);
+
+        // 2. totalCount 조회
+        Integer totalCount = Math.toIntExact(postRepository.totalCountByKeyword(keyword));
+
+        return new PostResponse.SearchDTO(searchItemDTOList, page, totalCount);
+    }
 }
 
