@@ -98,7 +98,7 @@ public class StoryService {
 
     public StoryResponse.FeedDTO getFeedStories(Integer page, Integer currentUserId) {
         // 1. userId, username, profileImageUrl, hasUnseen 조회
-        List<Object[]> obsList = storyRepository.findFromFollowees(currentUserId);
+        List<Object[]> obsList = storyRepository.findFromFollowees(page, currentUserId);
 
         // 2. ItemDTO 조립
         List<StoryResponse.ItemDTO> itemDTOList = obsList.stream()
@@ -110,6 +110,9 @@ public class StoryService {
                 ))
                 .toList();
 
-        return new StoryResponse.FeedDTO(itemDTOList);
+        // 3. totalCount 조회
+        Integer totalCount = Math.toIntExact(storyRepository.totalCountFromFollowees(currentUserId));
+
+        return new StoryResponse.FeedDTO(itemDTOList, page, totalCount);
     }
 }

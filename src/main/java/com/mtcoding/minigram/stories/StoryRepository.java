@@ -105,7 +105,7 @@ public class StoryRepository {
         return Optional.ofNullable(em.find(Story.class, storyId));
     }
 
-    public List<Object[]> findFromFollowees(Integer currentUserId) {
+    public List<Object[]> findFromFollowees(Integer page, Integer currentUserId) {
         return em.createQuery("""
                         WITH latest AS (
                           SELECT
@@ -142,6 +142,25 @@ public class StoryRepository {
                         ORDER BY MAX(l.created_at) DESC, u.id DESC
                         """, Object[].class)
                 .setParameter("currentUserId", currentUserId)
+                .setFirstResult(page * 10)
+                .setMaxResults(10)
                 .getResultList();
+    }
+
+    public Long totalCountFromFollowees(Integer currentUserId) {
+        return em.createQuery("""
+                        SELECT count(distinct u.id)
+                        FROM Follow f
+                        JOIN f.followee u
+                        WHERE f.follower.id = :currentUserId
+                          AND EXISTS (
+                            SELECT 1
+                            FROM Story s
+                            WHERE s.user = u
+                              AND s.status = 'ACTIVE'
+                          )
+                        """, Long.class)
+                .setParameter("currentUserId", currentUserId)
+                .getSingleResult();
     }
 }

@@ -87,10 +87,32 @@ public class StoryResponse {
 
     @Data
     public static class FeedDTO {
+        private Integer current;     // 현재 페이지(0-base)
+        private Integer size;        // 페이지당 개수
+        private Integer totalCount;  // 전체 글 수
+        private Integer totalPage;   // 전체 페이지 수
+        private Integer prev;        // current - 1
+        private Integer next;        // current + 1
+        private Boolean isFirst;     // current == 0
+        private Boolean isLast;      // (totalPage - 1) == current
         private List<ItemDTO> storyHeadList;
 
-        public FeedDTO(List<ItemDTO> storyHeadList) {
+        public FeedDTO(List<ItemDTO> storyHeadList, Integer current, Integer totalCount) {
             this.storyHeadList = storyHeadList;
+            this.current = current;
+            this.size = 10;
+            this.totalCount = totalCount;
+            this.totalPage = makeTotalPage(totalCount, size);
+            this.prev = Math.max(0, current - 1);
+            this.next = totalPage == 0 ? 0 : Math.min(totalPage - 1, current + 1);
+            this.isFirst = current == 0;
+            this.isLast = (totalPage - 1) == current;
+        }
+
+        private int makeTotalPage(int totalCount, int size) {
+            if (size <= 0) return 0;
+            int rest = (totalCount % size) > 0 ? 1 : 0;
+            return (totalCount / size) + rest;
         }
     }
 
