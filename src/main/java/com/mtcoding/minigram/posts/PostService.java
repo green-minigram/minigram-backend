@@ -204,7 +204,7 @@ public class PostService {
 
         // 2. totalCount 조회
         Integer totalCount = Math.toIntExact(postRepository.totalCountByKeyword(keyword));
-        
+
         return new PostResponse.SearchDTO(searchItemDTOList, page, totalCount);
     }
 }
