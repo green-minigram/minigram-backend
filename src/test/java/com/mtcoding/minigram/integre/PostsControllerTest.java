@@ -59,8 +59,8 @@ public class PostsControllerTest extends MyRestDoc {
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
@@ -101,6 +101,9 @@ public class PostsControllerTest extends MyRestDoc {
                         .header("Authorization", accessToken)
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
@@ -255,8 +258,8 @@ public class PostsControllerTest extends MyRestDoc {
         );
 
         // eye
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
