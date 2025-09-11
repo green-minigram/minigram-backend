@@ -162,7 +162,7 @@ public class PostResponse {
     }
 
     @Data
-    public static class ItemDTO{
+    public static class ItemDTO {
         private Integer postId;
         private String content;
         private Boolean isLiked;
@@ -174,7 +174,7 @@ public class PostResponse {
 
 
         @Data
-        public class UserDTO{
+        public class UserDTO {
             private Integer userId;
             private String username;
             private String profileImageUrl;
@@ -187,7 +187,7 @@ public class PostResponse {
         }
 
         @Data
-        public class PostImageDTO{
+        public class PostImageDTO {
             private Integer postImageId;
             private String url;
 
@@ -206,6 +206,50 @@ public class PostResponse {
             this.likesCount = likesCount;
             this.commentCount = commentCount;
             this.createdAt = post.getCreatedAt();
+        }
+    }
+
+    @Data
+    public static class SearchDTO {
+        private Integer current;     // 현재 페이지(0-base)
+        private Integer size;        // 페이지당 개수
+        private Integer totalCount;  // 전체 글 수
+        private Integer totalPage;   // 전체 페이지 수
+        private Integer prev;        // current - 1
+        private Integer next;        // current + 1
+        private Boolean isFirst;     // current == 0
+        private Boolean isLast;      // (totalPage - 1) == current
+        private List<SearchItemDTO> postList;
+
+        public SearchDTO(List<SearchItemDTO> postList, Integer current, Integer totalCount) {
+            this.postList = postList;
+            this.current = current;
+            this.size = 12;
+            this.totalCount = totalCount;
+            this.totalPage = makeTotalPage(totalCount, size);
+            this.prev = Math.max(0, current - 1);
+            this.next = totalPage == 0 ? 0 : Math.min(totalPage - 1, current + 1);
+            this.isFirst = current == 0;
+            this.isLast = (totalPage - 1) == current;
+        }
+
+        private int makeTotalPage(int totalCount, int size) {
+            if (size <= 0) return 0;
+            int rest = (totalCount % size) > 0 ? 1 : 0;
+            return (totalCount / size) + rest;
+        }
+    }
+
+    @Data
+    public static class SearchItemDTO {
+        private Integer postId;
+        private String postImageUrl;
+        private String content;
+
+        public SearchItemDTO(Integer postId, String postImageUrl, String content) {
+            this.postId = postId;
+            this.postImageUrl = postImageUrl;
+            this.content = content;
         }
     }
 }
