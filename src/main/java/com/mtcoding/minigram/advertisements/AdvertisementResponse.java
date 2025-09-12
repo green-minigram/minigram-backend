@@ -20,7 +20,7 @@ public class AdvertisementResponse {
         private final LocalDateTime updatedAt;
 
         public static CreateDTO from(Advertisement ad) {
-            return new SavedDTO(
+            return new CreateDTO(
                     ad.getPostId(),
                     ad.getPost().getId(),
                     ad.getUser().getId(),
