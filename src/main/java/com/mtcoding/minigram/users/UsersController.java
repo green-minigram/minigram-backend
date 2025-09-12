@@ -31,7 +31,7 @@ public class UsersController {
 
     @GetMapping("/s/api/users/{userId}/posts")
     public ResponseEntity<?> getUserPosts(@PathVariable Integer userId, @AuthenticationPrincipal User user) {
-        var respDTO = postService.getUserPost(userId, user.getId());
+        UserResponse.PostListDTO respDTO = postService.getUserPost(userId, user.getId());
         return Resp.ok(respDTO);
     }
 }

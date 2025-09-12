@@ -137,6 +137,31 @@ public class PostRepository {
 
         return query.getSingleResult();
     }
+
+    public List<Object[]> findAllByUserId(Integer profileUserId, boolean isOwner) {
+        return em.createQuery("""
+                        SELECT p.id, pi.url
+                        FROM Post p
+                        LEFT JOIN PostImage pi
+                               ON pi.post = p
+                              AND pi.id = (
+                                  SELECT MIN(pi2.id)
+                                  FROM PostImage pi2
+                                  WHERE pi2.post = p
+                              )
+                        WHERE p.user.id = :profileUserId
+                          AND (
+                               p.status = :postActive
+                               OR (:isOwner = true AND p.status = :postHidden)
+                          )
+                        ORDER BY p.createdAt DESC, p.id DESC
+                        """, Object[].class)
+                .setParameter("profileUserId", profileUserId)
+                .setParameter("isOwner", isOwner)
+                .setParameter("postActive", PostStatus.ACTIVE)
+                .setParameter("postHidden", PostStatus.HIDDEN)
+                .getResultList();
+    }
 }
 
 

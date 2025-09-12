@@ -2,6 +2,8 @@ package com.mtcoding.minigram.users;
 
 import lombok.Data;
 
+import java.util.List;
+
 public class UserResponse {
     @Data
     public static class JoinDTO {
@@ -55,6 +57,26 @@ public class UserResponse {
             this.postCount = postCount;
             this.followerCount = followerCount;
             this.followingCount = followingCount;
+        }
+    }
+
+    @Data
+    public static class PostListDTO {
+        private List<PostItemDTO> postList;
+
+        public PostListDTO(List<PostItemDTO> postList) {
+            this.postList = postList;
+        }
+    }
+
+    @Data
+    public static class PostItemDTO {
+        private Integer postId;
+        private String postImageUrl;
+
+        public PostItemDTO(Integer postId, String postImageUrl) {
+            this.postId = postId;
+            this.postImageUrl = postImageUrl;
         }
     }
 }
