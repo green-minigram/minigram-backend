@@ -69,4 +69,35 @@ public class UsersController {
         UserResponse.StoryListDTO respDTO = storyService.getUserStories(null, user.getId(), page);
         return Resp.ok(respDTO);
     }
+
+    // 유저 상세 페이지의 다른 유저 전체 조회
+    @GetMapping("/s/api/users/{userId}/detail")
+    public ResponseEntity<?> getUserDetail(
+            @PathVariable Integer userId,
+            @RequestParam(required = false, value = "postPage", defaultValue = "0") Integer postPage,
+            @RequestParam(required = false, value = "storyPage", defaultValue = "0") Integer storyPage,
+            @AuthenticationPrincipal User user) {
+
+        UserResponse.ProfileDTO profileDTO = userService.getUserProfile(userId, user.getId());
+        UserResponse.PostListDTO postListDTO = postService.getUserPost(userId, user.getId(), postPage);
+        UserResponse.StoryListDTO storyListDTO = storyService.getUserStories(userId, user.getId(), storyPage);
+
+        UserResponse.DetailDTO respDTO = new UserResponse.DetailDTO(profileDTO, postListDTO, storyListDTO);
+        return Resp.ok(respDTO);
+    }
+
+    // 유저 상세 페이지의 본인 전체 조회
+    @GetMapping("/s/api/users/me/detail")
+    public ResponseEntity<?> getMyDetail(
+            @RequestParam(required = false, value = "postPage", defaultValue = "0") Integer postPage,
+            @RequestParam(required = false, value = "storyPage", defaultValue = "0") Integer storyPage,
+            @AuthenticationPrincipal User user) {
+
+        UserResponse.ProfileDTO profileDTO = userService.getUserProfile(null, user.getId());
+        UserResponse.PostListDTO postListDTO = postService.getUserPost(null, user.getId(), postPage);
+        UserResponse.StoryListDTO storyListDTO = storyService.getUserStories(null, user.getId(), storyPage);
+
+        UserResponse.DetailDTO respDTO = new UserResponse.DetailDTO(profileDTO, postListDTO, storyListDTO);
+        return Resp.ok(respDTO);
+    }
 }

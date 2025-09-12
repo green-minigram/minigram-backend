@@ -142,4 +142,17 @@ public class UserResponse {
             this.thumbnailUrl = thumbnailUrl;
         }
     }
+
+    @Data
+    public static class DetailDTO {
+        private ProfileDTO profile;
+        private PostListDTO postList;
+        private StoryListDTO storyList;
+
+        public DetailDTO(ProfileDTO profile, PostListDTO postList, StoryListDTO storyList) {
+            this.profile = profile;
+            this.postList = postList;
+            this.storyList = storyList;
+        }
+    }
 }
