@@ -113,11 +113,11 @@ public class FeedControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].userId").value(8));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].username").value("luna"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].hasUnseen").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].profileImageUrl").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previewList").isArray());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previewList[0].userId").value(8));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previewList[0].username").value("luna"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previewList[0].hasUnseen").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previewList[0].profileImageUrl").value(Matchers.nullValue()));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 

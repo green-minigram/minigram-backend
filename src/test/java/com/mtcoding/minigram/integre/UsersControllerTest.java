@@ -232,4 +232,77 @@ public class UsersControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].thumbnailUrl").isString());
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
+    @Test
+    public void getUserDetail_test() throws Exception {
+        // 2번 유저가 3번 유저의 상세 조회
+        // given
+        Integer userId = 3;
+        Integer postPage = 0;
+        Integer storyPage = 0;
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/users/{userId}/detail", userId)
+                        .param("postPage", postPage.toString())
+                        .param("storyPage", storyPage.toString())
+                        .header("Authorization", accessToken2)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.userId").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.username").value("cos"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.profileImageUrl").isString());
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList.postList[0].postId").value(6));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList.postList[0].postImageUrl").isString());
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList.storyList[0].storyId").value(18));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList.storyList[0].thumbnailUrl").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    public void getMyDetail_test() throws Exception {
+        // given
+        Integer postPage = 0;
+        Integer storyPage = 0;
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/users/me/detail")
+                        .param("postPage", postPage.toString())
+                        .param("storyPage", storyPage.toString())
+                        .header("Authorization", accessToken2)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.userId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.username").value("ssar"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.bio").value("백엔드 개발자 지망생"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profile.profileImageUrl").isString());
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList.postList[0].postId").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList.postList[0].postImageUrl").isString());
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList.storyList[0].storyId").value(14));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList.storyList[0].thumbnailUrl").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }
