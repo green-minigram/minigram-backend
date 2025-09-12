@@ -20,7 +20,7 @@ public class AdvertisementsController {
 
     @PostMapping()
     public ResponseEntity<?> create(@AuthenticationPrincipal User user, @RequestBody AdvertisementRequest.CreateDTO reqDTO) {
-        AdvertisementResponse.SavedDTO respDTO = advertisementService.create(reqDTO, user.getId());
+        AdvertisementResponse.CreateDTO respDTO = advertisementService.create(reqDTO, user.getId());
         return Resp.ok(respDTO); // DetailDTO 반환
     }
 
