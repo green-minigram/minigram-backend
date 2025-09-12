@@ -97,4 +97,67 @@ public class UsersControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.followingCount").value(4));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
+    @Test
+    public void getUserPosts_test() throws Exception {
+        // given
+        Integer userId = 2;
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/users/{userId}/posts", userId)
+                        .header("Authorization", accessToken2)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(12));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageUrl").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    public void getMyPosts_test() throws Exception {
+        // given
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/users/me/posts")
+                        .header("Authorization", accessToken2)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(12));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageUrl").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }
