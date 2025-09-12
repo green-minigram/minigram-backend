@@ -28,5 +28,9 @@ public class AdvertisementRepository {
                 .getResultList();
 
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+  
+    public Advertisement save(Advertisement ad) {
+        em.persist(ad);
+        return ad;
     }
 }

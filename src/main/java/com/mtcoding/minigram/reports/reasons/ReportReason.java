@@ -1,7 +1,6 @@
 package com.mtcoding.minigram.reports.reasons;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,10 +23,4 @@ public class ReportReason {
     @Column(nullable = false)
     private String label;
 
-    @Builder
-    public ReportReason(Integer id, ReportReasonCode code, String label) {
-        this.id = id;
-        this.code = code;
-        this.label = label;
-    }
 }
