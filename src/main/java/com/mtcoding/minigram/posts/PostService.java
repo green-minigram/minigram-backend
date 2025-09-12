@@ -163,7 +163,7 @@ public class PostService {
         return new PostResponse.SearchListDTO(searchItemDTOList, page, totalCount);
     }
 
-    public UserResponse.PostListDTO getUserPost(Integer userId, Integer currentUserId) {
+    public UserResponse.PostListDTO getUserPost(Integer userId, Integer currentUserId, Integer page) {
         // 1. userId 없으면 내 프로필
         Integer profileUserId = (userId == null) ? currentUserId : userId;
 
@@ -171,7 +171,7 @@ public class PostService {
         Boolean isOwner = profileUserId.equals(currentUserId);
 
         // 3. postId, postImageUrl 조회
-        List<Object[]> obsList = postRepository.findAllByUserId(profileUserId, isOwner);
+        List<Object[]> obsList = postRepository.findAllByUserId(profileUserId, isOwner, page);
 
         // 4. PostItemDTO 조립
         List<UserResponse.PostItemDTO> postItemList = obsList.stream()
@@ -181,7 +181,10 @@ public class PostService {
                 ))
                 .toList();
 
-        return new UserResponse.PostListDTO(postItemList);
+        // 5. totalCount 조회
+        int totalCount = Math.toIntExact(postRepository.countAllByUserId(profileUserId, isOwner));
+
+        return new UserResponse.PostListDTO(postItemList, page, totalCount);
     }
 }
 
