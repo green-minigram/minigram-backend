@@ -195,53 +195,6 @@ public class PostsControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getFeedPosts_test() throws Exception {
-        // given
-        Integer page = 2;
-
-        // when
-        ResultActions actions = mvc.perform(
-                MockMvcRequestBuilders
-                        .get("/s/api/feed/posts")
-                        .param("page", page.toString())
-                        .header("Authorization", accessToken)
-        );
-
-        // eye
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
-
-        // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(18));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(3));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].isAdvertisement").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(4));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].content").value("Spring Boot + JPA 연동 성공! 🚀"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].isOwner").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].isLiked").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].likesCount").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].commentCount").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].createdAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.userId").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.username").value("ssar"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.profileImageUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.isFollowing").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList[0].postImageId").value(6));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList[0].url").isString());
-        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
-    }
-
-    @Test
     public void search_test() throws Exception {
         // given
         Integer page = 0;
@@ -250,7 +203,7 @@ public class PostsControllerTest extends MyRestDoc {
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
-                        .get("/s/api/posts/search")
+                        .get("/s/api/search/posts")
                         .param("page", page.toString())
                         .param("keyword", keyword)
                         .header("Authorization", accessToken)

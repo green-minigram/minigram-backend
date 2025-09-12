@@ -71,73 +71,6 @@ public class StoriesControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findAllMyStories_test() throws Exception {
-        // given
-
-        // when
-        ResultActions actions = mvc.perform(
-                MockMvcRequestBuilders
-                        .get("/s/api/users/me/stories")
-                        .header("Authorization", accessToken)
-        );
-
-        // eye
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        // System.out.println(responseBody);
-
-        // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].user.userId").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].user.username").value("ssar"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].user.profileImageUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.storyId").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.videoUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.thumbnailUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.createdAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].isFollowing").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].isOwner").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].isLiked").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].likeCount").value(5));
-        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
-    }
-
-    @Test
-    public void findAllByUserId_test() throws Exception {
-        // given
-        Integer userId = 2;
-
-        // when
-        ResultActions actions = mvc.perform(
-                MockMvcRequestBuilders
-                        .get("/s/api/users/{userId}/stories", userId)
-                        .header("Authorization", accessToken)
-        );
-
-        // eye
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        // System.out.println(responseBody);
-
-        // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].user.userId").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].user.username").value("ssar"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].user.profileImageUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.storyId").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.videoUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.thumbnailUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].story.createdAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].isFollowing").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].isOwner").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].isLiked").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].likeCount").value(5));
-        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
-    }
-
-    @Test
     public void create_test() throws Exception {
         // given
         StoryRequest.CreateDTO reqDTO = new StoryRequest.CreateDTO();
@@ -199,42 +132,6 @@ public class StoriesControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.status").value("DELETED"));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.createdAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.updatedAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
-        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
-    }
-
-    @Test
-    public void getFeedStories_test() throws Exception {
-        // given
-        Integer page = 0;
-
-        // when
-        ResultActions actions = mvc.perform(
-                MockMvcRequestBuilders
-                        .get("/s/api/feed/stories")
-                        .param("page", page.toString())
-                        .header("Authorization", accessToken)
-        );
-
-        // eye
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        // System.out.println(responseBody);
-
-        // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(10));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(4));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].userId").value(8));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].username").value("luna"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].hasUnseen").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyHeadList[0].profileImageUrl").value(Matchers.nullValue()));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 }

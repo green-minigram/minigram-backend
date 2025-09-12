@@ -30,4 +30,31 @@ public class UserResponse {
             this.roles = user.getRoles();
         }
     }
+
+    @Data
+    public static class ProfileDTO {
+        private Integer userId;
+        private String username;
+        private String bio;
+        private String profileImageUrl;
+        private Boolean hasUnseen;
+        private Boolean isOwner;
+        private Boolean isFollowing;
+        private Integer postCount;
+        private Integer followerCount;
+        private Integer followingCount;
+
+        public ProfileDTO(User user, Boolean hasUnseen, Boolean isOwner, Boolean isFollowing, Integer postCount, Integer followerCount, Integer followingCount) {
+            this.userId = user.getId();
+            this.username = user.getUsername();
+            this.bio = user.getBio();
+            this.profileImageUrl = user.getProfileImageUrl();
+            this.hasUnseen = hasUnseen;
+            this.isOwner = isOwner;
+            this.isFollowing = isFollowing;
+            this.postCount = postCount;
+            this.followerCount = followerCount;
+            this.followingCount = followingCount;
+        }
+    }
 }

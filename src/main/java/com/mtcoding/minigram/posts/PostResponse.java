@@ -1,9 +1,7 @@
 package com.mtcoding.minigram.posts;
 
-import com.mtcoding.minigram._core.constants.FeedConstants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mtcoding.minigram.posts.images.PostImage;
-import com.mtcoding.minigram.users.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -133,92 +131,7 @@ public class PostResponse {
         private Integer postId;
         private Boolean deleted; // 항상 true로 반환 (멱등)
     }
-
-
-    @Data
-    public static class FeedDTO {
-        private Integer current;     // 현재 페이지(0-base)
-        private Integer size;        // 페이지당 개수
-        private Integer totalCount;  // 전체 글 수
-        private Integer totalPage;   // 전체 페이지 수
-        private Integer prev;        // current - 1
-        private Integer next;        // current + 1
-        private Boolean isFirst;     // current == 0
-        private Boolean isLast;      // (totalPage - 1) == current
-        private List<ItemDTO> postList;
-
-        public FeedDTO(List<ItemDTO> postList, Integer current, Integer postTotalCount) {
-            this.postList = postList;
-            this.current = current;
-            this.size = postList.size();
-            this.totalCount = postTotalCount;
-            this.totalPage = makeTotalPage(totalCount);
-            this.prev = Math.max(0, current - 1);
-            this.next = totalPage == 0 ? 0 : Math.min(totalPage - 1, current + 1);
-            this.isFirst = current == 0;
-            this.isLast = totalPage == 0 || current.equals(totalPage - 1);
-        }
-
-        private int makeTotalPage(int totalCount) {
-            int postsPerPage = FeedConstants.POSTS_PER_PAGE;
-            return (totalCount + postsPerPage - 1) / postsPerPage;
-        }
-    }
-
-    @Data
-    public static class ItemDTO {
-        private Boolean isAdvertisement;
-        private Integer postId;
-        private String content;
-        private Boolean isOwner;
-        private Boolean isLiked;
-        private Integer likesCount;
-        private Integer commentCount;
-        private LocalDateTime createdAt;
-        private UserDTO user;
-        private List<PostImageDTO> postImageList;
-
-
-        @Data
-        public class UserDTO {
-            private Integer userId;
-            private String username;
-            private String profileImageUrl;
-            private Boolean isFollowing;
-
-            public UserDTO(User user, Boolean isFollowing) {
-                this.userId = user.getId();
-                this.username = user.getUsername();
-                this.profileImageUrl = user.getProfileImageUrl();
-                this.isFollowing = isFollowing;
-            }
-        }
-
-        @Data
-        public class PostImageDTO {
-            private Integer postImageId;
-            private String url;
-
-            public PostImageDTO(PostImage postImage) {
-                this.postImageId = postImage.getId();
-                this.url = postImage.getUrl();
-            }
-        }
-
-        public ItemDTO(Post post, Boolean isAdvertisement, Boolean isFollowing, Boolean isOwner, Boolean isLiked, Integer likesCount, Integer commentCount, List<PostImage> postImageList) {
-            this.user = new UserDTO(post.getUser(), isFollowing);
-            this.postImageList = postImageList.stream().map(postImage -> new PostImageDTO(postImage)).toList();
-            this.isAdvertisement = isAdvertisement;
-            this.postId = post.getId();
-            this.content = post.getContent();
-            this.isOwner = isOwner;
-            this.isLiked = isLiked;
-            this.likesCount = likesCount;
-            this.commentCount = commentCount;
-            this.createdAt = post.getCreatedAt();
-        }
-    }
-
+    
     @Data
     public static class SearchDTO {
         private Integer current;     // 현재 페이지(0-base)
