@@ -3,6 +3,7 @@
 
 INSERT INTO advertisements_tb (post_id, user_id, status, start_at, end_at, created_at, updated_at)
 VALUES
+    
 -- 광고 1: 특별 혜택 캠페인 (1주일간 진행)
 (1, 1, 'ACTIVE', NOW(), DATEADD('DAY', 7, NOW()), now(), now()),
 

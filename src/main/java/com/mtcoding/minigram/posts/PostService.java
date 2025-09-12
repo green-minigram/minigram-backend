@@ -78,12 +78,13 @@ public class PostService {
         boolean reported = userId != null
                 && reportRepository.existsActivePostReportByUser(postId, userId);
 
+        boolean isAd = advertisementRepository.findActiveNowByPostId(postId).isPresent();
 
         log.info("[POST_FIND] out: likes(count={}, liked={}), comments={}, owner={}, following={}, reported={}",
                 likeCount, liked, commentCount, owner, following, reported);
 
         // 3) 생성자 주입으로 한 번에 완성
-        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
+        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported, isAd);
     }
 
 
