@@ -145,7 +145,7 @@ public class PostResponse {
         public FeedDTO(List<ItemDTO> postList, Integer current, Integer totalCount) {
             this.postList = postList;
             this.current = current;
-            this.size = 10;
+            this.size = 8;
             this.totalCount = totalCount;
             this.totalPage = makeTotalPage(totalCount, size);
             this.prev = Math.max(0, current - 1);

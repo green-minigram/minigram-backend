@@ -83,8 +83,8 @@ public class PostRepository {
                         """, Object[].class)
                 .setParameter("currentUserId", currentUserId)
                 .setParameter("status", PostStatus.ACTIVE)
-                .setFirstResult(page * 10)
-                .setMaxResults(10)
+                .setFirstResult(page * 8)
+                .setMaxResults(8)
                 .getResultList();
     }
 
