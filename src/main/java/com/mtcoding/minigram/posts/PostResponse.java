@@ -178,11 +178,13 @@ public class PostResponse {
             private Integer userId;
             private String username;
             private String profileImageUrl;
+            private Boolean isFollowing;
 
             public UserDTO(User user) {
                 this.userId = user.getId();
                 this.username = user.getUsername();
                 this.profileImageUrl = user.getProfileImageUrl();
+                this.isFollowing = true; // 팔로우 중인 게시글만 조회되는 피드이므로 항상 true
             }
         }
 
