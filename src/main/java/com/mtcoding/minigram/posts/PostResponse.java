@@ -163,10 +163,10 @@ public class PostResponse {
 
     @Data
     public static class ItemDTO {
-        // private Boolean isAdvertisement; // 광고 여부 필드
         private Boolean isAdvertisement;
         private Integer postId;
         private String content;
+        private Boolean isOwner;
         private Boolean isLiked;
         private Integer likesCount;
         private Integer commentCount;
@@ -201,12 +201,13 @@ public class PostResponse {
             }
         }
 
-        public ItemDTO(Post post, Boolean isAdvertisement, Boolean isFollowing, Boolean isLiked, Integer likesCount, Integer commentCount, List<PostImage> postImageList) {
+        public ItemDTO(Post post, Boolean isAdvertisement, Boolean isFollowing, Boolean isOwner, Boolean isLiked, Integer likesCount, Integer commentCount, List<PostImage> postImageList) {
             this.user = new UserDTO(post.getUser(), isFollowing);
             this.postImageList = postImageList.stream().map(postImage -> new PostImageDTO(postImage)).toList();
             this.isAdvertisement = isAdvertisement;
             this.postId = post.getId();
             this.content = post.getContent();
+            this.isOwner = isOwner;
             this.isLiked = isLiked;
             this.likesCount = likesCount;
             this.commentCount = commentCount;

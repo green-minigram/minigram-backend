@@ -17,11 +17,12 @@ public class AdvertisementRepositoryTest {
 
     @Test
     public void findAllValid_test() {
-        Integer currentUserId = 2;
-        Integer page = 0;
+        int currentUserId = 2;
+        int page = 1;
         LocalDateTime now = LocalDateTime.now();
+        int totalCount = 3;
 
-        List<Object[]> obsList = advertisementRepository.findAllValid(page, currentUserId, now);
+        List<Object[]> obsList = advertisementRepository.findAllValid(page, currentUserId, now, totalCount);
         System.out.println("=========== 게시 기간 내 활성화된 광고 조회 ============");
         for (Object[] obs : obsList) {
             Advertisement ad = (Advertisement) obs[0];

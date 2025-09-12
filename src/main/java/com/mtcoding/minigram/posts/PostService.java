@@ -159,14 +159,15 @@ public class PostService {
     public PostResponse.FeedDTO getFeedPosts(Integer page, Integer currentUserId) {
         // 1. 일반 게시글
         // 1-1. 게시글 총 개수 조회
-        int postTotalCount = Math.toIntExact(postRepository.totalCountFromFollowees(currentUserId));
+        int postTotalCount = Math.toIntExact(postRepository.totalCountFromFolloweesIncludingMine(currentUserId));
 
         // 1-2. Post, likesCount, isLiked, commentCount 조회
-        List<Object[]> postObsList = postRepository.findFromFollowees(page, currentUserId);
+        List<Object[]> postObsList = postRepository.findFromFolloweesIncludingMine(page, currentUserId);
         if (postObsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, postTotalCount);
 
         // 1-3. 게시글 리스트 + 게시글 Id 리스트 조립
-        record PostRow(Post post, int likesCount, boolean isLiked, int commentCount) {
+        record PostRow(Post post, int likesCount, boolean isLiked, int commentCount, boolean isFollowing,
+                       boolean isOwner) {
         }
         List<PostRow> postRowList = new ArrayList<>(postObsList.size());
         List<Integer> postIdList = new ArrayList<>(postObsList.size());
@@ -176,8 +177,10 @@ public class PostService {
             int likesCount = Math.toIntExact((Long) obs[1]);
             boolean isLiked = (Boolean) obs[2];
             int commentCount = Math.toIntExact((Long) obs[3]);
+            boolean isFollowing = (Boolean) obs[4];
+            boolean isOwner = post.getUser().getId().equals(currentUserId);
 
-            postRowList.add(new PostRow(post, likesCount, isLiked, commentCount));
+            postRowList.add(new PostRow(post, likesCount, isLiked, commentCount, isFollowing, isOwner));
 
             postIdList.add(post.getId());
         }
@@ -191,7 +194,8 @@ public class PostService {
         List<Object[]> adObsList = advertisementRepository.findAllValid(page, currentUserId, now, adTotalCount);
 
         // 2-3. 광고 리스트 + 광고 Id 리스트 조립
-        record AdRow(Advertisement ad, int likesCount, boolean isLiked, int commentCount) {
+        record AdRow(Advertisement ad, int likesCount, boolean isLiked, int commentCount, boolean isFollowing,
+                     boolean isOwner) {
         }
         List<AdRow> adRowList = new ArrayList<>(adObsList.size());
         List<Integer> adPostIdList = new ArrayList<>(adObsList.size());
@@ -202,7 +206,7 @@ public class PostService {
             boolean isLiked = (Boolean) obs[2];
             int commentCount = Math.toIntExact((Long) obs[3]);
 
-            adRowList.add(new AdRow(ad, likesCount, isLiked, commentCount));
+            adRowList.add(new AdRow(ad, likesCount, isLiked, commentCount, false, false));
             adPostIdList.add(ad.getPost().getId());
         }
 
@@ -239,7 +243,8 @@ public class PostService {
                     itemDTOList.add(new PostResponse.ItemDTO(
                             adRow.ad().getPost(),
                             true,
-                            false, // TODO : 관리자 팔로우 불가 전제로 고정 -> 체크 필요
+                            adRow.isFollowing(), // TODO : 관리자 팔로우 불가 전제로 고정 -> 체크 필요
+                            adRow.isOwner(),
                             adRow.isLiked(),
                             adRow.likesCount(),
                             adRow.commentCount(),
@@ -259,7 +264,8 @@ public class PostService {
                     itemDTOList.add(new PostResponse.ItemDTO(
                             postRow.post(),
                             false,
-                            true, // TODO : 내 게시글 조회 후 수정 필요
+                            postRow.isFollowing(),
+                            postRow.isOwner(),
                             postRow.isLiked(),
                             postRow.likesCount(),
                             postRow.commentCount(),
