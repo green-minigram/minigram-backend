@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.stories;
 
+import com.mtcoding.minigram._core.constants.UserDetailConstants;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -59,5 +60,42 @@ public class StoryRepository {
                 .setMaxResults(1)
                 .getResultList();
         return !result.isEmpty();
+    }
+
+    public List<Object[]> findAllByUserId(Integer profileUserId, boolean isOwner, Integer page) {
+        return em.createQuery("""
+                        SELECT s.id, s.thumbnailUrl
+                        FROM Story s
+                        WHERE s.user.id = :profileUserId
+                          AND (
+                               s.status = :storyActive
+                               OR (:isOwner = true AND s.status = :storyHidden)
+                          )
+                        ORDER BY s.createdAt DESC, s.id DESC
+                        """, Object[].class)
+                .setParameter("profileUserId", profileUserId)
+                .setParameter("isOwner", isOwner)
+                .setParameter("storyActive", StoryStatus.ACTIVE)
+                .setParameter("storyHidden", StoryStatus.HIDDEN)
+                .setFirstResult(page * UserDetailConstants.ITEMS_PER_PAGE)
+                .setMaxResults(UserDetailConstants.ITEMS_PER_PAGE)
+                .getResultList();
+    }
+
+    public Long countAllByUserId(Integer profileUserId, boolean isOwner) {
+        return em.createQuery("""
+                        SELECT COUNT(s.id)
+                        FROM Story s
+                        WHERE s.user.id = :profileUserId
+                          AND (
+                               s.status = :storyActive
+                               OR (:isOwner = true AND s.status = :storyHidden)
+                          )
+                        """, Long.class)
+                .setParameter("profileUserId", profileUserId)
+                .setParameter("isOwner", isOwner)
+                .setParameter("storyActive", StoryStatus.ACTIVE)
+                .setParameter("storyHidden", StoryStatus.HIDDEN)
+                .getSingleResult();
     }
 }

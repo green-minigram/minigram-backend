@@ -2,6 +2,7 @@ package com.mtcoding.minigram.users;
 
 import com.mtcoding.minigram._core.util.Resp;
 import com.mtcoding.minigram.posts.PostService;
+import com.mtcoding.minigram.stories.StoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsersController {
     private final UserService userService;
     private final PostService postService;
+    private final StoryService storyService;
 
     // 유서 상세 페이지 다른 유저 프로필 (본인도 가능)
     @GetMapping("/s/api/users/{userId}/profile")
@@ -46,6 +48,25 @@ public class UsersController {
             @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
             @AuthenticationPrincipal User user) {
         UserResponse.PostListDTO respDTO = postService.getUserPost(null, user.getId(), page);
+        return Resp.ok(respDTO);
+    }
+
+    // 유저 상세 페이지의 다른 유저 스토리 목록
+    @GetMapping("/s/api/users/{userId}/stories")
+    public ResponseEntity<?> getUserStories(
+            @PathVariable Integer userId,
+            @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
+            @AuthenticationPrincipal User user) {
+        UserResponse.StoryListDTO respDTO = storyService.getUserStories(userId, user.getId(), page);
+        return Resp.ok(respDTO);
+    }
+
+    // 유저 상세 페이지의 본인 스토리 목록
+    @GetMapping("/s/api/users/me/stories")
+    public ResponseEntity<?> getMyStories(
+            @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
+            @AuthenticationPrincipal User user) {
+        UserResponse.StoryListDTO respDTO = storyService.getUserStories(null, user.getId(), page);
         return Resp.ok(respDTO);
     }
 }

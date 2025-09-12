@@ -3,10 +3,13 @@ package com.mtcoding.minigram.stories;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.users.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,5 +61,29 @@ public class StoryService {
         storyPS.delete();
 
         return new StoryResponse.DTO(storyPS);
+    }
+
+    public UserResponse.StoryListDTO getUserStories(Integer userId, Integer currentUserId, Integer page) {
+        // 1. userId 없으면 내 프로필
+        Integer profileUserId = (userId == null) ? currentUserId : userId;
+
+        // 2. 본인 여부 판단
+        boolean isOwner = profileUserId.equals(currentUserId);
+
+        // 3. storyId, thumbnailUrl 조회
+        List<Object[]> obsList = storyRepository.findAllByUserId(profileUserId, isOwner, page);
+
+        // 4. StoryItemDTO 조립
+        List<UserResponse.StoryItemDTO> storyItemList = obsList.stream()
+                .map(obs -> new UserResponse.StoryItemDTO(
+                        (Integer) obs[0],
+                        (String) obs[1]
+                ))
+                .toList();
+
+        // 5. totalCount 조회
+        int totalCount = Math.toIntExact(storyRepository.countAllByUserId(profileUserId, isOwner));
+
+        return new UserResponse.StoryListDTO(storyItemList, page, totalCount);
     }
 }

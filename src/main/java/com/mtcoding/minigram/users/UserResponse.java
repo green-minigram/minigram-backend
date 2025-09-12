@@ -101,4 +101,45 @@ public class UserResponse {
             this.postImageUrl = postImageUrl;
         }
     }
+
+    @Data
+    public static class StoryListDTO {
+        private Integer current;     // 현재 페이지(0-base)
+        private Integer size;        // 페이지당 개수
+        private Integer totalCount;  // 전체 글 수
+        private Integer totalPage;   // 전체 페이지 수
+        private Integer prev;        // current - 1
+        private Integer next;        // current + 1
+        private Boolean isFirst;     // current == 0
+        private Boolean isLast;      // (totalPage - 1) == current
+        private List<StoryItemDTO> storyList;
+
+        public StoryListDTO(List<StoryItemDTO> storyList, Integer current, Integer totalCount) {
+            this.storyList = storyList;
+            this.current = current;
+            this.size = UserDetailConstants.ITEMS_PER_PAGE;
+            this.totalCount = totalCount;
+            this.totalPage = makeTotalPage(totalCount, size); // 2
+            this.prev = Math.max(0, current - 1);
+            this.next = totalPage == 0 ? 0 : Math.min(totalPage - 1, current + 1);
+            this.isFirst = current == 0;
+            this.isLast = totalPage == 0 || current.equals(totalPage - 1);
+        }
+
+        private Integer makeTotalPage(int totalCount, int size) {
+            int rest = totalCount % size > 0 ? 1 : 0;
+            return totalCount / size + rest;
+        }
+    }
+
+    @Data
+    public static class StoryItemDTO {
+        private Integer storyId;
+        private String thumbnailUrl;
+
+        public StoryItemDTO(Integer storyId, String thumbnailUrl) {
+            this.storyId = storyId;
+            this.thumbnailUrl = thumbnailUrl;
+        }
+    }
 }
