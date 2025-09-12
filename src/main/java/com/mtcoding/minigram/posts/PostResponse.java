@@ -143,22 +143,21 @@ public class PostResponse {
         private Boolean isLast;      // (totalPage - 1) == current
         private List<ItemDTO> postList;
 
-        public FeedDTO(List<ItemDTO> postList, Integer current, Integer totalCount) {
+        public FeedDTO(List<ItemDTO> postList, Integer current, Integer postTotalCount) {
             this.postList = postList;
             this.current = current;
-            this.size = FeedConstants.ITEMS_PER_PAGE;
-            this.totalCount = totalCount;
-            this.totalPage = makeTotalPage(totalCount, size);
+            this.size = postList.size();
+            this.totalCount = postTotalCount;
+            this.totalPage = makeTotalPage(totalCount);
             this.prev = Math.max(0, current - 1);
             this.next = totalPage == 0 ? 0 : Math.min(totalPage - 1, current + 1);
             this.isFirst = current == 0;
-            this.isLast = (totalPage - 1) == current;
+            this.isLast = totalPage == 0 || current.equals(totalPage - 1);
         }
 
-        private int makeTotalPage(int totalCount, int size) {
-            if (size <= 0) return 0;
-            int rest = (totalCount % size) > 0 ? 1 : 0;
-            return (totalCount / size) + rest;
+        private int makeTotalPage(int totalCount) {
+            int postsPerPage = FeedConstants.POSTS_PER_PAGE;
+            return (totalCount + postsPerPage - 1) / postsPerPage;
         }
     }
 

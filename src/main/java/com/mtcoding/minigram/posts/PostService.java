@@ -1,8 +1,11 @@
 package com.mtcoding.minigram.posts;
 
+import com.mtcoding.minigram._core.constants.FeedConstants;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.advertisements.Advertisement;
+import com.mtcoding.minigram.advertisements.AdvertisementRepository;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
@@ -16,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,7 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final AdvertisementRepository advertisementRepository;
 
     @Transactional(readOnly = true)
     // 게시글 상세
@@ -152,52 +157,121 @@ public class PostService {
     }
 
     public PostResponse.FeedDTO getFeedPosts(Integer page, Integer currentUserId) {
-        // 1. PostRow, postIdList 조립
-        // 1-1. Post, likesCount, isLiked, commentCount 조회
-        List<Object[]> obsList = postRepository.findFromFollowees(page, currentUserId);
+        // 1. 일반 게시글
+        // 1-1. 게시글 총 개수 조회
+        int postTotalCount = Math.toIntExact(postRepository.totalCountFromFollowees(currentUserId));
 
-        // 1-2. totalCount 조회
-        Integer totalCount = Math.toIntExact(postRepository.totalCountFromFollowees(currentUserId));
+        // 1-2. Post, likesCount, isLiked, commentCount 조회
+        List<Object[]> postObsList = postRepository.findFromFollowees(page, currentUserId);
+        if (postObsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, postTotalCount);
 
-        if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, totalCount);
-
-        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {
+        // 1-3. 게시글 리스트 + 게시글 Id 리스트 조립
+        record PostRow(Post post, int likesCount, boolean isLiked, int commentCount) {
         }
+        List<PostRow> postRowList = new ArrayList<>(postObsList.size());
+        List<Integer> postIdList = new ArrayList<>(postObsList.size());
 
-        List<PostRow> rows = new ArrayList<>(obsList.size());
-        List<Integer> postIdList = new ArrayList<>(obsList.size());
-
-        for (Object[] obs : obsList) {
+        for (Object[] obs : postObsList) {
             Post post = (Post) obs[0];
             int likesCount = Math.toIntExact((Long) obs[1]);
-            Boolean isLiked = (Boolean) obs[2];
+            boolean isLiked = (Boolean) obs[2];
             int commentCount = Math.toIntExact((Long) obs[3]);
 
-            rows.add(new PostRow(post, isLiked, likesCount, commentCount));
+            postRowList.add(new PostRow(post, likesCount, isLiked, commentCount));
 
             postIdList.add(post.getId());
         }
 
-        // 2. postId 기반 postImage 조회
-        List<PostImage> postImageList = postImageRepository.findAllByPostIdIn(postIdList);
+        // 2. 광고
+        // 2-1. 광고 총 개수 조회
+        LocalDateTime now = LocalDateTime.now();
+        int adTotalCount = Math.toIntExact(advertisementRepository.totalCount(now));
 
-        // 3. postImageList를 postId 기준으로 그룹핑
-        Map<Integer, List<PostImage>> postImageMap = postImageList.stream().collect(Collectors.groupingBy(postImage -> postImage.getPost().getId()));
+        // 2-2. Advertisement, likesCount, isLiked, commentCount 조회
+        List<Object[]> adObsList = advertisementRepository.findAllValid(page, currentUserId, now, adTotalCount);
 
-        // 4. PostRow, PostImageMap -> ItemDTO 조립
-        List<PostResponse.ItemDTO> itemDTOList = rows.stream()
-                .map(row -> new PostResponse.ItemDTO(
-                        row.post(),
-                        false,
-                        true,
-                        row.isLiked(),
-                        row.likesCount(),
-                        row.commentCount(),
-                        postImageMap.getOrDefault(row.post().getId(), List.of())
-                ))
-                .toList();
+        // 2-3. 광고 리스트 + 광고 Id 리스트 조립
+        record AdRow(Advertisement ad, int likesCount, boolean isLiked, int commentCount) {
+        }
+        List<AdRow> adRowList = new ArrayList<>(adObsList.size());
+        List<Integer> adPostIdList = new ArrayList<>(adObsList.size());
 
-        return new PostResponse.FeedDTO(itemDTOList, page, totalCount);
+        for (Object[] obs : adObsList) {
+            Advertisement ad = (Advertisement) obs[0];
+            int likesCount = Math.toIntExact((Long) obs[1]);
+            boolean isLiked = (Boolean) obs[2];
+            int commentCount = Math.toIntExact((Long) obs[3]);
+
+            adRowList.add(new AdRow(ad, likesCount, isLiked, commentCount));
+            adPostIdList.add(ad.getPost().getId());
+        }
+
+        // 3. 이미지
+        // 3-1. 일반 게시글 + 광고 postIdList 합치기
+        List<Integer> allPostIdList = new ArrayList<>(postIdList.size() + adPostIdList.size());
+        allPostIdList.addAll(postIdList);
+        allPostIdList.addAll(adPostIdList);
+
+        // 3-2. postId 기반 postImage 조회 및 postId 기준으로 그룹핑
+        Map<Integer, List<PostImage>> postImageMap = postImageRepository.findAllByPostIdIn(allPostIdList)
+                .stream()
+                .collect(Collectors.groupingBy(postImage -> postImage.getPost().getId()));
+
+        // 3-3. 4+1+4+1 패턴으로 섞어서 itemDTO 리스트 만들기
+        List<PostResponse.ItemDTO> itemDTOList = new ArrayList<>(FeedConstants.ITEMS_PER_PAGE);
+
+        int postCount = 0, adCount = 0;
+
+        for (int slot = 0; slot < FeedConstants.ITEMS_PER_PAGE; slot++) {
+            boolean isAdSlot = (slot == FeedConstants.AD_SLOTS[0] || slot == FeedConstants.AD_SLOTS[1]);
+
+            // (1) 광고 자리이면
+            if (isAdSlot) {
+                if (!adRowList.isEmpty()) {
+                    AdRow adRow = adRowList.get(adCount % adRowList.size());
+                    adCount++;
+
+                    // postImageMap에서 광고 게시글의 이미지 추출
+                    int adPostId = adRow.ad().getPost().getId();
+                    List<PostImage> postImageList = postImageMap.getOrDefault(adPostId, List.of());
+
+                    // ItemDTO 조립 후 list에 추가
+                    itemDTOList.add(new PostResponse.ItemDTO(
+                            adRow.ad().getPost(),
+                            true,
+                            false, // TODO : 관리자 팔로우 불가 전제로 고정 -> 체크 필요
+                            adRow.isLiked(),
+                            adRow.likesCount(),
+                            adRow.commentCount(),
+                            postImageList
+                    ));
+                }
+            }
+            // (2) 일반 게시글 자리이면
+            else {
+                if (postCount < postRowList.size()) {
+                    PostRow postRow = postRowList.get(postCount++);
+
+                    // // postImageMap에서 일반 게시글의 이미지 추출
+                    List<PostImage> postImageList = postImageMap.getOrDefault(postRow.post().getId(), List.of());
+
+                    // ItemDTO 조립 후 list에 추가
+                    itemDTOList.add(new PostResponse.ItemDTO(
+                            postRow.post(),
+                            false,
+                            true, // TODO : 내 게시글 조회 후 수정 필요
+                            postRow.isLiked(),
+                            postRow.likesCount(),
+                            postRow.commentCount(),
+                            postImageList
+                    ));
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return new PostResponse.FeedDTO(itemDTOList, page, postTotalCount);
     }
 
     public PostResponse.SearchDTO search(Integer page, String keyword) {

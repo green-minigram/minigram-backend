@@ -15,7 +15,7 @@ import java.util.List;
 public class AdvertisementRepository {
     private final EntityManager em;
 
-    public List<Object[]> findAllValid(int page, int currentUserId, LocalDateTime now, Integer totalCount) {
+    public List<Object[]> findAllValid(int page, int currentUserId, LocalDateTime now, int totalCount) {
         if (totalCount <= 0) return List.of();
 
         final int adsPerPage = FeedConstants.ADS_PER_PAGE; // 페이지당 광고 수 (2개)
