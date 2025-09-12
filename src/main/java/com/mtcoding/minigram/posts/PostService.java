@@ -188,6 +188,8 @@ public class PostService {
         List<PostResponse.ItemDTO> itemDTOList = rows.stream()
                 .map(row -> new PostResponse.ItemDTO(
                         row.post(),
+                        false,
+                        true,
                         row.isLiked(),
                         row.likesCount(),
                         row.commentCount(),

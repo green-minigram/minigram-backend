@@ -165,6 +165,7 @@ public class PostResponse {
     @Data
     public static class ItemDTO {
         // private Boolean isAdvertisement; // 광고 여부 필드
+        private Boolean isAdvertisement;
         private Integer postId;
         private String content;
         private Boolean isLiked;
@@ -182,11 +183,11 @@ public class PostResponse {
             private String profileImageUrl;
             private Boolean isFollowing;
 
-            public UserDTO(User user) {
+            public UserDTO(User user, Boolean isFollowing) {
                 this.userId = user.getId();
                 this.username = user.getUsername();
                 this.profileImageUrl = user.getProfileImageUrl();
-                this.isFollowing = true; // 팔로우 중인 게시글만 조회되는 피드이므로 항상 true
+                this.isFollowing = isFollowing;
             }
         }
 
@@ -201,9 +202,10 @@ public class PostResponse {
             }
         }
 
-        public ItemDTO(Post post, Boolean isLiked, Integer likesCount, Integer commentCount, List<PostImage> postImageList) {
-            this.user = new UserDTO(post.getUser());
+        public ItemDTO(Post post, Boolean isAdvertisement, Boolean isFollowing, Boolean isLiked, Integer likesCount, Integer commentCount, List<PostImage> postImageList) {
+            this.user = new UserDTO(post.getUser(), isFollowing);
             this.postImageList = postImageList.stream().map(postImage -> new PostImageDTO(postImage)).toList();
+            this.isAdvertisement = isAdvertisement;
             this.postId = post.getId();
             this.content = post.getContent();
             this.isLiked = isLiked;
