@@ -33,7 +33,7 @@ public class PostsController {
         PostResponse.DeleteDTO respDTO = postService.delete(postId, user.getId());
         return Resp.ok(respDTO);
     }
-    
+
     // 게시글 검색
     @GetMapping("/s/api/search/posts")
     public ResponseEntity<?> search(
@@ -42,7 +42,7 @@ public class PostsController {
 
         log.info("[Post Search] keyword='{}' (len={})", keyword, keyword == null ? -1 : keyword.length());
 
-        PostResponse.SearchDTO respDTO = postService.search(page, keyword);
+        PostResponse.SearchListDTO respDTO = postService.search(page, keyword);
         return Resp.ok(respDTO);
     }
 }

@@ -133,7 +133,7 @@ public class PostResponse {
     }
     
     @Data
-    public static class SearchDTO {
+    public static class SearchListDTO {
         private Integer current;     // 현재 페이지(0-base)
         private Integer size;        // 페이지당 개수
         private Integer totalCount;  // 전체 글 수
@@ -144,7 +144,7 @@ public class PostResponse {
         private Boolean isLast;      // (totalPage - 1) == current
         private List<SearchItemDTO> postList;
 
-        public SearchDTO(List<SearchItemDTO> postList, Integer current, Integer totalCount) {
+        public SearchListDTO(List<SearchItemDTO> postList, Integer current, Integer totalCount) {
             this.postList = postList;
             this.current = current;
             this.size = 12;
