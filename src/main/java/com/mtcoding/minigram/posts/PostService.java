@@ -12,6 +12,7 @@ import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.ReportRepository;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
+import com.mtcoding.minigram.users.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -160,6 +161,30 @@ public class PostService {
         Integer totalCount = Math.toIntExact(postRepository.totalCountByKeyword(keyword));
 
         return new PostResponse.SearchListDTO(searchItemDTOList, page, totalCount);
+    }
+
+    public UserResponse.PostListDTO getUserPost(Integer userId, Integer currentUserId, Integer page) {
+        // 1. userId 없으면 내 프로필
+        Integer profileUserId = (userId == null) ? currentUserId : userId;
+
+        // 2. 본인 여부 판단
+        Boolean isOwner = profileUserId.equals(currentUserId);
+
+        // 3. postId, postImageUrl 조회
+        List<Object[]> obsList = postRepository.findAllByUserId(profileUserId, isOwner, page);
+
+        // 4. PostItemDTO 조립
+        List<UserResponse.PostItemDTO> postItemList = obsList.stream()
+                .map(obs -> new UserResponse.PostItemDTO(
+                        (Integer) obs[0],
+                        (String) obs[1]
+                ))
+                .toList();
+
+        // 5. totalCount 조회
+        int totalCount = Math.toIntExact(postRepository.countAllByUserId(profileUserId, isOwner));
+
+        return new UserResponse.PostListDTO(postItemList, page, totalCount);
     }
 }
 

@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts;
 
+import com.mtcoding.minigram._core.constants.UserDetailConstants;
 import com.mtcoding.minigram.posts.images.PostImage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -136,6 +137,50 @@ public class PostRepository {
         }
 
         return query.getSingleResult();
+    }
+
+    public List<Object[]> findAllByUserId(Integer profileUserId, boolean isOwner, Integer page) {
+        return em.createQuery("""
+                        SELECT p.id, pi.url
+                        FROM Post p
+                        LEFT JOIN PostImage pi
+                               ON pi.post = p
+                              AND pi.id = (
+                                  SELECT MIN(pi2.id)
+                                  FROM PostImage pi2
+                                  WHERE pi2.post = p
+                              )
+                        WHERE p.user.id = :profileUserId
+                          AND (
+                               p.status = :postActive
+                               OR (:isOwner = true AND p.status = :postHidden)
+                          )
+                        ORDER BY p.createdAt DESC, p.id DESC
+                        """, Object[].class)
+                .setParameter("profileUserId", profileUserId)
+                .setParameter("isOwner", isOwner)
+                .setParameter("postActive", PostStatus.ACTIVE)
+                .setParameter("postHidden", PostStatus.HIDDEN)
+                .setFirstResult(page * UserDetailConstants.ITEMS_PER_PAGE)
+                .setMaxResults(UserDetailConstants.ITEMS_PER_PAGE)
+                .getResultList();
+    }
+
+    public Long countAllByUserId(Integer profileUserId, boolean isOwner) {
+        return em.createQuery("""
+                            SELECT COUNT(p.id)
+                            FROM Post p
+                            WHERE p.user.id = :profileUserId
+                              AND (
+                                   p.status = :postActive
+                                   OR (:isOwner = true AND p.status = :postHidden)
+                              )
+                        """, Long.class)
+                .setParameter("profileUserId", profileUserId)
+                .setParameter("isOwner", isOwner)
+                .setParameter("postActive", PostStatus.ACTIVE)
+                .setParameter("postHidden", PostStatus.HIDDEN)
+                .getSingleResult();
     }
 }
 
