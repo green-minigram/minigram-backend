@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts;
 
+import com.mtcoding.minigram._core.constants.FeedConstants;
 import com.mtcoding.minigram.posts.images.PostImage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -83,8 +84,8 @@ public class PostRepository {
                         """, Object[].class)
                 .setParameter("currentUserId", currentUserId)
                 .setParameter("status", PostStatus.ACTIVE)
-                .setFirstResult(page * 8)
-                .setMaxResults(8)
+                .setFirstResult(page * FeedConstants.POSTS_PER_PAGE)
+                .setMaxResults(FeedConstants.POSTS_PER_PAGE)
                 .getResultList();
     }
 

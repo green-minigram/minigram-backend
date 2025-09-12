@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts;
 
+import com.mtcoding.minigram._core.constants.FeedConstants;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.users.User;
 import lombok.AllArgsConstructor;
@@ -145,7 +146,7 @@ public class PostResponse {
         public FeedDTO(List<ItemDTO> postList, Integer current, Integer totalCount) {
             this.postList = postList;
             this.current = current;
-            this.size = 8;
+            this.size = FeedConstants.ITEMS_PER_PAGE;
             this.totalCount = totalCount;
             this.totalPage = makeTotalPage(totalCount, size);
             this.prev = Math.max(0, current - 1);
@@ -163,6 +164,7 @@ public class PostResponse {
 
     @Data
     public static class ItemDTO {
+        // private Boolean isAdvertisement; // 광고 여부 필드
         private Integer postId;
         private String content;
         private Boolean isLiked;
