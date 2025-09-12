@@ -48,7 +48,7 @@ public class PostsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("게시글 단건 조회 - OK")
+    @DisplayName("게시글 단건 조회 - OK (일반 게시글)")
     void find_test() throws Exception {
 
         int postId = 18;
@@ -59,8 +59,8 @@ public class PostsControllerTest extends MyRestDoc {
                         .accept(MediaType.APPLICATION_JSON_VALUE)
         );
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
@@ -83,11 +83,54 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.likes.isLiked").value(true))
                 .andExpect(jsonPath("$.body.commentCount").value(15))
                 .andExpect(jsonPath("$.body.postedAt").isString())
-                .andExpect(jsonPath("$.body.isReported").value(true));
+                .andExpect(jsonPath("$.body.isReported").value(true))
+                .andExpect(jsonPath("$.body.isAd").value(false));
 
 
         actions.andDo(document);
     }
+
+    @Test
+    @DisplayName("게시글 단건 조회 - OK (광고 게시글: isFollowing 미노출)")
+    void find_ad_post_test() throws Exception {
+        // 시드에서 postId=1을 광고로 설정해둔다 (ACTIVE + 기간 유효)
+        int postId = 1;
+
+        ResultActions actions = mvc.perform(
+                get("/s/api/posts/{postId}", postId)
+                        .header("Authorization", accessToken)
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").value(1))
+                .andExpect(jsonPath("$.body.author.isFollowing").doesNotExist())
+
+                .andExpect(jsonPath("$.body.author.userId").value(1))
+                .andExpect(jsonPath("$.body.author.username").value("minigram"))
+                .andExpect(jsonPath("$.body.author.profileImageUrl",
+                        anyOf(nullValue(), matchesPattern("^https?://.+"))))
+                .andExpect(jsonPath("$.body.author.isOwner").value(false))
+                .andExpect(jsonPath("$.body.images", hasSize(2)))
+                .andExpect(jsonPath("$.body.images[0].id").isNumber())
+                .andExpect(jsonPath("$.body.images[0].url").isString())
+                .andExpect(jsonPath("$.body.content",
+                        containsString("[광고]")))
+                .andExpect(jsonPath("$.body.likes.count").value(3))
+                .andExpect(jsonPath("$.body.likes.isLiked").value(true))
+                .andExpect(jsonPath("$.body.commentCount").value(5))
+                .andExpect(jsonPath("$.body.postedAt",
+                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T.*")))
+                .andExpect(jsonPath("$.body.isReported").value(false))
+                .andExpect(jsonPath("$.body.isAd").value(true));  // ← 광고
+        actions.andDo(document);
+    }
+
 
     @Test
     @DisplayName("게시글 작성 - OK (JSON)")
@@ -215,8 +258,8 @@ public class PostsControllerTest extends MyRestDoc {
         );
 
         // eye
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));

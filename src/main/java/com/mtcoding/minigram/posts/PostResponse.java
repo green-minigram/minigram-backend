@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.users.User;
 import lombok.AllArgsConstructor;
@@ -21,13 +22,14 @@ public class PostResponse {
         private Integer commentCount;
         private LocalDateTime postedAt;
         private Boolean isReported;
+        private Boolean isAd;
 
         public DetailDTO(Post post,
                          List<PostImage> images,
                          int likeCount, boolean isLiked,
                          int commentCount,
                          boolean isOwner, boolean isFollowing,
-                         boolean isReported) {
+                         boolean isReported, boolean isAd) {
 
             this.postId = post.getId();
             this.content = post.getContent();
@@ -38,7 +40,7 @@ public class PostResponse {
                     post.getUser().getId(),
                     post.getUser().getUsername(),
                     post.getUser().getProfileImageUrl(),
-                    isFollowing,
+                    isAd ? null : isFollowing,
                     isOwner
             );
 
@@ -51,6 +53,7 @@ public class PostResponse {
             this.likes = new LikesDTO(likeCount, isLiked);
             this.commentCount = commentCount;
             this.isReported = isReported;
+            this.isAd = isAd;
         }
     }
 
@@ -97,6 +100,7 @@ public class PostResponse {
         private String username;
         private String profileImageUrl;
 
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private Boolean isFollowing;
 
         private Boolean isOwner;

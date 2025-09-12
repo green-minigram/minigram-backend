@@ -3,6 +3,7 @@ package com.mtcoding.minigram.posts;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.advertisements.AdvertisementRepository;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
@@ -36,6 +37,7 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final AdvertisementRepository advertisementRepository;
 
     @Transactional(readOnly = true)
     // 게시글 상세
@@ -73,12 +75,13 @@ public class PostService {
         boolean reported = userId != null
                 && reportRepository.existsActivePostReportByUser(postId, userId);
 
+        boolean isAd = advertisementRepository.findActiveNowByPostId(postId).isPresent();
 
         log.info("[POST_FIND] out: likes(count={}, liked={}), comments={}, owner={}, following={}, reported={}",
                 likeCount, liked, commentCount, owner, following, reported);
 
         // 3) 생성자 주입으로 한 번에 완성
-        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
+        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported, isAd);
     }
 
 
