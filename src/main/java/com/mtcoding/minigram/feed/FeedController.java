@@ -42,4 +42,18 @@ public class FeedController {
         FeedResponse.StoryListDTO respDTO = feedService.findStoriesByUserId(userId, user.getId());
         return Resp.ok(respDTO);
     }
+
+    // 피드 게시글 조회
+    @GetMapping("/s/api/feed")
+    public ResponseEntity<?> findAll(
+            @RequestParam(required = false, value = "previewPage", defaultValue = "0") Integer previewPage,
+            @RequestParam(required = false, value = "postPage", defaultValue = "0") Integer postPage,
+            @AuthenticationPrincipal User user) {
+        FeedResponse.PreviewListDTO previewListDTO = feedService.findStoryPreviews(previewPage, user.getId());
+
+        FeedResponse.PostListDTO postListDTO = feedService.findPosts(postPage, user.getId());
+
+        FeedResponse.ListDTO respDTO = new FeedResponse.ListDTO(previewListDTO, postListDTO);
+        return Resp.ok(respDTO);
+    }
 }

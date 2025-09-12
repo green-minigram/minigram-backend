@@ -187,4 +187,68 @@ public class FeedControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList[0].likeCount").value(5));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
+    @Test
+    public void findAll_test() throws Exception {
+        // given
+        Integer previewPage = 0;
+        Integer postPage = 0;
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/feed")
+                        .param("previewPage", previewPage.toString())
+                        .param("postPage", postPage.toString())
+                        .header("Authorization", accessToken)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.size").value(10));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.totalCount").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.totalPage").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.next").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.isLast").value(true));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.previewList[0].userId").value(8));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.previewList[0].username").value("luna"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.previewList[0].profileImageUrl").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.previews.previewList[0].hasUnseen").value(true));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.size").value(10));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.totalCount").value(18));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.totalPage").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.next").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.isLast").value(false));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].isAdvertisement").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].postId").value(23));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].content").value("팔로워 1만 명 감사합니다 🎉"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].isOwner").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].isLiked").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].likesCount").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].commentCount").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].createdAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].user.userId").value(8));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].user.username").value("luna"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].user.profileImageUrl").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].user.isFollowing").value(true));
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].postImageList[0].postImageId").value(45));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.posts.postList[0].postImageList[0].url").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }
