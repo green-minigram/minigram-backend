@@ -105,10 +105,10 @@ public class FeedResponse {
         private Integer next;        // current + 1
         private Boolean isFirst;     // current == 0
         private Boolean isLast;      // (totalPage - 1) == current
-        private List<PreviewItemDTO> storyHeadList;
+        private List<PreviewItemDTO> previewList;
 
-        public PreviewListDTO(List<PreviewItemDTO> storyHeadList, Integer current, Integer totalCount) {
-            this.storyHeadList = storyHeadList;
+        public PreviewListDTO(List<PreviewItemDTO> previewList, Integer current, Integer totalCount) {
+            this.previewList = previewList;
             this.current = current;
             this.size = 10;
             this.totalCount = totalCount;
@@ -149,7 +149,7 @@ public class FeedResponse {
             this.storyList = storyList;
         }
     }
-    
+
     @Data
     public static class StoryItemDTO {
         private UserDTO user;
@@ -194,6 +194,17 @@ public class FeedResponse {
             this.isOwner = isOwner;
             this.isLiked = isLiked;
             this.likeCount = likeCount;
+        }
+    }
+
+    @Data
+    public static class ListDTO {
+        private PreviewListDTO previews;
+        private PostListDTO posts;
+
+        public ListDTO(PreviewListDTO previews, PostListDTO posts) {
+            this.previews = previews;
+            this.posts = posts;
         }
     }
 }
