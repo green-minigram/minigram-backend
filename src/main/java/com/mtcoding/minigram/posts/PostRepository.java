@@ -1,6 +1,5 @@
 package com.mtcoding.minigram.posts;
 
-import com.mtcoding.minigram._core.constants.FeedConstants;
 import com.mtcoding.minigram.posts.images.PostImage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -63,51 +62,6 @@ public class PostRepository {
 
     public Optional<Post> findPostById(Integer id) {
         return Optional.ofNullable(em.find(Post.class, id));
-    }
-
-    public List<Object[]> findFromFolloweesIncludingMine(Integer page, Integer currentUserId) {
-        return em.createQuery("""
-                        SELECT
-                           p,
-                           (SELECT COUNT(pl1.id) FROM PostLike pl1 WHERE pl1.post = p),
-                           CASE WHEN EXISTS (
-                                  SELECT pl2.id FROM PostLike pl2
-                                   WHERE pl2.post = p AND pl2.user.id = :currentUserId
-                                ) THEN true ELSE false END,
-                           (SELECT COUNT(c1.id) FROM Comment c1 WHERE c1.post = p),
-                           CASE WHEN u.id = :currentUserId THEN false
-                                WHEN f.id IS NOT NULL THEN true
-                                ELSE false END
-                        FROM Post p
-                        JOIN FETCH p.user u
-                        LEFT JOIN Follow f
-                               ON f.followee = u
-                              AND f.follower.id = :currentUserId
-                        WHERE p.status = :status
-                          AND (u.id = :currentUserId OR f.id IS NOT NULL)
-                        ORDER BY p.createdAt DESC, p.id DESC
-                        """, Object[].class)
-                .setParameter("currentUserId", currentUserId)
-                .setParameter("status", PostStatus.ACTIVE)
-                .setFirstResult(page * FeedConstants.POSTS_PER_PAGE)
-                .setMaxResults(FeedConstants.POSTS_PER_PAGE)
-                .getResultList();
-    }
-
-    public Long totalCountFromFolloweesIncludingMine(Integer currentUserId) {
-        return em.createQuery("""
-                        SELECT COUNT(DISTINCT p)
-                        FROM Post p
-                        JOIN p.user u
-                        LEFT JOIN Follow f
-                               ON f.followee = u
-                              AND f.follower.id = :currentUserId
-                        WHERE p.status = :status
-                          AND (u.id = :currentUserId OR f.id IS NOT NULL)
-                        """, Long.class)
-                .setParameter("currentUserId", currentUserId)
-                .setParameter("status", PostStatus.ACTIVE)
-                .getSingleResult();
     }
 
     public List<PostResponse.SearchItemDTO> findAllByKeyword(int page, String keyword) {
