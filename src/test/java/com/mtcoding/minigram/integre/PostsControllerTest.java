@@ -197,7 +197,7 @@ public class PostsControllerTest extends MyRestDoc {
     @Test
     public void getFeedPosts_test() throws Exception {
         // given
-        Integer page = 0;
+        Integer page = 2;
 
         // when
         ResultActions actions = mvc.perform(
@@ -214,26 +214,29 @@ public class PostsControllerTest extends MyRestDoc {
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(10));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(16));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(18));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(23));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].content").value("팔로워 1만 명 감사합니다 \uD83C\uDF89"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].isAdvertisement").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].content").value("Spring Boot + JPA 연동 성공! 🚀"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].isOwner").value(true));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].isLiked").value(false));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].likesCount").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].likesCount").value(2));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].commentCount").value(0));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].createdAt").value(Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.userId").value(8));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.username").value("luna"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.profileImageUrl").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.userId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.username").value("ssar"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.profileImageUrl").isString());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].user.isFollowing").value(false));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList[0].postImageId").value(45));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList[0].postImageId").value(6));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageList[0].url").isString());
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
