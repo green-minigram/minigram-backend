@@ -96,5 +96,38 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andDo(document);
     }
 
+    @Test
+    public void findRepliesByRoot_test() throws Exception {
+        // given
+        Integer commentId = 2;
 
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/comments/{commentId}/replies", commentId)
+                        .header("Authorization", accessToken)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList").isArray());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].commentId").value(8));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].rootId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].parentId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].content").value("222 비하인드 좋아요"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].isOwner").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].isLiked").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].likeCount").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].createdAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.userId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.username").value("ssar"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.profileImageUrl").isString());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.hasUnseen").value(true));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }
