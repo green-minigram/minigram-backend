@@ -1,5 +1,6 @@
 package com.mtcoding.minigram.posts.comments;
 
+import com.mtcoding.minigram._core.constants.CommentConstants;
 import com.mtcoding.minigram.stories.StoryStatus;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +85,7 @@ public class CommentRepository {
                 .findFirst();
     }
 
-    public List<Object[]> findAllByPostId(Integer postId, Integer currentUserId) {
+    public List<Object[]> findAllByPostId(Integer page, Integer postId, Integer currentUserId) {
         return em.createQuery("""
         SELECT
             c,
@@ -126,10 +127,26 @@ public class CommentRepository {
                 .setParameter("currentUserId", currentUserId)
                 .setParameter("commentActive", CommentStatus.ACTIVE)
                 .setParameter("storyActive", StoryStatus.ACTIVE)
+                .setFirstResult(page * CommentConstants.ITEMS_PER_PAGE)
+                .setMaxResults(CommentConstants.ITEMS_PER_PAGE)
                 .getResultList();
     }
 
-    public List<Object[]> findRepliesByRoot(Integer rootId, Integer currentUserId) {
+    public Long countAllByPostId(Integer postId) {
+        return em.createQuery("""
+        SELECT COUNT(c)
+        FROM Comment c
+        JOIN c.user u
+        WHERE c.post.id = :postId
+          AND c.status = :commentActive
+        """, Long.class)
+                .setParameter("postId", postId)
+                .setParameter("commentActive", CommentStatus.ACTIVE)
+                .getSingleResult();
+    }
+
+
+    public List<Object[]> findRepliesByRoot(Integer page, Integer rootId, Integer currentUserId) {
         return em.createQuery("""
         SELECT
             c,
@@ -175,8 +192,25 @@ public class CommentRepository {
                 .setParameter("currentUserId", currentUserId)
                 .setParameter("commentActive", CommentStatus.ACTIVE)
                 .setParameter("storyActive", StoryStatus.ACTIVE)
+                .setFirstResult(page * CommentConstants.ITEMS_PER_PAGE)
+                .setMaxResults(CommentConstants.ITEMS_PER_PAGE)
                 .getResultList();
     }
+
+    public Long countRepliesByRoot(Integer rootId) {
+        return em.createQuery("""
+        SELECT COUNT(c)
+        FROM Comment c
+        JOIN c.user u
+        WHERE c.root.id = :rootId
+          AND c.parent IS NOT NULL
+          AND c.status = :commentActive
+        """, Long.class)
+                .setParameter("rootId", rootId)
+                .setParameter("commentActive", CommentStatus.ACTIVE)
+                .getSingleResult();
+    }
+
 
     public Optional<Comment> findById(Integer commentId) {
         return Optional.ofNullable(em.find(Comment.class, commentId));

@@ -16,8 +16,11 @@ public class CommentsController {
 
     // 게시글 기준 댓글 전체 목록 조회
     @GetMapping("/s/api/posts/{postId}/comments")
-    public ResponseEntity<?> findAllByPostId(@PathVariable Integer postId, @AuthenticationPrincipal User user) {
-        CommentResponse.ListDTO respDTO = commentService.findAllByPostId(postId, user.getId());
+    public ResponseEntity<?> findAllByPostId(
+            @PathVariable Integer postId,
+            @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
+            @AuthenticationPrincipal User user) {
+        CommentResponse.ListDTO respDTO = commentService.findAllByPostId(page, postId, user.getId());
         return Resp.ok(respDTO);
     }
 
@@ -29,8 +32,11 @@ public class CommentsController {
 
     // root 기준 대댓글 전체 목록 조회
     @GetMapping("/s/api/comments/{commentId}/replies")
-    public ResponseEntity<?> findRepliesByRoot(@PathVariable Integer commentId, @AuthenticationPrincipal User user) {
-        CommentResponse.ListDTO respDTO = commentService.findRepliesByRoot(commentId, user.getId());
+    public ResponseEntity<?> findRepliesByRoot(
+            @PathVariable Integer commentId,
+            @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
+            @AuthenticationPrincipal User user) {
+        CommentResponse.ListDTO respDTO = commentService.findRepliesByRoot(page, commentId, user.getId());
         return Resp.ok(respDTO);
     }
 

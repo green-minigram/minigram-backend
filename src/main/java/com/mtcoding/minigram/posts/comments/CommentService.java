@@ -26,7 +26,7 @@ public class CommentService {
     private final UserRepository userRepository;
 
     //게시글 댓글 조회
-    public CommentResponse.ListDTO findAllByPostId(Integer postId, Integer currentUserId) {
+    public CommentResponse.ListDTO findAllByPostId(Integer page, Integer postId, Integer currentUserId) {
         Post postPS =  postRepository.findById(postId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다"));
 
@@ -35,7 +35,7 @@ public class CommentService {
             case HIDDEN  -> throw new ExceptionApi404("숨김 처리된 게시글입니다: postId=" + postId);
         }
 
-        List<Object[]> obsList = commentRepository.findAllByPostId(postId, currentUserId);
+        List<Object[]> obsList = commentRepository.findAllByPostId(page, postId, currentUserId);
 
         List<CommentResponse.ItemDTO> itemDTOList = obsList.stream()
                 .map(obs -> {
@@ -55,7 +55,9 @@ public class CommentService {
                 })
                 .toList();
 
-        return new CommentResponse.ListDTO(itemDTOList);
+        int totalCount = Math.toIntExact(commentRepository.countAllByPostId(postId));
+
+        return new CommentResponse.ListDTO(itemDTOList, page, totalCount);
     }
 
     @Transactional
@@ -79,7 +81,7 @@ public class CommentService {
         return new CommentResponse.DeleteDTO(commentId, msg);
     }
 
-    public CommentResponse.ListDTO findRepliesByRoot(Integer rootId, Integer currentUserId) {
+    public CommentResponse.ListDTO findRepliesByRoot(Integer page, Integer rootId, Integer currentUserId) {
         Comment root = commentRepository.findById(rootId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 댓글입니다: id=" + rootId));
 
@@ -87,7 +89,7 @@ public class CommentService {
             throw new ExceptionApi400("최상위 댓글이 아닙니다: id=" + rootId);
         }
 
-        List<Object[]> obsList = commentRepository.findRepliesByRoot(rootId, currentUserId);
+        List<Object[]> obsList = commentRepository.findRepliesByRoot(page, rootId, currentUserId);
 
         List<CommentResponse.ItemDTO> itemDTOList = obsList.stream()
                 .map(obs -> {
@@ -107,7 +109,9 @@ public class CommentService {
                 })
                 .toList();
 
-        return new CommentResponse.ListDTO(itemDTOList);
+        int totalCount = Math.toIntExact(commentRepository.countRepliesByRoot(rootId));
+
+        return new CommentResponse.ListDTO(itemDTOList, page, totalCount);
     }
 
     @Transactional
