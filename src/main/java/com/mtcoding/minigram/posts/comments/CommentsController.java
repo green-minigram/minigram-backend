@@ -3,13 +3,11 @@ package com.mtcoding.minigram.posts.comments;
 import com.mtcoding.minigram._core.util.Resp;
 import com.mtcoding.minigram.users.User;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -33,6 +31,13 @@ public class CommentsController {
     @GetMapping("/s/api/comments/{commentId}/replies")
     public ResponseEntity<?> findRepliesByRoot(@PathVariable Integer commentId, @AuthenticationPrincipal User user) {
         CommentResponse.ListDTO respDTO = commentService.findRepliesByRoot(commentId, user.getId());
+        return Resp.ok(respDTO);
+    }
+
+    // 댓글 작성
+    @PostMapping("/s/api/posts/{postId}/comments")
+    public ResponseEntity<?> create(@PathVariable Integer postId, @Valid @RequestBody CommentRequest.CreateDTO reqDTO, @AuthenticationPrincipal User user) {
+        CommentResponse.DTO respDTO = commentService.create(postId, reqDTO, user.getId());
         return Resp.ok(respDTO);
     }
 }
