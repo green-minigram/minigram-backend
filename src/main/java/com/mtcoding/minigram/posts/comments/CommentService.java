@@ -153,4 +153,17 @@ public class CommentService {
 
         return new CommentResponse.DTO(commentPS);
     }
+
+    public CommentResponse.DTO update(Integer commentId, CommentRequest.UpdateDTO reqDTO, Integer currentUserId) {
+        Comment commentPS = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ExceptionApi404("댓글을 찾을 수 없습니다"));
+
+        if (!commentPS.getUser().getId().equals(currentUserId)) {
+            throw new ExceptionApi403("댓글 수정 권한이 없습니다");
+        }
+
+        commentPS.update(reqDTO.getContent());
+
+        return new CommentResponse.DTO(commentPS);
+    }
 }

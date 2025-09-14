@@ -74,4 +74,8 @@ public class Comment {
         if (isDeleted()) return;
         this.status = CommentStatus.DELETED;
     }
+
+    public void update(String content) {
+        this.content = content;
+    }
 }
