@@ -17,7 +17,7 @@ public class CommentsController {
     private final CommentService commentService;
     private final HttpSession session;
 
-    @GetMapping("s/api/posts/{postId}/comments")
+    @GetMapping("/s/api/posts/{postId}/comments")
     public ResponseEntity<?> findAllByPostId(@PathVariable Integer postId, @AuthenticationPrincipal User user) {
         CommentResponse.ListDTO respDTO = commentService.findAllByPostId(postId, user.getId());
         return Resp.ok(respDTO);
