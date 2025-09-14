@@ -1,8 +1,16 @@
 package com.mtcoding.minigram.users;
 
 import com.mtcoding.minigram._core.constants.UserDetailConstants;
+import com.mtcoding.minigram._core.enums.Gender;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserResponse {
@@ -153,6 +161,33 @@ public class UserResponse {
             this.profile = profile;
             this.postList = postList;
             this.storyList = storyList;
+        }
+    }
+
+    @Data
+    public static class DTO {
+        private Integer userId;
+        private String email;
+        private String username;
+        private String roles;
+        private Gender gender;
+        private LocalDate birthdate;
+        private String profileImageUrl;
+        private String bio;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+
+        public DTO(User user) {
+            this.userId = user.getId();
+            this.email = user.getEmail();
+            this.username = user.getUsername();
+            this.roles = user.getRoles();
+            this.gender = user.getGender();
+            this.birthdate = user.getBirthdate();
+            this.profileImageUrl = user.getProfileImageUrl();
+            this.bio = user.getBio();
+            this.createdAt = user.getCreatedAt();
+            this.updatedAt = user.getUpdatedAt();
         }
     }
 }
