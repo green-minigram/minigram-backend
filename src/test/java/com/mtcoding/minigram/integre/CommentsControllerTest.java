@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -23,12 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
-@AutoConfigureMockMvc(printOnlyOnFailure = true)
+@AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class CommentsControllerTest extends MyRestDoc {
-
-    @Autowired
-    private MockMvc mvc;
 
     @Autowired
     private ObjectMapper om;
@@ -37,48 +38,43 @@ public class CommentsControllerTest extends MyRestDoc {
 
     @BeforeEach
     void setUp() {
-
-        User user = User.builder().id(2).username("ssar").roles("USER").build();
-        accessToken = JwtUtil.create(user);
+        User ssar = User.builder().id(2).username("ssar").roles("USER").build();
+        accessToken = JwtUtil.create(ssar);
     }
 
-
     @Test
-    @DisplayName("댓글 목록 조회 - OK (루트 배열, 대댓글 포함)")
-    void findAll_ok() throws Exception {
-        int postId = 18; // 더미에 존재하는 ID
+    public void findAllByPostId_test() throws Exception {
+        // given
+        Integer postId = 18;
 
+        // when
         ResultActions actions = mvc.perform(
-                get("/s/api/posts/{postId}/comments", postId)
-                        .header("Authorization", "Bearer " + accessToken)
-
+                MockMvcRequestBuilders
+                        .get("/s/api/posts/{postId}/comments", postId)
+                        .header("Authorization", accessToken)
         );
 
-//        String responseBody = actions.andReturn().getResponse().getContentAsString();
-//        System.out.println(responseBody);
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
 
-        actions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.msg").value("성공"))
-                .andExpect(jsonPath("$.body.items").isArray())
-                .andExpect(jsonPath("$.body.items[0].commentId").value(1))
-                .andExpect(jsonPath("$.body.items[0].user.userId").value(2))
-                .andExpect(jsonPath("$.body.items[0].isOwner").value(true))
-                .andExpect(jsonPath("$.body.items[0].isPostAuthor").value(false))
-                // 좋아요 (시드: (1,3),(1,4),(1,5) → 3개, viewer=2는 좋아요 안함)
-                .andExpect(jsonPath("$.body.items[0].likes.count").value(3))
-                .andExpect(jsonPath("$.body.items[0].likes.isLiked").value(false))
-                // createdAt은 값 패턴으로 검증
-                .andExpect(jsonPath("$.body.items[0].createdAt",
-                        matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*")))
-
-                // 첫 부모의 자식 댓글들(정렬: id asc → [6, 9])
-                .andExpect(jsonPath("$.body.items[0].children", hasSize(2)))
-                .andExpect(jsonPath("$.body.items[0].children[0].commentId").value(6))
-                .andExpect(jsonPath("$.body.items[0].children[0].user.userId").value(8)) // luna
-                .andExpect(jsonPath("$.body.items[0].children[0].isPostAuthor").value(true));
-
-        actions.andDo(document);
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList").isArray());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].commentId").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].rootId").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].parentId").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].content").value("첫 댓글! 영상 너무 재밌어요 \uD83D\uDE4C"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].isOwner").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].isLiked").value(false));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].likeCount").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].createdAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.userId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.username").value("ssar"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.profileImageUrl").isString());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].user.hasUnseen").value(true));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
     @Test
@@ -90,7 +86,7 @@ public class CommentsControllerTest extends MyRestDoc {
                 .header("Authorization", accessToken));
 
         String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+        // System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
