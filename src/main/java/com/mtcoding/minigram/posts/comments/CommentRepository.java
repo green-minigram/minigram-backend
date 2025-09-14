@@ -181,4 +181,9 @@ public class CommentRepository {
     public Optional<Comment> findById(Integer commentId) {
         return Optional.ofNullable(em.find(Comment.class, commentId));
     }
+
+    public Comment save(Comment comment) {
+        em.persist(comment);
+        return comment;
+    }
 }

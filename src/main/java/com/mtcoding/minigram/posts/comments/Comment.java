@@ -53,6 +53,7 @@ public class Comment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Builder
     public Comment(Integer id, Post post, User user, Comment root, Comment parent, String content, CommentStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.post = post;

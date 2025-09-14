@@ -64,5 +64,28 @@ public class CommentResponse {
         private Integer commentId;
         private String message;
     }
+
+    @Data
+    public static class DTO {
+        private Integer commentId;
+        private Integer postId;
+        private Integer userId;
+        private Integer rootId;
+        private Integer parentId;
+        private String content;
+        private CommentStatus status;
+        private LocalDateTime createdAt;
+
+        public DTO(Comment comment) {
+            this.commentId = comment.getId();
+            this.postId = comment.getPost().getId();
+            this.userId = comment.getUser().getId();
+            this.rootId = comment.getRoot().getId();
+            this.parentId = comment.getParent().getId();
+            this.content = comment.getContent();
+            this.status = comment.getStatus();
+            this.createdAt = comment.getCreatedAt();
+        }
+    }
 }
 
