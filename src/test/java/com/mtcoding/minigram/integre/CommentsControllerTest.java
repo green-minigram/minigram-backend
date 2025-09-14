@@ -49,11 +49,13 @@ public class CommentsControllerTest extends MyRestDoc {
     public void findAllByPostId_test() throws Exception {
         // given
         Integer postId = 18;
+        Integer page = 0;
 
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
                         .get("/s/api/posts/{postId}/comments", postId)
+                        .param("page", page.toString())
                         .header("Authorization", accessToken)
         );
 
@@ -64,6 +66,14 @@ public class CommentsControllerTest extends MyRestDoc {
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(10));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(15));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(false));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList").isArray());
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].commentId").value(1));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].rootId").value(Matchers.nullValue()));
@@ -103,11 +113,13 @@ public class CommentsControllerTest extends MyRestDoc {
     public void findRepliesByRoot_test() throws Exception {
         // given
         Integer commentId = 2;
+        Integer page = 0;
 
         // when
         ResultActions actions = mvc.perform(
                 MockMvcRequestBuilders
                         .get("/s/api/comments/{commentId}/replies", commentId)
+                        .param("page", page.toString())
                         .header("Authorization", accessToken)
         );
 
@@ -118,6 +130,14 @@ public class CommentsControllerTest extends MyRestDoc {
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(10));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList").isArray());
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].commentId").value(8));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.commentList[0].rootId").value(2));
