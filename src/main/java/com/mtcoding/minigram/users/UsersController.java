@@ -3,13 +3,14 @@ package com.mtcoding.minigram.users;
 import com.mtcoding.minigram._core.util.Resp;
 import com.mtcoding.minigram.posts.PostService;
 import com.mtcoding.minigram.stories.StoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -98,6 +99,26 @@ public class UsersController {
         UserResponse.StoryListDTO storyListDTO = storyService.getUserStories(null, user.getId(), storyPage);
 
         UserResponse.DetailDTO respDTO = new UserResponse.DetailDTO(profileDTO, postListDTO, storyListDTO);
+        return Resp.ok(respDTO);
+    }
+
+    // 이메일 중복 체크
+    @GetMapping("/api/check-email-available/{email}")
+    public ResponseEntity<?> checkEmailAvailable(@PathVariable("email") String email) {
+        Map<String, Object> respDTO = userService.checkEmailAvailable(email);
+        return Resp.ok(respDTO);
+    }
+
+    // username 중복 체크
+    @GetMapping("/api/check-username-available/{username}")
+    public ResponseEntity<?> checkUsernameAvailable(@PathVariable("username") String username) {
+        Map<String, Object> respDTO = userService.checkUsernameAvailable(username);
+        return Resp.ok(respDTO);
+    }
+
+    @PutMapping("/s/api/users")
+    public ResponseEntity<?> update(@Valid @RequestBody UserRequest.UpdateDTO reqDTO, Errors errors, @AuthenticationPrincipal User user) {
+        UserResponse.DTO respDTO = userService.update(reqDTO, user.getId());
         return Resp.ok(respDTO);
     }
 }

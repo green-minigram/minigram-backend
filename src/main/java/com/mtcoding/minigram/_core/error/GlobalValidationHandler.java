@@ -22,7 +22,6 @@ public class GlobalValidationHandler {
         for (Object arg : args) {
 
             if (arg instanceof Errors) {
-                log.warn("유효성 검증 실패로 400 예외 처리 예정");
                 Errors errors = (Errors) arg;
 
                 if (errors.hasErrors()) {
