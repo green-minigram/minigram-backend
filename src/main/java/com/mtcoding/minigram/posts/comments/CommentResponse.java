@@ -11,77 +11,50 @@ public class CommentResponse {
 
     @Data
     public static class ListDTO {
-        private final List<ItemDTO> items;
+        private List<ItemDTO> commentList;
+
+        public ListDTO(List<ItemDTO> commentList) {
+            this.commentList = commentList;
+        }
     }
 
     @Data
     public static class ItemDTO {
         private Integer commentId;
-        private UserDTO user;
+        private Integer rootId;
+        private Integer parentId;
         private String content;
-        private LocalDateTime createdAt;
-        private Integer parentId;                 // null이면 최상위
-        private List<ItemDTO> children = List.of();
-        private LikesDTO likes;                   // ← 내부 클래스로 교체
         private Boolean isOwner;
-        private Boolean isPostAuthor;
+        private Boolean isLiked;
+        private Integer likeCount;
+        private LocalDateTime createdAt;
+        private UserDTO user;
 
         @Data
-        public static class UserDTO {
+        public class UserDTO {
             private Integer userId;
             private String username;
             private String profileImageUrl;
+            private Boolean hasUnseen;
 
-            public UserDTO(User user) {
+            public UserDTO(User user, Boolean hasUnseen) {
                 this.userId = user.getId();
                 this.username = user.getUsername();
                 this.profileImageUrl = user.getProfileImageUrl();
+                this.hasUnseen = hasUnseen;
             }
         }
 
-        @Data
-        @AllArgsConstructor
-        public static class LikesDTO {
-            private Integer count;
-            private Boolean isLiked;
-
-            public LikesDTO(int count, boolean liked) {
-                this.count = count;
-                this.isLiked = liked;
-            }
-        }
-
-        public ItemDTO(Comment comment,
-                       List<ItemDTO> children,
-                       LikesDTO likes,
-                       boolean isOwner,
-                       boolean isPostAuthor) {
+        public ItemDTO(Comment comment, Boolean isOwner, Boolean isLiked, Integer likeCount, Boolean hasUnseen) {
             this.commentId = comment.getId();
-            this.user = new UserDTO(comment.getUser());
+            this.rootId = (comment.getRoot() != null) ? comment.getRoot().getId() : null;
+            this.parentId = (comment.getParent() != null) ? comment.getParent().getId() : null;
             this.content = comment.getContent();
-            this.createdAt = comment.getCreatedAt();
-            this.parentId = (comment.getParent() == null) ? null : comment.getParent().getId();
-            this.children = (children == null) ? List.of() : children;
-            this.likes = likes;
             this.isOwner = isOwner;
-            this.isPostAuthor = isPostAuthor;
-        }
-
-        public static ItemDTO from(
-                Comment comment,
-                List<ItemDTO> children,
-                int likeCount,
-                boolean liked,
-                boolean owner,
-                boolean postAuthor
-        ) {
-            return new ItemDTO(
-                    comment,
-                    (children == null) ? List.of() : children,
-                    new LikesDTO(likeCount, liked),
-                    owner,
-                    postAuthor
-            );
+            this.isLiked = isLiked;
+            this.likeCount = likeCount;
+            this.createdAt = comment.getCreatedAt();
+            this.user = new UserDTO(comment.getUser(), hasUnseen);
         }
     }
 
