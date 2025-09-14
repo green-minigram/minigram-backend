@@ -3,12 +3,17 @@ package com.mtcoding.minigram.integre;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
+import com.mtcoding.minigram.storage.PresignRequest;
+import com.mtcoding.minigram.storage.UploadType;
 import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.users.UserRequest;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -303,6 +308,88 @@ public class UsersControllerTest extends MyRestDoc {
 
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList.storyList[0].storyId").value(14));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.storyList.storyList[0].thumbnailUrl").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    public void checkEmailAvailable_test() throws Exception {
+        // given
+        String email = "ssar1234@nate.com";
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/api/check-email-available/{email}", email)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.available").value("true"));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    public void checkUsernameAvailable_test() throws Exception {
+        // given
+        String username = "ssar1234";
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/api/check-username-available/{username}", username)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.available").value("true"));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    public void update_test() throws Exception {
+        // given
+        UserRequest.UpdateDTO reqDTO = new UserRequest.UpdateDTO();
+        reqDTO.setUsername("ssar12345");
+
+        String requestBody = om.writeValueAsString(reqDTO);
+        // System.out.println(requestBody);
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .put("/s/api/users")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .header("Authorization", accessToken2)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.userId").value(2));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.email").value("ssar@nate.com"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.username").value("ssar12345"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.roles").value("USER"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.gender").value("MALE"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.birthdate").value("1995-01-15"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.profileImageUrl").isString());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.bio").value("백엔드 개발자 지망생"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.createdAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.updatedAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 }

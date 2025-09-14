@@ -115,8 +115,6 @@ public class UserService {
                 StringUtils.hasText(reqDTO.getBio()) ? reqDTO.getBio() : userPS.getBio()
                 );
 
-        log.info("[User Update] password={} 회원정보수정 성공", userPS.getPassword());
-
         return new UserResponse.DTO(userPS);
     }
 }

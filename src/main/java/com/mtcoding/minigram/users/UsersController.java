@@ -116,6 +116,7 @@ public class UsersController {
         return Resp.ok(respDTO);
     }
 
+    // 유저 정보 수정
     @PutMapping("/s/api/users")
     public ResponseEntity<?> update(@Valid @RequestBody UserRequest.UpdateDTO reqDTO, Errors errors, @AuthenticationPrincipal User user) {
         UserResponse.DTO respDTO = userService.update(reqDTO, user.getId());
