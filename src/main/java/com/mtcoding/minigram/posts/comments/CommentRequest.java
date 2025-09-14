@@ -28,4 +28,9 @@ public class CommentRequest {
                     .build();
         }
     }
+
+    @Data
+    public static class UpdateDTO {
+        private String content;
+    }
 }

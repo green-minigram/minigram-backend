@@ -46,4 +46,11 @@ public class CommentsController {
         CommentResponse.DTO respDTO = commentService.create(postId, reqDTO, user.getId());
         return Resp.ok(respDTO);
     }
+
+    // 댓글 수정
+    @PutMapping("/s/api/comments/{commentId}")
+    public ResponseEntity<?> update(@PathVariable Integer commentId,@Valid @RequestBody CommentRequest.UpdateDTO reqDTO, @AuthenticationPrincipal User user) {
+        CommentResponse.DTO respDTO = commentService.update(commentId, reqDTO, user.getId());
+        return Resp.ok(respDTO);
+    }
 }

@@ -98,16 +98,18 @@ public class CommentResponse {
         private String content;
         private CommentStatus status;
         private LocalDateTime createdAt;
+        private LocalDateTime updateAt;
 
         public DTO(Comment comment) {
             this.commentId = comment.getId();
             this.postId = comment.getPost().getId();
             this.userId = comment.getUser().getId();
-            this.rootId = comment.getRoot().getId();
-            this.parentId = comment.getParent().getId();
+            this.rootId = comment.getRoot()!= null ? comment.getRoot().getId() : null;;
+            this.parentId = comment.getParent()!= null ? comment.getParent().getId() : null;;
             this.content = comment.getContent();
             this.status = comment.getStatus();
             this.createdAt = comment.getCreatedAt();
+            this.updateAt = comment.getUpdatedAt();
         }
     }
 }
