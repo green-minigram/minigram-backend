@@ -45,4 +45,14 @@ public class PostsController {
         PostResponse.SearchListDTO respDTO = postService.search(page, keyword);
         return Resp.ok(respDTO);
     }
+
+    @PutMapping("/s/api/posts/{postId}")
+    public ResponseEntity<?> update(
+            @PathVariable Integer postId,
+            @AuthenticationPrincipal com.mtcoding.minigram.users.User user,
+            @RequestBody PostRequest.UpdateDTO req
+    ) {
+        var resp = postService.update(postId, req, user.getId());
+        return Resp.ok(resp); // PostResponse.UpdateDTO
+    }
 }

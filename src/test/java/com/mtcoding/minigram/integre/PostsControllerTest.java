@@ -22,6 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -57,28 +62,28 @@ public class PostsControllerTest extends MyRestDoc {
 //        String responseBody = actions.andReturn().getResponse().getContentAsString();
 //        System.out.println(responseBody);
 
-        actions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.postId").value(18))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.author.userId").value(8))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.author.username").value("luna"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.author.profileImageUrl",
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").value(18))
+                .andExpect(jsonPath("$.body.author.userId").value(8))
+                .andExpect(jsonPath("$.body.author.username").value("luna"))
+                .andExpect(jsonPath("$.body.author.profileImageUrl",
                         Matchers.anyOf(Matchers.nullValue(), Matchers.matchesPattern("^https?://.+"))
                 ))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.author.isFollowing").value(true))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.author.isOwner").value(false))
+                .andExpect(jsonPath("$.body.author.isFollowing").value(true))
+                .andExpect(jsonPath("$.body.author.isOwner").value(false))
 
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images", Matchers.hasSize(10)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images[0].id").isNumber())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images[0].url").isString())
+                .andExpect(jsonPath("$.body.images", hasSize(10)))
+                .andExpect(jsonPath("$.body.images[0].id").isNumber())
+                .andExpect(jsonPath("$.body.images[0].url").isString())
 
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.content").value("브이로그: 하루 일상 ☀️"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.likes.count").value(8))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.likes.isLiked").value(true))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.commentCount").value(15))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.postedAt").isString())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.isReported").value(true));
+                .andExpect(jsonPath("$.body.content").value("브이로그: 하루 일상 ☀️"))
+                .andExpect(jsonPath("$.body.likes.count").value(8))
+                .andExpect(jsonPath("$.body.likes.isLiked").value(true))
+                .andExpect(jsonPath("$.body.commentCount").value(15))
+                .andExpect(jsonPath("$.body.postedAt").isString())
+                .andExpect(jsonPath("$.body.isReported").value(true));
 
         actions.andDo(document);
     }
@@ -105,19 +110,19 @@ public class PostsControllerTest extends MyRestDoc {
 //        System.out.println(responseBody);
 
         // then
-        actions.andExpect(MockMvcResultMatchers.status().isOk())
+        actions.andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.postId").isNumber())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.userId").value(2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images", Matchers.hasSize(2)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images[0].id").isNumber())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images[0].url").value("https://picsum.photos/seed/a/800"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.images[1].url").value("https://picsum.photos/seed/b/800"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.content").value("주말 바다 🌊"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.postedAt").isString())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.updatedAt").isString());
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").isNumber())
+                .andExpect(jsonPath("$.body.userId").value(2))
+                .andExpect(jsonPath("$.body.images", hasSize(2)))
+                .andExpect(jsonPath("$.body.images[0].id").isNumber())
+                .andExpect(jsonPath("$.body.images[0].url").value("https://picsum.photos/seed/a/800"))
+                .andExpect(jsonPath("$.body.images[1].url").value("https://picsum.photos/seed/b/800"))
+                .andExpect(jsonPath("$.body.content").value("주말 바다 🌊"))
+                .andExpect(jsonPath("$.body.postedAt").isString())
+                .andExpect(jsonPath("$.body.updatedAt").isString());
 
         actions.andDo(document);
     }
@@ -142,10 +147,10 @@ public class PostsControllerTest extends MyRestDoc {
 //        System.out.println(responseBody);
 
         // then
-        actions.andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(400))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.msg", Matchers.containsString("이미지")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body").doesNotExist());
+        actions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.msg", Matchers.containsString("이미지")))
+                .andExpect(jsonPath("$.body").doesNotExist());
 
         actions.andDo(document);
     }
@@ -165,11 +170,11 @@ public class PostsControllerTest extends MyRestDoc {
 //        String responseBody = actions.andReturn().getResponse().getContentAsString();
 //        System.out.println(responseBody);
 
-        actions.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.postId").value(postId))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.deleted").value(true))
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").value(postId))
+                .andExpect(jsonPath("$.body.deleted").value(true))
                 .andDo(document);
 
         // 2) 삭제 후 상세 조회 → 404
@@ -178,8 +183,8 @@ public class PostsControllerTest extends MyRestDoc {
                                 .header("Authorization", "Bearer " + accessToken)
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 )
-                .andExpect(MockMvcResultMatchers.status().isNotFound())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(404));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
 
         // 3) 다시 삭제
         mvc.perform(
@@ -187,11 +192,11 @@ public class PostsControllerTest extends MyRestDoc {
                                 .header("Authorization", accessToken)
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.postId").value(postId))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.deleted").value(true));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.postId").value(postId))
+                .andExpect(jsonPath("$.body.deleted").value(true));
     }
 
     @Test
@@ -214,20 +219,41 @@ public class PostsControllerTest extends MyRestDoc {
         // System.out.println(responseBody);
 
         // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.current").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.size").value(12));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalCount").value(4));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.totalPage").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.prev").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.next").value(0));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFirst").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isLast").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postId").value(21));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].postImageUrl").isString());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].content").value("오늘의 추천 음악 \uD83C\uDFB6"));
+        actions.andExpect(jsonPath("$.status").value(200));
+        actions.andExpect(jsonPath("$.msg").value("성공"));
+        actions.andExpect(jsonPath("$.body.current").value(0));
+        actions.andExpect(jsonPath("$.body.size").value(12));
+        actions.andExpect(jsonPath("$.body.totalCount").value(4));
+        actions.andExpect(jsonPath("$.body.totalPage").value(1));
+        actions.andExpect(jsonPath("$.body.prev").value(0));
+        actions.andExpect(jsonPath("$.body.next").value(0));
+        actions.andExpect(jsonPath("$.body.isFirst").value(true));
+        actions.andExpect(jsonPath("$.body.isLast").value(true));
+        actions.andExpect(jsonPath("$.body.postList").isArray());
+        actions.andExpect(jsonPath("$.body.postList[0].postId").value(21));
+        actions.andExpect(jsonPath("$.body.postList[0].postImageUrl").isString());
+        actions.andExpect(jsonPath("$.body.postList[0].content").value("오늘의 추천 음악 \uD83C\uDFB6"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    void update_ok() throws Exception {
+        var body = """
+                {
+                  "content": "수정된 본문",
+                  "imageUrls": ["https://picsum.photos/seed/u1/800","https://picsum.photos/seed/u2/800"]
+                }
+                """;
+
+        mvc.perform(put("/s/api/posts/{id}", 3)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body.postId").value(3))
+                .andExpect(jsonPath("$.body.content").value("수정된 본문"))
+                .andExpect(jsonPath("$.body.images", hasSize(2)))
+                .andExpect(jsonPath("$.body.updatedAt").isString());
     }
 }

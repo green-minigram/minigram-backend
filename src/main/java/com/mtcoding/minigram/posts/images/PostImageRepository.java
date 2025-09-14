@@ -18,12 +18,18 @@ public class PostImageRepository {
 
     public List<PostImage> findAllByPostIdIn(List<Integer> postIdList) {
         return em.createQuery("""
-                select pi
-                from PostImage pi
-                where pi.post.id in :postIdList
-                ORDER BY pi.post.id ASC, pi.id ASC
-            """, PostImage.class)
+                            select pi
+                            from PostImage pi
+                            where pi.post.id in :postIdList
+                            ORDER BY pi.post.id ASC, pi.id ASC
+                        """, PostImage.class)
                 .setParameter("postIdList", postIdList)
                 .getResultList();
+    }
+
+    public void deleteByPostId(Integer postId) {
+        em.createQuery("delete from PostImage pi where pi.post.id = :postId")
+                .setParameter("postId", postId)
+                .executeUpdate();
     }
 }

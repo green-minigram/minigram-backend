@@ -186,5 +186,54 @@ public class PostService {
 
         return new UserResponse.PostListDTO(postItemList, page, totalCount);
     }
+
+    @Transactional
+    public PostResponse.UpdateDTO update(Integer postId, PostRequest.UpdateDTO req, Integer requesterId) {
+        // 1) 로드 + 존재/상태 체크
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+        if (post.getStatus() == PostStatus.DELETED) {
+            throw new ExceptionApi404("존재하지 않는 게시글입니다.");
+        }
+
+        // 2) 권한(소유자)
+        if (!post.getUser().getId().equals(requesterId)) {
+            throw new ExceptionApi403("본인 게시글만 수정할 수 있습니다.");
+        }
+
+        // 3) content 수정 (null이면 유지)
+        if (req.getContent() != null) {
+            String newContent = req.getContent().trim();
+            post.updateContent(newContent); // ← 아래 엔티티 메서드 추가
+        }
+
+        // 4) 이미지 수정 (null이면 유지, null 아니면 전체 교체)
+        List<PostImage> latestImages;
+        if (req.getImageUrls() != null) {
+            List<String> cleaned = req.getImageUrls().stream()
+                    .map(s -> s == null ? "" : s.trim())
+                    .filter(s -> !s.isBlank())
+                    .distinct()
+                    .toList();
+
+            if (cleaned.isEmpty()) throw new ExceptionApi400("이미지 최소 1장은 필요합니다.");
+            if (cleaned.size() > 10) throw new ExceptionApi400("이미지는 최대 10장까지 가능합니다.");
+
+            // 전체 교체: 기존 삭제 → 신규 저장
+            postImageRepository.deleteByPostId(postId);
+            latestImages = new java.util.ArrayList<>(cleaned.size());
+            for (String url : cleaned) {
+                PostImage pi = PostImage.builder().post(post).url(url).build();
+                postImageRepository.save(pi);
+                latestImages.add(pi);
+            }
+        } else {
+            // 유지: 재조회
+            latestImages = postRepository.findImagesByPostId(postId);
+        }
+
+        // 5) 응답
+        return PostResponse.UpdateDTO.from(post, latestImages);
+    }
 }
 
