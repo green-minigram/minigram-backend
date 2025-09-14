@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -84,4 +84,32 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
+    @Test
+    @DisplayName("광고 삭제 - OK (소프트, 멱등 + 상세조회 isAd=false)")
+    void delete_ok() throws Exception {
+        int adId = 1; // @MapsId → adId == postId
+
+        // 1) 최초 삭제
+        mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.adId").value(adId))
+                .andExpect(jsonPath("$.body.deleted").value(true));
+
+        // 2) 멱등: 다시 삭제해도 200/true
+        mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body.deleted").value(true));
+
+        // 3) 게시글 상세: 이제 광고 아님 + 팔로우 필드 다시 노출
+        mvc.perform(get("/s/api/posts/{postId}", adId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.body.isAd").value(false))
+                .andExpect(jsonPath("$.body.author.isFollowing").isBoolean());
+    }
 }
+
