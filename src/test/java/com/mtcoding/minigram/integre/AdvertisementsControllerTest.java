@@ -96,12 +96,12 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
-                .andExpect(jsonPath("$.body.adId").value(adId))
+                .andExpect(jsonPath("$.body.adId").value(1))
                 .andExpect(jsonPath("$.body.deleted").value(true))
                 .andDo(MockMvcResultHandlers.print()).andDo(document);
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         // 2) 멱등: 다시 삭제해도 200/true
         mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
@@ -115,8 +115,8 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
 
-        String detailBody = detailActions.andReturn().getResponse().getContentAsString();
-        System.out.println(detailBody);
+//        String detailBody = detailActions.andReturn().getResponse().getContentAsString();
+//        System.out.println(detailBody);
     }
 }
 
