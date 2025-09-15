@@ -8,16 +8,21 @@ import java.time.LocalDateTime;
 public class ReportResponse {
 
     @Data
-    @Builder
-    public static class SaveResultDTO {
+    public static class DTO {
         private Integer reportId;
+        private ReportType reportType;
+        private Integer targetId;
+        private Integer userId;
+        private Integer reasonId;
         private ReportStatus status;
 
-        public static SaveResultDTO from(Report report) {
-            return SaveResultDTO.builder()
-                    .reportId(report.getId())
-                    .status(report.getStatus())
-                    .build();
+        public DTO(Report report) {
+            this.reportId = report.getId();
+            this.reportType = report.getType();
+            this.targetId = report.getTargetId();
+            this.userId = report.getReporter().getId();
+            this.reasonId = report.getReason().getId();
+            this.status = report.getStatus();
         }
     }
 

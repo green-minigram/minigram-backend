@@ -105,6 +105,16 @@ public class StoryRepository {
         return Optional.ofNullable(em.find(Story.class, storyId));
     }
 
+    public boolean existsById(Integer targerId) {
+        List<Integer> result = em.createQuery("""
+                        select 1 from Story s where s.id = :stroyId
+                        """, Integer.class)
+                .setParameter("stroyId", targerId)
+                .setMaxResults(1)
+                .getResultList();
+        return !result.isEmpty();
+    }
+                                              
     public List<Object[]> findFromFollowees(Integer page, Integer currentUserId) {
         return em.createQuery("""
                         WITH latest AS (
