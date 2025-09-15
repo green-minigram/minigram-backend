@@ -1,7 +1,9 @@
 package com.mtcoding.minigram.posts;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
+import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.advertisements.AdvertisementRepository;
 import com.mtcoding.minigram.follows.FollowRepository;
 import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
@@ -10,6 +12,7 @@ import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.ReportRepository;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
+import com.mtcoding.minigram.users.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,7 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final AdvertisementRepository advertisementRepository;
 
     @Transactional(readOnly = true)
     // 게시글 상세
@@ -41,6 +45,11 @@ public class PostService {
         // 1) 엔티티 로드
         Post postPS = postRepository.findById(postId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+
+        // 삭제된 글은 404
+        if (postPS.getStatus() == PostStatus.DELETED) {
+            throw new ExceptionApi404("존재하지 않는 게시글입니다.");
+        }
 
         List<PostImage> images = postRepository.findImagesByPostId(postId);
 
@@ -65,12 +74,13 @@ public class PostService {
         boolean reported = userId != null
                 && reportRepository.existsActivePostReportByUser(postId, userId);
 
+        boolean isAd = advertisementRepository.findActiveNowByPostId(postId).isPresent();
 
         log.info("[POST_FIND] out: likes(count={}, liked={}), comments={}, owner={}, following={}, reported={}",
                 likeCount, liked, commentCount, owner, following, reported);
 
         // 3) 생성자 주입으로 한 번에 완성
-        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported);
+        return new PostResponse.DetailDTO(postPS, images, likeCount, liked, commentCount, owner, following, reported, isAd);
     }
 
 
@@ -120,6 +130,61 @@ public class PostService {
 
         // 3) 상세 DTO 반환
         return PostResponse.SavedDTO.from(post, savedImages);
+    }
+
+    @Transactional
+    // 게시글 삭제(소프트)
+    public PostResponse.DeleteDTO delete(Integer postId, Integer requesterId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+
+        // 이미 삭제된 글이면 멱등 성공
+        if (post.getStatus() == PostStatus.DELETED) {
+            return new PostResponse.DeleteDTO(post.getId(), true);
+        }
+
+        // 권한 체크(소유자만)
+        Integer ownerId = post.getUser().getId();
+        if (!ownerId.equals(requesterId)) {
+            throw new ExceptionApi403("본인 게시글만 삭제할 수 있습니다.");
+        }
+
+        post.markDeleted(); // 소프트 삭제
+        return new PostResponse.DeleteDTO(post.getId(), true);
+    }
+
+    public PostResponse.SearchListDTO search(Integer page, String keyword) {
+        // 1. 게시글 조회
+        List<PostResponse.SearchItemDTO> searchItemDTOList = postRepository.findAllByKeyword(page, keyword);
+
+        // 2. totalCount 조회
+        Integer totalCount = Math.toIntExact(postRepository.totalCountByKeyword(keyword));
+
+        return new PostResponse.SearchListDTO(searchItemDTOList, page, totalCount);
+    }
+
+    public UserResponse.PostListDTO getUserPost(Integer userId, Integer currentUserId, Integer page) {
+        // 1. userId 없으면 내 프로필
+        Integer profileUserId = (userId == null) ? currentUserId : userId;
+
+        // 2. 본인 여부 판단
+        Boolean isOwner = profileUserId.equals(currentUserId);
+
+        // 3. postId, postImageUrl 조회
+        List<Object[]> obsList = postRepository.findAllByUserId(profileUserId, isOwner, page);
+
+        // 4. PostItemDTO 조립
+        List<UserResponse.PostItemDTO> postItemList = obsList.stream()
+                .map(obs -> new UserResponse.PostItemDTO(
+                        (Integer) obs[0],
+                        (String) obs[1]
+                ))
+                .toList();
+
+        // 5. totalCount 조회
+        int totalCount = Math.toIntExact(postRepository.countAllByUserId(profileUserId, isOwner));
+
+        return new UserResponse.PostListDTO(postItemList, page, totalCount);
     }
 }
 

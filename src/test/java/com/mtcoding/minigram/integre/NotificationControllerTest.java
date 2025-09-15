@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,10 +59,10 @@ public class NotificationControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.profileImageUrl").value("https://picsum.photos/seed/cos/200"));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.isFollowing").value(true));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].targetId").value(4));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postId").value(org.hamcrest.Matchers.nullValue()));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postImageUrl").value(org.hamcrest.Matchers.nullValue()));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].commentContent").value(org.hamcrest.Matchers.nullValue()));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].createdAt").value(org.hamcrest.Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postId").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postImageUrl").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].commentContent").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].createdAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].readStatus").value("READ"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }

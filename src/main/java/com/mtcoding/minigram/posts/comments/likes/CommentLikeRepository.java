@@ -54,4 +54,43 @@ public class CommentLikeRepository {
 
         return new HashSet<>(rows);
     }
+
+    public void save(CommentLike like) {
+        em.persist(like);
+    }
+
+    public void delete(CommentLike like) {
+        em.remove(like);
+    }
+
+    public Optional<CommentLike> findByCommentIdAndUserId(Integer commentId, Integer userId) {
+        return em.createQuery("""
+                        select cl from CommentLike cl
+                        where cl.comment.id = :cid and cl.user.id = :uid
+                        """, CommentLike.class)
+                .setParameter("cid", commentId)
+                .setParameter("uid", userId)
+                .getResultStream()
+                .findFirst();
+    }
+
+    public int deleteByCommentIdAndUserId(Integer commentId, Integer userId) {
+        return em.createQuery("""
+                        delete from CommentLike cl
+                        where cl.comment.id = :cid and cl.user.id = :uid
+                        """)
+                .setParameter("cid", commentId)
+                .setParameter("uid", userId)
+                .executeUpdate();
+    }
+
+    public int countByCommentId(Integer commentId) {
+        Long cnt = em.createQuery("""
+                        select count(cl) from CommentLike cl
+                        where cl.comment.id = :cid
+                        """, Long.class)
+                .setParameter("cid", commentId)
+                .getSingleResult();
+        return cnt.intValue();
+    }
 }

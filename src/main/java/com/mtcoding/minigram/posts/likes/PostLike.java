@@ -43,4 +43,9 @@ public class PostLike {
         this.user = user;
         this.createdAt = createdAt;
     }
+
+    public PostLike(Post post, User user) {
+        this.post = post;
+        this.user = user;
+    }
 }
