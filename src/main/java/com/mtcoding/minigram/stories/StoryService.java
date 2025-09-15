@@ -3,6 +3,7 @@ package com.mtcoding.minigram.stories;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.users.User;
+import com.mtcoding.minigram.users.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,40 +37,6 @@ public class StoryService {
         );
     }
 
-    public StoryResponse.ListDTO findAllMyStories(Integer currentUserId) {
-        List<Object[]> obsList = storyRepository.findAllMyStories(currentUserId);
-
-        List<StoryResponse.DetailDTO> detailDTOList = obsList.stream().map(ob -> {
-            Story story = (Story) ob[0];
-            Boolean isFollowing = (Boolean) ob[1];
-            Integer likeCount = ((Long) ob[2]).intValue();
-            Boolean isLiked = (Boolean) ob[3];
-
-            boolean isOwner = true;
-
-            return new StoryResponse.DetailDTO(story, isFollowing, isOwner, isLiked, likeCount);
-        }).toList();
-
-        return new StoryResponse.ListDTO(detailDTOList);
-    }
-
-    public StoryResponse.ListDTO findAllByUserId(Integer userId, Integer currentUserId) {
-        List<Object[]> obsList = storyRepository.findAllByUserId(userId, currentUserId);
-
-        List<StoryResponse.DetailDTO> detailDTOList = obsList.stream().map(ob -> {
-            Story story = (Story) ob[0];
-            Boolean isFollowing = (Boolean) ob[1];
-            Integer likeCount = ((Long) ob[2]).intValue();
-            Boolean isLiked = (Boolean) ob[3];
-
-            Boolean isOwner = story.getUser().getId().equals(currentUserId);
-
-            return new StoryResponse.DetailDTO(story, isFollowing, isOwner, isLiked, likeCount);
-        }).toList();
-
-        return new StoryResponse.ListDTO(detailDTOList);
-    }
-
     @Transactional
     public StoryResponse.DTO create(StoryRequest.CreateDTO reqDTO, User user) {
         Story story = reqDTO.toEntity(user);
@@ -96,23 +63,27 @@ public class StoryService {
         return new StoryResponse.DTO(storyPS);
     }
 
-    public StoryResponse.FeedDTO getFeedStories(Integer page, Integer currentUserId) {
-        // 1. userId, username, profileImageUrl, hasUnseen 조회
-        List<Object[]> obsList = storyRepository.findFromFollowees(page, currentUserId);
+    public UserResponse.StoryListDTO getUserStories(Integer userId, Integer currentUserId, Integer page) {
+        // 1. userId 없으면 내 프로필
+        Integer profileUserId = (userId == null) ? currentUserId : userId;
 
-        // 2. ItemDTO 조립
-        List<StoryResponse.ItemDTO> itemDTOList = obsList.stream()
-                .map(obs -> new StoryResponse.ItemDTO(
+        // 2. 본인 여부 판단
+        boolean isOwner = profileUserId.equals(currentUserId);
+
+        // 3. storyId, thumbnailUrl 조회
+        List<Object[]> obsList = storyRepository.findAllByUserId(profileUserId, isOwner, page);
+
+        // 4. StoryItemDTO 조립
+        List<UserResponse.StoryItemDTO> storyItemList = obsList.stream()
+                .map(obs -> new UserResponse.StoryItemDTO(
                         (Integer) obs[0],
-                        (String) obs[1],
-                        (String) obs[2],
-                        (Boolean) obs[3]
+                        (String) obs[1]
                 ))
                 .toList();
 
-        // 3. totalCount 조회
-        Integer totalCount = Math.toIntExact(storyRepository.totalCountFromFollowees(currentUserId));
+        // 5. totalCount 조회
+        int totalCount = Math.toIntExact(storyRepository.countAllByUserId(profileUserId, isOwner));
 
-        return new StoryResponse.FeedDTO(itemDTOList, page, totalCount);
+        return new UserResponse.StoryListDTO(storyItemList, page, totalCount);
     }
 }

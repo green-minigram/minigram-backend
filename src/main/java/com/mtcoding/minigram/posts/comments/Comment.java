@@ -30,7 +30,12 @@ public class Comment {
     @JoinColumn(nullable = false)
     private User user;
 
-    // 부모 댓글 (NULL 가능 → 최상위 댓글, 값 있으면 대댓글)
+    // 최상위 댓글이면 null, 대댓글부터는 최상위 댓글을 가리킴
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "root_id")
+    private Comment root;
+
+    // 직계 부모, 최상위면 null
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
@@ -48,22 +53,17 @@ public class Comment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // 대댓글 리스트
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("id ASC")
-    private List<Comment> children = new ArrayList<>();
-
     @Builder
-    public Comment(Integer id, Post post, User user, Comment parent, String content, CommentStatus status, LocalDateTime createdAt, LocalDateTime updatedAt, List<Comment> children) {
+    public Comment(Integer id, Post post, User user, Comment root, Comment parent, String content, CommentStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.post = post;
         this.user = user;
+        this.root = root;
         this.parent = parent;
         this.content = content;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.children = children;
     }
 
     public boolean isDeleted() {
@@ -73,5 +73,9 @@ public class Comment {
     public void markDeleted() {
         if (isDeleted()) return;
         this.status = CommentStatus.DELETED;
+    }
+
+    public void update(String content) {
+        this.content = content;
     }
 }
