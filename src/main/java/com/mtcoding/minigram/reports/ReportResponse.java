@@ -5,22 +5,35 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ReportResponse {
 
     @Data
+    public static class ReasonListDTO {
+        private List<ReasonItemDTO> reasonList;
+
+        public ReasonListDTO(List<ReasonItemDTO> reasonList) {
+            this.reasonList = reasonList;
+        }
+    }
+
+    @Data
     @Builder
-    public static class ReasonDTO {
+    public static class ReasonItemDTO {
+        private Integer id;
         private String code;
         private String label;
 
-        public static ReasonDTO from(ReportReasonCode reasonCode) {
-            return ReasonDTO.builder()
-                    .code(reasonCode.name())     // enum 이름
-                    .label(reasonCode.getLabel()) // 라벨 값
+        public static ReasonItemDTO from(ReportReasonCode reasonCode) {
+            return ReasonItemDTO.builder()
+                    .id(reasonCode.getId())
+                    .code(reasonCode.name())
+                    .label(reasonCode.getLabel())
                     .build();
         }
     }
+
 
     @Data
     public static class DTO {

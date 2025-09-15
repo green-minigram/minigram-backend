@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @RestController
 
-public class ReportController {
+public class ReportsController {
 
     private final ReportService reportService;
 
@@ -33,9 +31,9 @@ public class ReportController {
     //2. 신고이유 목록 보내기
     @GetMapping("/s/api/reports/reasons")
     public ResponseEntity<?> getReasons() {
-        List<ReportResponse.ReasonDTO> reasons = reportService.getReasons();
+        ReportResponse.ReasonListDTO reasonListDTO = reportService.getReasons();
 
-        return ResponseEntity.ok(reasons);
+        return Resp.ok(reasonListDTO);
 
     }
 }
