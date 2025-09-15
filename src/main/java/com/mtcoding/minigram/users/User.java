@@ -77,4 +77,15 @@ public class User implements UserDetails {
 
         return authorities;
     }
+
+    public void update(String email, String username, String password, String name, Gender gender, LocalDate birthdate, String profileImageUrl, String bio){
+        this.email = email;
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.gender = gender;
+        this.birthdate = birthdate;
+        this.profileImageUrl = profileImageUrl;
+        this.bio = bio;
+    }
 }

@@ -34,22 +34,15 @@ public class PostsController {
         return Resp.ok(respDTO);
     }
 
-    // 피드 게시글 조회
-    @GetMapping("/s/api/feed/posts")
-    public ResponseEntity<?> getFeedPosts(@RequestParam(required = false, value = "page", defaultValue = "0") Integer page, @AuthenticationPrincipal User user) {
-        PostResponse.FeedDTO respDTO = postService.getFeedPosts(page, user.getId());
-        return Resp.ok(respDTO);
-    }
-
     // 게시글 검색
-    @GetMapping("/s/api/posts/search")
+    @GetMapping("/s/api/search/posts")
     public ResponseEntity<?> search(
             @RequestParam(required = false, value = "page", defaultValue = "0") Integer page,
             @RequestParam(required = false, value = "keyword", defaultValue = "") String keyword) {
 
         log.info("[Post Search] keyword='{}' (len={})", keyword, keyword == null ? -1 : keyword.length());
 
-        PostResponse.SearchDTO respDTO = postService.search(page, keyword);
+        PostResponse.SearchListDTO respDTO = postService.search(page, keyword);
         return Resp.ok(respDTO);
     }
 }

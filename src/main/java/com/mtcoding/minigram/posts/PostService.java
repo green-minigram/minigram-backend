@@ -12,6 +12,7 @@ import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.ReportRepository;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
+import com.mtcoding.minigram.users.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 // @Slf4j
 // - Lombok이 자동으로 Logger 필드를 추가해주는 어노테이션
@@ -154,61 +153,38 @@ public class PostService {
         return new PostResponse.DeleteDTO(post.getId(), true);
     }
 
-    public PostResponse.FeedDTO getFeedPosts(Integer page, Integer currentUserId) {
-        // 1. PostRow, postIdList 조립
-        // 1-1. Post, likesCount, isLiked, commentCount 조회
-        List<Object[]> obsList = postRepository.findFromFollowees(page, currentUserId);
-
-        // 1-2. totalCount 조회
-        Integer totalCount = Math.toIntExact(postRepository.totalCountFromFollowees(currentUserId));
-
-        if (obsList.isEmpty()) return new PostResponse.FeedDTO(List.of(), page, totalCount);
-
-        record PostRow(Post post, Boolean isLiked, Integer likesCount, Integer commentCount) {
-        }
-
-        List<PostRow> rows = new ArrayList<>(obsList.size());
-        List<Integer> postIdList = new ArrayList<>(obsList.size());
-
-        for (Object[] obs : obsList) {
-            Post post = (Post) obs[0];
-            int likesCount = Math.toIntExact((Long) obs[1]);
-            Boolean isLiked = (Boolean) obs[2];
-            int commentCount = Math.toIntExact((Long) obs[3]);
-
-            rows.add(new PostRow(post, isLiked, likesCount, commentCount));
-
-            postIdList.add(post.getId());
-        }
-
-        // 2. postId 기반 postImage 조회
-        List<PostImage> postImageList = postImageRepository.findAllByPostIdIn(postIdList);
-
-        // 3. postImageList를 postId 기준으로 그룹핑
-        Map<Integer, List<PostImage>> postImageMap = postImageList.stream().collect(Collectors.groupingBy(postImage -> postImage.getPost().getId()));
-
-        // 4. PostRow, PostImageMap -> ItemDTO 조립
-        List<PostResponse.ItemDTO> itemDTOList = rows.stream()
-                .map(row -> new PostResponse.ItemDTO(
-                        row.post(),
-                        row.isLiked(),
-                        row.likesCount(),
-                        row.commentCount(),
-                        postImageMap.getOrDefault(row.post().getId(), List.of())
-                ))
-                .toList();
-
-        return new PostResponse.FeedDTO(itemDTOList, page, totalCount);
-    }
-
-    public PostResponse.SearchDTO search(Integer page, String keyword) {
+    public PostResponse.SearchListDTO search(Integer page, String keyword) {
         // 1. 게시글 조회
         List<PostResponse.SearchItemDTO> searchItemDTOList = postRepository.findAllByKeyword(page, keyword);
 
         // 2. totalCount 조회
         Integer totalCount = Math.toIntExact(postRepository.totalCountByKeyword(keyword));
 
-        return new PostResponse.SearchDTO(searchItemDTOList, page, totalCount);
+        return new PostResponse.SearchListDTO(searchItemDTOList, page, totalCount);
+    }
+
+    public UserResponse.PostListDTO getUserPost(Integer userId, Integer currentUserId, Integer page) {
+        // 1. userId 없으면 내 프로필
+        Integer profileUserId = (userId == null) ? currentUserId : userId;
+
+        // 2. 본인 여부 판단
+        Boolean isOwner = profileUserId.equals(currentUserId);
+
+        // 3. postId, postImageUrl 조회
+        List<Object[]> obsList = postRepository.findAllByUserId(profileUserId, isOwner, page);
+
+        // 4. PostItemDTO 조립
+        List<UserResponse.PostItemDTO> postItemList = obsList.stream()
+                .map(obs -> new UserResponse.PostItemDTO(
+                        (Integer) obs[0],
+                        (String) obs[1]
+                ))
+                .toList();
+
+        // 5. totalCount 조회
+        int totalCount = Math.toIntExact(postRepository.countAllByUserId(profileUserId, isOwner));
+
+        return new UserResponse.PostListDTO(postItemList, page, totalCount);
     }
 }
 

@@ -1,5 +1,7 @@
 package com.mtcoding.minigram.posts.comments;
 
+import com.mtcoding.minigram._core.constants.CommentConstants;
+import com.mtcoding.minigram.stories.StoryStatus;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -81,5 +83,141 @@ public class CommentRepository {
                 .setParameter("id", commentId)
                 .getResultStream()
                 .findFirst();
+    }
+
+    public List<Object[]> findAllByPostId(Integer page, Integer postId, Integer currentUserId) {
+        return em.createQuery("""
+        SELECT
+            c,
+            EXISTS (
+               SELECT 1 FROM CommentLike cl
+               WHERE cl.comment = c AND cl.user.id = :currentUserId
+            ) as isLiked,
+            (SELECT COUNT(cl2) FROM CommentLike cl2
+             WHERE cl2.comment = c) as likeCount,
+            EXISTS (
+               SELECT 1
+               FROM Story s
+               WHERE s.user = u
+                 AND s.status = :storyActive
+                 AND (
+                      SELECT COUNT(s2) FROM Story s2
+                      WHERE s2.user = u
+                        AND s2.status = :storyActive
+                        AND (
+                             s2.createdAt > s.createdAt
+                          OR (s2.createdAt = s.createdAt AND s2.id > s.id)
+                        )
+                 ) < 5
+                 AND NOT EXISTS (
+                      SELECT 1 FROM StoryView sv
+                      WHERE sv.story = s AND sv.user.id = :currentUserId
+                 )
+            ) as hasUnseen
+        FROM Comment c
+        JOIN FETCH c.user u
+        WHERE c.post.id = :postId
+          AND c.status = :commentActive
+        ORDER BY
+            COALESCE(c.root.id, c.id) ASC,
+            CASE WHEN c.parent.id IS NULL THEN 0 ELSE 1 END ASC,
+            c.id ASC
+        """, Object[].class)
+                .setParameter("postId", postId)
+                .setParameter("currentUserId", currentUserId)
+                .setParameter("commentActive", CommentStatus.ACTIVE)
+                .setParameter("storyActive", StoryStatus.ACTIVE)
+                .setFirstResult(page * CommentConstants.ITEMS_PER_PAGE)
+                .setMaxResults(CommentConstants.ITEMS_PER_PAGE)
+                .getResultList();
+    }
+
+    public Long countAllByPostId(Integer postId) {
+        return em.createQuery("""
+        SELECT COUNT(c)
+        FROM Comment c
+        JOIN c.user u
+        WHERE c.post.id = :postId
+          AND c.status = :commentActive
+        """, Long.class)
+                .setParameter("postId", postId)
+                .setParameter("commentActive", CommentStatus.ACTIVE)
+                .getSingleResult();
+    }
+
+
+    public List<Object[]> findRepliesByRoot(Integer page, Integer rootId, Integer currentUserId) {
+        return em.createQuery("""
+        SELECT
+            c,
+            CASE WHEN EXISTS (
+                SELECT 1
+                FROM CommentLike cl
+                WHERE cl.comment = c
+                  AND cl.user.id = :currentUserId
+            ) THEN true ELSE false END AS isLiked,
+            (SELECT COUNT(cl2)
+             FROM CommentLike cl2
+             WHERE cl2.comment = c) AS likeCount,
+            EXISTS (
+                SELECT 1
+                FROM Story s
+                WHERE s.user = u
+                  AND s.status = :storyActive
+                  AND (
+                      SELECT COUNT(s2)
+                      FROM Story s2
+                      WHERE s2.user = u
+                        AND s2.status = :storyActive
+                        AND (
+                             s2.createdAt > s.createdAt
+                          OR (s2.createdAt = s.createdAt AND s2.id > s.id)
+                        )
+                  ) < 5
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM StoryView sv
+                      WHERE sv.story = s
+                        AND sv.user.id = :currentUserId
+                  )
+            ) AS hasUnseen
+        FROM Comment c
+        JOIN FETCH c.user u
+        WHERE c.root.id = :rootId
+          AND c.parent IS NOT NULL
+          AND c.status = :commentActive
+        ORDER BY c.createdAt ASC, c.id ASC
+        """, Object[].class)
+                .setParameter("rootId", rootId)
+                .setParameter("currentUserId", currentUserId)
+                .setParameter("commentActive", CommentStatus.ACTIVE)
+                .setParameter("storyActive", StoryStatus.ACTIVE)
+                .setFirstResult(page * CommentConstants.ITEMS_PER_PAGE)
+                .setMaxResults(CommentConstants.ITEMS_PER_PAGE)
+                .getResultList();
+    }
+
+    public Long countRepliesByRoot(Integer rootId) {
+        return em.createQuery("""
+        SELECT COUNT(c)
+        FROM Comment c
+        JOIN c.user u
+        WHERE c.root.id = :rootId
+          AND c.parent IS NOT NULL
+          AND c.status = :commentActive
+        """, Long.class)
+                .setParameter("rootId", rootId)
+                .setParameter("commentActive", CommentStatus.ACTIVE)
+                .getSingleResult();
+    }
+
+
+    public Optional<Comment> findById(Integer commentId) {
+        return Optional.ofNullable(em.find(Comment.class, commentId));
+    }
+
+    public Comment save(Comment comment) {
+        em.persist(comment);
+        return comment;
     }
 }
