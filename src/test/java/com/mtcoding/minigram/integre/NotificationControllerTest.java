@@ -46,22 +46,24 @@ public class NotificationControllerTest extends MyRestDoc {
 
         // eye
         String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+        // System.out.println(responseBody);
 
         // then
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].notificationId").value(10));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].type").value("FOLLOWED"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.userId").value(3));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.username").value("cos"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.profileImageUrl").value("https://picsum.photos/seed/cos/200"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].notificationId").value(13));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].type").value("STORY_LIKED"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.userId").value(8));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.username").value("luna"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.profileImageUrl").value(Matchers.nullValue()));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].sender.isFollowing").value(true));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].targetId").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].targetId").value(19));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postId").value(Matchers.nullValue()));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].postImageUrl").value(Matchers.nullValue()));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].commentContent").value(Matchers.nullValue()));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].storyId").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].storyThumbnailUrl").isString());
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].createdAt").value(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?")));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.notificationList[0].readStatus").value("READ"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
