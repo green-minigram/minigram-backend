@@ -18,7 +18,7 @@ public class StoryService {
     private final StoryRepository storyRepository;
 
     public StoryResponse.DetailDTO findByStoryId(Integer storyId, Integer currentUserId) {
-        Object[] objects = storyRepository.findByStoryId(storyId, currentUserId)
+        Object[] objects = storyRepository.findByStoryIdForUser(storyId, currentUserId)
                 .orElseThrow(() -> new ExceptionApi404("스토리를 찾을 수 없습니다"));
 
         Story story = (Story) objects[0];

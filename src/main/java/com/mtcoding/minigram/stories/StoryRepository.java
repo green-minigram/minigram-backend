@@ -13,7 +13,7 @@ import java.util.Optional;
 public class StoryRepository {
     private final EntityManager em;
 
-    public Optional<Object[]> findByStoryId(Integer storyId, Integer currentUserId) {
+    public Optional<Object[]> findByStoryIdForUser(Integer storyId, Integer currentUserId) {
         try {
             Object[] objects = em.createQuery("""
                                SELECT\s
