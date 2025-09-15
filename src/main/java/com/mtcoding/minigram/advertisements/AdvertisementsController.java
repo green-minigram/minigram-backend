@@ -22,10 +22,7 @@ public class AdvertisementsController {
     }
 
     @DeleteMapping("/{adId}")
-    public ResponseEntity<?> delete(
-            @AuthenticationPrincipal User user,
-            @PathVariable Integer adId
-    ) {
+    public ResponseEntity<?> delete(@AuthenticationPrincipal User user, @PathVariable Integer adId) {
         AdvertisementResponse.DeleteDTO respDTO = advertisementService.delete(adId, user.getId());
         return Resp.ok(respDTO);
     }

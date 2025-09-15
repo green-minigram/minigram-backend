@@ -90,13 +90,17 @@ public class AdvertisementsControllerTest extends MyRestDoc {
         int adId = 1; // @MapsId → adId == postId
 
         // 1) 최초 삭제
-        mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
+        ResultActions actions = mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.adId").value(adId))
-                .andExpect(jsonPath("$.body.deleted").value(true));
+                .andExpect(jsonPath("$.body.deleted").value(true))
+                .andDo(MockMvcResultHandlers.print()).andDo(document);
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
 
         // 2) 멱등: 다시 삭제해도 200/true
         mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
@@ -105,11 +109,15 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.body.deleted").value(true));
 
         // 3) 게시글 상세: 이제 광고 아님 + 팔로우 필드 다시 노출
-        mvc.perform(get("/s/api/posts/{postId}", adId)
+        ResultActions detailActions = mvc.perform(get("/s/api/posts/{postId}", adId)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.body.isAd").value(false))
                 .andExpect(jsonPath("$.body.author.isFollowing").isBoolean());
+
+        String detailBody = detailActions.andReturn().getResponse().getContentAsString();
+        System.out.println(detailBody);
+        
     }
 }
 
