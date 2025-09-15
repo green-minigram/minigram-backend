@@ -238,7 +238,7 @@ public class PostsControllerTest extends MyRestDoc {
 
     @Test
     void update_ok() throws Exception {
-        var body = """
+        String body = """
                 {
                   "content": "수정된 본문",
                   "imageUrls": ["https://picsum.photos/seed/u1/800","https://picsum.photos/seed/u2/800"]
@@ -254,10 +254,13 @@ public class PostsControllerTest extends MyRestDoc {
         System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.postId").value(3))
                 .andExpect(jsonPath("$.body.content").value("수정된 본문"))
                 .andExpect(jsonPath("$.body.images", hasSize(2)))
                 .andExpect(jsonPath("$.body.updatedAt").isString());
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
 }

@@ -47,7 +47,7 @@ public class PostsController {
     }
 
     @PutMapping("/s/api/posts/{postId}")
-    public ResponseEntity<?> update(@PathVariable Integer postId, @AuthenticationPrincipal com.mtcoding.minigram.users.User user,
+    public ResponseEntity<?> update(@PathVariable Integer postId, @AuthenticationPrincipal User user,
                                     @RequestBody PostRequest.UpdateDTO reqDTO
     ) {
         PostResponse.UpdateDTO respDTO = postService.update(postId, reqDTO, user.getId());

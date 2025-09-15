@@ -184,7 +184,7 @@ public class PostResponse {
         private List<ImageDTO> images;
 
         public static UpdateDTO from(Post post, List<PostImage> images) {
-            var dto = new UpdateDTO();
+            UpdateDTO dto = new UpdateDTO();
             dto.postId = post.getId();
             dto.content = post.getContent();
             dto.updatedAt = post.getUpdatedAt();
