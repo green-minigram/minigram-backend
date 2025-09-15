@@ -249,9 +249,9 @@ public class PostsControllerTest extends MyRestDoc {
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
-
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
