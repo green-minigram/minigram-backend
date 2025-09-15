@@ -192,6 +192,7 @@ public class PostService {
         // 1) 로드 + 존재/상태 체크
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+
         if (post.getStatus() == PostStatus.DELETED) {
             throw new ExceptionApi404("존재하지 않는 게시글입니다.");
         }

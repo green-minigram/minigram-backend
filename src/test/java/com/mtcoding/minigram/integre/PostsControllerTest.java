@@ -245,15 +245,19 @@ public class PostsControllerTest extends MyRestDoc {
                 }
                 """;
 
-        mvc.perform(put("/s/api/posts/{id}", 3)
-                        .header("Authorization", "Bearer " + accessToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+        ResultActions actions = mvc.perform(put("/s/api/posts/{id}", 3)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
 
-                .andExpect(status().isOk())
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.body.postId").value(3))
                 .andExpect(jsonPath("$.body.content").value("수정된 본문"))
                 .andExpect(jsonPath("$.body.images", hasSize(2)))
                 .andExpect(jsonPath("$.body.updatedAt").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 }
