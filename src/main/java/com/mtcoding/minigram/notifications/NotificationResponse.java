@@ -61,25 +61,44 @@ public class NotificationResponse {
     }
 
     @Data
-    public static class DTO {
+    public static class PushDTO {
         private Integer notificationId;
-        private NotificationType type;
-        private Integer senderId;
-        private Integer recipientId;
-        private Integer targetId;
-        private ReadStatus readStatus;
-        private LocalDateTime reatedAt;
+        private NotificationType type; // POST_LIKED, COMMENTED, FOLLOWED
+        private UserDTO sender;
+        private Integer targetId; // post_like.id / comment.id / follow.id / story_like.id
+        private Integer postId; // 댓글/게시글 좋아요일때만
+        private String postImageUrl;
+        private String commentContent; // 댓글일 때만
+        private Integer storyId; // 스토리 좋아요일때만
+        private String storyThumbnailUrl; // 스토리 좋아요일때만
         private LocalDateTime createdAt;
+        private ReadStatus readStatus;
 
-        public DTO(Notification notification) {
+        @Data
+        public class UserDTO {
+            private Integer userId;
+            private String username;
+            private String profileImageUrl;
+
+            public UserDTO(User user) {
+                this.userId = user.getId();
+                this.username = user.getUsername();
+                this.profileImageUrl = user.getProfileImageUrl();
+            }
+        }
+
+        public PushDTO(Notification notification, Integer postId, String postImageUrl, String commentContent, Integer storyId, String storyThumbnailUrl) {
             this.notificationId = notification.getId();
             this.type = notification.getType();
-            this.senderId = notification.getSender().getId();
-            this.recipientId = notification.getRecipient().getId();
+            this.sender = new UserDTO(notification.getSender());
             this.targetId = notification.getTargetId();
-            this.readStatus = notification.getStatus();
-            this.reatedAt = notification.getCreatedAt();
+            this.postId = postId;
+            this.postImageUrl = postImageUrl;
+            this.commentContent = commentContent;
+            this.storyId = storyId;
+            this.storyThumbnailUrl = storyThumbnailUrl;
             this.createdAt = notification.getCreatedAt();
+            this.readStatus = notification.getStatus();
         }
     }
 }

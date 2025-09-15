@@ -26,7 +26,7 @@ public class NotificationsController {
     }
 
     @GetMapping(value = "/s/api/notifications/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseEntity<?> connect(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal User user) {
         // 1분 동안 서버측 응답 없으면, 브라우저에서 자동으로 서버에 재연결 요청을 함
 
         // 1. 현재 로그인한 사용자 ID 가져오기
@@ -57,6 +57,6 @@ public class NotificationsController {
 
         // 5. ResponseEntity로 emitter 반환
         //    - produces가 TEXT_EVENT_STREAM이므로 브라우저는 이벤트 스트림을 열고 대기
-        return Resp.ok(emitter);
+        return ResponseEntity.ok(emitter);
     }
 }

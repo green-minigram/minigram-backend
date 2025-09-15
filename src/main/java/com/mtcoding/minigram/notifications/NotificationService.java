@@ -1,6 +1,8 @@
 package com.mtcoding.minigram.notifications;
 
 import com.mtcoding.minigram._core.config.SseEmitters;
+import com.mtcoding.minigram.posts.Post;
+import com.mtcoding.minigram.posts.likes.PostLike;
 import com.mtcoding.minigram.stories.Story;
 import com.mtcoding.minigram.stories.likes.StoryLike;
 import com.mtcoding.minigram.users.User;
@@ -153,8 +155,27 @@ public class NotificationService {
         );
 
         // 2. SSE 푸시
-        NotificationResponse.DTO dto = new NotificationResponse.DTO(notificationPS);
+        NotificationResponse.PushDTO pushDTO = new NotificationResponse.PushDTO(notificationPS, null, null, null, story.getId(), story.getThumbnailUrl());
 
-        sseEmitters.sendTo(story.getUser().getId(), "notification", dto);
+        sseEmitters.sendTo(story.getUser().getId(), "notification", pushDTO);
+    }
+
+    @Transactional
+    public void notifyPostLiked(Post post, PostLike postLike, User sender) {
+        // 1. 알림 DB 저장
+        Notification notificationPS = notificationRepository.save(
+                Notification.builder()
+                        .type(NotificationType.POST_LIKED)
+                        .sender(sender)               // 좋아요 누른 사람
+                        .recipient(post.getUser())   // 게시글 주인
+                        .targetId(postLike.getId())  // post_like.id
+                        .status(ReadStatus.UNREAD)
+                        .build()
+        );
+
+        // 2. SSE 푸시
+        NotificationResponse.PushDTO pushDTO = new NotificationResponse.PushDTO(notificationPS, post.getId(), null, null, null, null);
+
+        sseEmitters.sendTo(post.getUser().getId(), "notification", pushDTO);
     }
 }

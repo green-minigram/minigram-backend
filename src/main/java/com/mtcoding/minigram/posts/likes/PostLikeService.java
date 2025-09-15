@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.posts.likes;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.notifications.NotificationService;
 import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.users.User;
@@ -21,15 +22,16 @@ public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     //좋아요 생성
     @Transactional
     public PostLikeResponse.LikesDTO like(Integer postId, Integer userId) {
 
         // 1) 존재 검증 (404)
-        Post post = postRepository.findPostById(postId)
+        Post postPS = postRepository.findPostById(postId)
                 .orElseThrow(() -> new ExceptionApi404("게시글이 존재하지 않습니다."));
-        User user = userRepository.findById(userId)
+        User userPS = userRepository.findById(userId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
 
         // 2) 이미 좋아요면 멱등 처리: 카운트만 갱신해서 반환
@@ -39,14 +41,19 @@ public class PostLikeService {
         }
 
         // 3) 신규 좋아요 (동시 삽입 경합은 UNIQUE 제약으로 방지)
+        PostLike postLikePS = null;
         try {
-            postLikeRepository.save(new PostLike(post, user));
+            postLikePS = postLikeRepository.save(new PostLike(postPS, userPS));
         } catch (DataIntegrityViolationException e) {
             // 레이스 컨디션: 동시에 같은 (postId,userId) 삽입 → 이미 좋아요로 간주
         }
 
         // 4) 최종 카운트 재집계 후 isLiked=true 반환
         int count = (int) postLikeRepository.countByPostId(postId);
+
+        // 알림
+        notificationService.notifyPostLiked(postPS, postLikePS, userPS);
+
         return new PostLikeResponse.LikesDTO(count, true);
     }
 

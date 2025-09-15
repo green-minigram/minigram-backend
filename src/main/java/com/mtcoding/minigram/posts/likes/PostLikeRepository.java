@@ -27,8 +27,9 @@ public class PostLikeRepository {
         return count > 0;
     }
 
-    public void save(PostLike like) {
+    public PostLike save(PostLike like) {
         em.persist(like);
+        return like;
     }
 
     public void delete(PostLike like) {
