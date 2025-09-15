@@ -18,7 +18,7 @@ public class StoryRepositoryTest {
         int storyId = 1;
         int currentUserId = 2;
 
-        Optional<Object[]> opt = storyRepository.findByStoryId(storyId, currentUserId);
+        Optional<Object[]> opt = storyRepository.findByStoryIdForUser(storyId, currentUserId);
         System.out.println("===========스토리 1건 조회============");
         if (opt.isPresent()) {
             Object[] objects = opt.get();
