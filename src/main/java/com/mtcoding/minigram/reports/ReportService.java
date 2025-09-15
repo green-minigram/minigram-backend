@@ -61,13 +61,14 @@ public class ReportService {
 
         return new ReportResponse.DTO(reportPS);
     }
-    
 
-    public List<ReportResponse.ReasonDTO> getReasons() {
-        return Arrays.stream(ReportReasonCode.values())
-                .map(ReportResponse.ReasonDTO::from)
+
+    public ReportResponse.ReasonListDTO getReasons() {
+        List<ReportResponse.ReasonItemDTO> reasonItemList = Arrays.stream(ReportReasonCode.values())
+                .map(ReportResponse.ReasonItemDTO::from)
                 .collect(Collectors.toList());
 
+        return new ReportResponse.ReasonListDTO(reasonItemList);
     }
 }
 
