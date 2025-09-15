@@ -92,12 +92,11 @@ public class AdvertisementService {
     }
 
     @Transactional
-    public AdvertisementResponse.UpdateDTO update(Integer adId,
-                                                  AdvertisementRequest.UpdateDTO req,
-                                                  Integer adminUserId) {
+    public AdvertisementResponse.UpdateDTO update(Integer adId, AdvertisementRequest.UpdateDTO req, Integer adminUserId) {
         // 1) 권한
         var admin = advertisementRepository.findUser(adminUserId)
                 .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
+
         if (!admin.getRoles().contains("ADMIN")) {
             throw new ExceptionApi403("관리자 권한이 필요합니다.");
         }

@@ -22,13 +22,10 @@ public class AdvertisementsController {
     }
 
     @PutMapping("/{adId}")
-    public ResponseEntity<?> update(
-            @PathVariable Integer adId,
-            @AuthenticationPrincipal com.mtcoding.minigram.users.User user,
-            @RequestBody AdvertisementRequest.UpdateDTO req
-    ) {
-        var resp = advertisementService.update(adId, req, user.getId());
-        return Resp.ok(resp); // AdvertisementResponse.UpdateDTO
+    public ResponseEntity<?> update(@PathVariable Integer adId, @AuthenticationPrincipal User user,
+                                    @RequestBody AdvertisementRequest.UpdateDTO reqDTO) {
+        AdvertisementResponse.UpdateDTO respDTO = advertisementService.update(adId, reqDTO, user.getId());
+        return Resp.ok(respDTO);
     }
 
 }

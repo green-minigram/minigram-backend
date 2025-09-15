@@ -90,7 +90,8 @@ public class AdvertisementsControllerTest extends MyRestDoc {
     void update_ok() throws Exception {
         String body = """
                 {
-                  "endAt": "2025-09-30T23:59:59"
+                  "startAt": "2025-09-20T00:00:00",
+                  "endAt": "2025-10-05T23:59:59"
                 }
                 """;
 
@@ -99,13 +100,14 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.body.adId").value(1))
                 .andExpect(jsonPath("$.body.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.body.endAt").value("2025-09-30T23:59:59"))
+                .andExpect(jsonPath("$.body.startAt").value("2025-09-20T00:00:00"))
+                .andExpect(jsonPath("$.body.endAt").value("2025-10-05T23:59:59"))
                 .andExpect(jsonPath("$.body.updatedAt").isString())
                 .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
