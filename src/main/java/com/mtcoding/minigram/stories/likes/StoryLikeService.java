@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.stories.likes;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.notifications.NotificationService;
 import com.mtcoding.minigram.stories.Story;
 import com.mtcoding.minigram.stories.StoryRepository;
 import com.mtcoding.minigram.stories.StoryStatus;
@@ -18,6 +19,7 @@ public class StoryLikeService {
     private final StoryLikeRepository storyLikeRepository;
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public StoryLikeResponse.CreateDTO create(Integer storyId, Integer currentUserId) {
@@ -34,6 +36,9 @@ public class StoryLikeService {
         StoryLike storyLikePS = storyLikeRepository.save(storyLike);
 
         int likeCount = (storyLikeRepository.countByStoryId(storyId)).intValue();
+
+        // 알림
+        notificationService.notifyStoryLiked(storyPS, storyLikePS, userRef);
 
         return new StoryLikeResponse.CreateDTO(storyLikePS, likeCount);
     }

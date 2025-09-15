@@ -59,4 +59,27 @@ public class NotificationResponse {
             this.readStatus = notification.getStatus();
         }
     }
+
+    @Data
+    public static class DTO {
+        private Integer notificationId;
+        private NotificationType type;
+        private Integer senderId;
+        private Integer recipientId;
+        private Integer targetId;
+        private ReadStatus readStatus;
+        private LocalDateTime reatedAt;
+        private LocalDateTime createdAt;
+
+        public DTO(Notification notification) {
+            this.notificationId = notification.getId();
+            this.type = notification.getType();
+            this.senderId = notification.getSender().getId();
+            this.recipientId = notification.getRecipient().getId();
+            this.targetId = notification.getTargetId();
+            this.readStatus = notification.getStatus();
+            this.reatedAt = notification.getCreatedAt();
+            this.createdAt = notification.getCreatedAt();
+        }
+    }
 }

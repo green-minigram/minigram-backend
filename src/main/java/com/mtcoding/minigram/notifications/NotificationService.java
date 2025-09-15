@@ -1,8 +1,13 @@
 package com.mtcoding.minigram.notifications;
 
+import com.mtcoding.minigram._core.config.SseEmitters;
+import com.mtcoding.minigram.stories.Story;
+import com.mtcoding.minigram.stories.likes.StoryLike;
+import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -11,6 +16,7 @@ import java.util.*;
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final SseEmitters sseEmitters;
 
     public NotificationResponse.ListDTO findAllWithinOneMonth(Integer userId) {
 
@@ -131,5 +137,24 @@ public class NotificationService {
         }
 
         return new NotificationResponse.ListDTO(itemDTOList);
+    }
+
+    @Transactional
+    public void notifyStoryLiked(Story story, StoryLike storyLike, User sender) {
+        // 1. 알림 DB 저장
+        Notification notificationPS = notificationRepository.save(
+                Notification.builder()
+                        .type(NotificationType.STORY_LIKED)
+                        .sender(sender)               // 좋아요 누른 사람
+                        .recipient(story.getUser())   // 스토리 주인
+                        .targetId(storyLike.getId())  // story_like.id
+                        .status(ReadStatus.UNREAD)
+                        .build()
+        );
+
+        // 2. SSE 푸시
+        NotificationResponse.DTO dto = new NotificationResponse.DTO(notificationPS);
+
+        sseEmitters.sendTo(story.getUser().getId(), "notification", dto);
     }
 }
