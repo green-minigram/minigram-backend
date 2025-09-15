@@ -1,11 +1,26 @@
 package com.mtcoding.minigram.reports;
 
+import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 public class ReportResponse {
+
+    @Data
+    @Builder
+    public static class ReasonDTO {
+        private String code;
+        private String label;
+
+        public static ReasonDTO from(ReportReasonCode reasonCode) {
+            return ReasonDTO.builder()
+                    .code(reasonCode.name())     // enum 이름
+                    .label(reasonCode.getLabel()) // 라벨 값
+                    .build();
+        }
+    }
 
     @Data
     public static class DTO {
