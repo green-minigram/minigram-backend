@@ -7,14 +7,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 
-public class ReportsController {
+public class ReportController {
 
     private final ReportService reportService;
 
@@ -25,6 +28,15 @@ public class ReportsController {
         ReportResponse.DTO respDTO = reportService.create(reqDTO, user);
 
         return Resp.ok(respDTO);
+    }
+
+    //2. 신고이유 목록 보내기
+    @GetMapping("/s/api/reports/reasons")
+    public ResponseEntity<?> getReasons() {
+        List<ReportResponse.ReasonDTO> reasons = reportService.getReasons();
+
+        return ResponseEntity.ok(reasons);
+
     }
 }
 
