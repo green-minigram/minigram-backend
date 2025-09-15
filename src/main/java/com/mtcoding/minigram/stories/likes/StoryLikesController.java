@@ -5,6 +5,7 @@ import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,9 +23,9 @@ public class StoryLikesController {
     }
 
     // 스토리 좋아요 취소
-//    @DeleteMapping("/s/api/stories/{storyId}/likes")
-//    public ResponseEntity<?> delete(@AuthenticationPrincipal User user) {
-//        StoryLikeResponse.DeleteDTO respDTO = storyLikeService.delete(user.getId());
-//        return Resp.ok(respDTO);
-//    }
+    @DeleteMapping("/s/api/stories/{storyId}/likes")
+    public ResponseEntity<?> delete(@PathVariable Integer storyId, @AuthenticationPrincipal User user) {
+        StoryLikeResponse.DeleteDTO respDTO = storyLikeService.delete(storyId, user.getId());
+        return Resp.ok(respDTO);
+    }
 }

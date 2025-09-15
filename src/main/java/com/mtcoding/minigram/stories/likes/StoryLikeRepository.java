@@ -23,4 +23,15 @@ public class StoryLikeRepository {
                 .setParameter("storyId", storyId)
                 .getSingleResult();
     }
+
+    public void deleteByStoryIdAndUserId(Integer storyId, Integer currentUserId) {
+        em.createQuery("""
+                            DELETE FROM StoryLike sl
+                            WHERE sl.story.id = :storyId
+                              AND sl.user.id = :currentUserId
+                        """)
+                .setParameter("storyId", storyId)
+                .setParameter("currentUserId", currentUserId)
+                .executeUpdate();
+    }
 }
