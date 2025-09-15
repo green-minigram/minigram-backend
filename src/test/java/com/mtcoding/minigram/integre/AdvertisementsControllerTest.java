@@ -68,8 +68,8 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                         .content(body)
         );
 
-        String responseBody = actions.andReturn().getResponse().getContentAsString();
-        System.out.println(responseBody);
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
 
         // then (신규 postId/adId는 고정값이 아니므로 존재/양수만 체크)
         actions.andExpect(status().isOk())
@@ -85,13 +85,14 @@ public class AdvertisementsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("광고 삭제 - OK (소프트, 멱등 + 상세조회 isAd=false)")
+    @DisplayName("광고 삭제 - OK (광고=DELETED + 게시글=DELETED → 상세 404)")
     void delete_ok() throws Exception {
         int adId = 1; // @MapsId → adId == postId
 
-        // 1) 최초 삭제
-        ResultActions actions = mvc.perform(delete("/s/api/admin/advertisements/{adId}", adId)
-                        .header("Authorization", "Bearer " + adminToken))
+        // 1) 최초 삭제 (문서화 포함)
+        ResultActions actions = mvc.perform(
+                        delete("/s/api/admin/advertisements/{adId}", adId)
+                                .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.msg").value("성공"))
@@ -108,16 +109,14 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.body.deleted").value(true));
 
-        // 3) 게시글 상세: 이제 광고 아님 + 팔로우 필드 다시 노출
+        // 3) 상세 재조회 → 404 (게시글도 DELETED 처리라 노출 금지)
         ResultActions detailActions = mvc.perform(get("/s/api/posts/{postId}", adId)
                         .header("Authorization", "Bearer " + adminToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.body.isAd").value(false))
-                .andExpect(jsonPath("$.body.author.isFollowing").isBoolean());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
 
         String detailBody = detailActions.andReturn().getResponse().getContentAsString();
         System.out.println(detailBody);
-        
     }
 }
 

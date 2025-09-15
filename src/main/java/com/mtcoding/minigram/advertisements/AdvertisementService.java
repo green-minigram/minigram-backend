@@ -106,6 +106,7 @@ public class AdvertisementService {
         if (ad.getStatus() != AdvertisementStatus.DELETED) {
             ad.markDeleted();          // 엔티티 도메인 메서드로 상태 전환
             ad.closeNow();             // 즉시 노출 중단(선택: endAt=now)
+            ad.getPost().markDeleted();  // ★ 게시글도 삭제 상태로 전환
             // @PreUpdate가 updatedAt 갱신
         }
 
