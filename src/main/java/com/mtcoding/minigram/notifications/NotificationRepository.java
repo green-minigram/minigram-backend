@@ -35,8 +35,8 @@ public class NotificationRepository {
     }
 
     // targetId == postLikeId 추가 정보 조회 (post.id, post_image.url)
-    public List<Object[]> findPostLikeTargetDetailsByIds(Set<Integer> postLikeIdList) {
-        if (postLikeIdList == null || postLikeIdList.isEmpty()) return Collections.emptyList();
+    public List<Object[]> findPostLikeTargetDetailsByIds(Set<Integer> postLikeIdSet) {
+        if (postLikeIdSet == null || postLikeIdSet.isEmpty()) return Collections.emptyList();
 
         return em.createQuery("""
                         SELECT
@@ -54,13 +54,13 @@ public class NotificationRepository {
                               )
                         WHERE pl.id IN :ids
                         """, Object[].class)
-                .setParameter("ids", postLikeIdList)
+                .setParameter("ids", postLikeIdSet)
                 .getResultList();
     }
 
     // targetId == commentId 추가 정보 조회 (post.id, post_image.url, commentContent)
-    public List<Object[]> findCommentTargetDetailsByIds(Set<Integer> commentIdList) {
-        if (commentIdList == null || commentIdList.isEmpty()) return Collections.emptyList();
+    public List<Object[]> findCommentTargetDetailsByIds(Set<Integer> commentIdSet) {
+        if (commentIdSet == null || commentIdSet.isEmpty()) return Collections.emptyList();
 
         return em.createQuery("""
                         SELECT
@@ -79,7 +79,24 @@ public class NotificationRepository {
                               )
                         WHERE c.id IN :ids
                         """, Object[].class)
-                .setParameter("ids", commentIdList)
+                .setParameter("ids", commentIdSet)
+                .getResultList();
+    }
+
+    // targetId == storyLikeId 추가 정보 조회 (story.id, story.thumbnailUrl)
+    public List<Object[]> findStoryLikeTargetDetailsByIds(Set<Integer> storyLikeIdSet) {
+        if (storyLikeIdSet == null || storyLikeIdSet.isEmpty()) return Collections.emptyList();
+
+        return em.createQuery("""
+                        SELECT
+                            sl.id,
+                            s.id,
+                            s.thumbnailUrl
+                        FROM StoryLike sl
+                        JOIN sl.story s
+                        WHERE sl.id IN :ids
+                        """, Object[].class)
+                .setParameter("ids", storyLikeIdSet)
                 .getResultList();
     }
 }
