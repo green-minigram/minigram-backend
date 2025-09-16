@@ -32,4 +32,11 @@ public class AdvertisementResponse {
             );
         }
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class DeleteDTO {
+        private Integer adId;
+        private boolean deleted;
+    }
 }

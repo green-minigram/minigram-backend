@@ -2,6 +2,7 @@ package com.mtcoding.minigram.advertisements;
 
 import com.mtcoding.minigram._core.constants.FeedConstants;
 import com.mtcoding.minigram.posts.PostStatus;
+import com.mtcoding.minigram.users.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -108,5 +109,13 @@ public class AdvertisementRepository {
                 .setParameter("postActive", PostStatus.ACTIVE)
                 .setParameter("now", now)
                 .getSingleResult();
+    }
+
+    public Optional<Advertisement> findByPostId(Integer adId) {
+        return Optional.ofNullable(em.find(Advertisement.class, adId));
+    }
+
+    public Optional<User> findUser(Integer userId) {
+        return Optional.ofNullable(em.find(User.class, userId));
     }
 }

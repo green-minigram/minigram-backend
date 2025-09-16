@@ -89,4 +89,27 @@ public class AdvertisementService {
         // 6) 응답 (공유 PK라 adId == postId)
         return AdvertisementResponse.CreateDTO.from(ad);
     }
+
+    @Transactional
+    public AdvertisementResponse.DeleteDTO delete(Integer adId, Integer adminUserId) {
+
+        User admin = advertisementRepository.findUser(adminUserId)
+                .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
+        if (!admin.getRoles().contains("ADMIN")) {
+            throw new ExceptionApi403("관리자 권한이 필요합니다.");
+        }
+
+        Advertisement ad = advertisementRepository.findByPostId(adId)
+                .orElseThrow(() -> new ExceptionApi404("광고가 존재하지 않습니다."));
+
+        // 이미 삭제 상태면 멱등 처리
+        if (ad.getStatus() != AdvertisementStatus.DELETED) {
+            ad.markDeleted();          // 엔티티 도메인 메서드로 상태 전환
+            ad.closeNow();             // 즉시 노출 중단(선택: endAt=now)
+            ad.getPost().markDeleted();  // ★ 게시글도 삭제 상태로 전환
+            // @PreUpdate가 updatedAt 갱신
+        }
+
+        return new AdvertisementResponse.DeleteDTO(ad.getPostId(), true);
+    }
 }

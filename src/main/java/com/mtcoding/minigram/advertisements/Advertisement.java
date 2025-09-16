@@ -77,4 +77,12 @@ public class Advertisement {
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void markDeleted() {
+        this.status = AdvertisementStatus.DELETED;
+    }
+
+    public void closeNow() {
+        this.endAt = LocalDateTime.now();
+    }
 }
