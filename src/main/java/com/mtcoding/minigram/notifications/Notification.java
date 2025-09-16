@@ -21,7 +21,7 @@ public class Notification {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition =
-            "ENUM('POST_LIKED','COMMENTED','FOLLOWED')")
+            "ENUM('POST_LIKED','COMMENTED','FOLLOWED','STORY_LIKED')")
     private NotificationType type;
 
     // 알림 발생 주체 (보낸 사람)
