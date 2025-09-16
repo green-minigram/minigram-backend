@@ -1,7 +1,12 @@
 package com.mtcoding.minigram.notifications;
 
 import com.mtcoding.minigram._core.config.SseEmitters;
+import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.follows.Follow;
 import com.mtcoding.minigram.posts.Post;
+import com.mtcoding.minigram.posts.comments.Comment;
+import com.mtcoding.minigram.posts.images.PostImage;
+import com.mtcoding.minigram.posts.images.PostImageRepository;
 import com.mtcoding.minigram.posts.likes.PostLike;
 import com.mtcoding.minigram.stories.Story;
 import com.mtcoding.minigram.stories.likes.StoryLike;
@@ -19,6 +24,7 @@ import java.util.*;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SseEmitters sseEmitters;
+    private final PostImageRepository postImageRepository;
 
     public NotificationResponse.ListDTO findAllWithinOneMonth(Integer userId) {
 
@@ -173,9 +179,57 @@ public class NotificationService {
                         .build()
         );
 
+        // 이미지 조회
+        PostImage postImagePS = postImageRepository.findFirstByPostId(post.getId())
+                .orElseThrow(() -> new ExceptionApi404("게시글의 이미지가 존재하지 않습니다."));
+
         // 2. SSE 푸시
-        NotificationResponse.PushDTO pushDTO = new NotificationResponse.PushDTO(notificationPS, post.getId(), null, null, null, null);
+        NotificationResponse.PushDTO pushDTO = new NotificationResponse.PushDTO(notificationPS, post.getId(), postImagePS.getUrl(), null, null, null);
 
         sseEmitters.sendTo(post.getUser().getId(), "notification", pushDTO);
     }
+
+    @Transactional
+    public void notifyComment(Post post, Comment comment, User sender) {
+        // 1. 알림 DB 저장
+        Notification notificationPS = notificationRepository.save(
+                Notification.builder()
+                        .type(NotificationType.COMMENTED)
+                        .sender(sender)               // 댓글 작성한 사람
+                        .recipient(post.getUser())   // 게시글 주인
+                        .targetId(comment.getId())  // comment.id
+                        .status(ReadStatus.UNREAD)
+                        .build()
+        );
+
+        // 이미지 조회
+        PostImage postImagePS = postImageRepository.findFirstByPostId(post.getId())
+                .orElseThrow(() -> new ExceptionApi404("게시글의 이미지가 존재하지 않습니다."));
+
+        // 2. SSE 푸시
+        NotificationResponse.PushDTO pushDTO = new NotificationResponse.PushDTO(notificationPS, post.getId(), postImagePS.getUrl(), comment.getContent(), null, null);
+
+        sseEmitters.sendTo(post.getUser().getId(), "notification", pushDTO);
+    }
+
+    @Transactional
+    public void notifyFollow(Follow follow, User follower) {
+        // 1. 알림 DB 저장
+        Notification notificationPS = notificationRepository.save(
+                Notification.builder()
+                        .type(NotificationType.FOLLOWED)
+                        .sender(follower)               // 팔로우 한 사람
+                        .recipient(follow.getFollowee())   // 팔로우 당한 사람
+                        .targetId(follow.getId())  // follow.id
+                        .status(ReadStatus.UNREAD)
+                        .build()
+        );
+
+        // 2. SSE 푸시
+        NotificationResponse.PushDTO pushDTO = new NotificationResponse.PushDTO(notificationPS, null, null, null, null, null);
+
+        sseEmitters.sendTo(follow.getFollowee().getId(), "notification", pushDTO);
+    }
+
+
 }

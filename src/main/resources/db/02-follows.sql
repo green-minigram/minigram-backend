@@ -7,7 +7,7 @@ VALUES
 (2, 4, now()), -- ssar → love
 (3, 2, now()), -- cos → ssar
 (3, 4, now()), -- cos → love
-(4, 2, now()), -- love → ssar
+-- (4, 2, now()), -- love → ssar
 (4, 3, now()), -- love → cos
 
 -- 인플루언서 패턴: 모두가 luna(8)을 팔로우

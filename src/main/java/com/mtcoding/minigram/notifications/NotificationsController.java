@@ -27,15 +27,15 @@ public class NotificationsController {
 
     @GetMapping(value = "/s/api/notifications/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal User user) {
-        // 1분 동안 서버측 응답 없으면, 브라우저에서 자동으로 서버에 재연결 요청을 함
+        // 30분 동안 서버측 응답 없으면, 브라우저에서 자동으로 서버에 재연결 요청을 함
 
         // 1. 현재 로그인한 사용자 ID 가져오기
         Integer clientId = user.getId();
-        log.info("새로고침 : " + clientId);
+        log.info("새로고침(clientId) : " + clientId);
 
-        // 2. SseEmitter 객체 생성 (타임아웃: 1분)
-        //    - 1분 동안 서버에서 아무 데이터도 안 보내면 자동으로 타임아웃됨
-        SseEmitter emitter = new SseEmitter(60 * 1000L);
+        // 2. SseEmitter 객체 생성 (타임아웃: 30분)
+        //    - 30분 동안 서버에서 아무 데이터도 안 보내면 자동으로 타임아웃됨
+        SseEmitter emitter = new SseEmitter(60 * 1000L * 30);
 
         // 3. 관리 클래스(sseEmitters)에 emitter 등록
         //    - clientId를 key로 emitter를 저장해둬야, 나중에 알림(push)이 올 때 찾아서 send 가능
