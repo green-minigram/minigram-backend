@@ -70,6 +70,10 @@ public class ReportService {
         return new ReportResponse.ReasonListDTO(reasonItemList);
 
     }
+
+    public ReportResponse.DetailDTO find(Integer reportId, Integer id) {
+        return null;
+    }
 }
 
 

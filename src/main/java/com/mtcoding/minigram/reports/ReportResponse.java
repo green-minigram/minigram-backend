@@ -78,4 +78,8 @@ public class ReportResponse {
                     .build();
         }
     }
+
+    public class DetailDTO {
+
+    }
 }
