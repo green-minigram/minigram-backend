@@ -240,8 +240,7 @@ public class PostsControllerTest extends MyRestDoc {
     void update_ok() throws Exception {
         String body = """
                 {
-                  "content": "수정된 본문",
-                  "imageUrls": ["https://picsum.photos/seed/u1/800","https://picsum.photos/seed/u2/800"]
+                  "content": "수정된 본문"
                 }
                 """;
 
@@ -250,8 +249,8 @@ public class PostsControllerTest extends MyRestDoc {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
 //
-//        String responseBody = actions.andReturn().getResponse().getContentAsString();
-//        System.out.println(responseBody);
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
 
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))

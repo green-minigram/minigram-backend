@@ -16,8 +16,6 @@ public class PostRequest {
 
     @Data
     public static class UpdateDTO {
-        // 둘 다 "옵션": null이면 해당 필드는 수정 안 함
-        private String content;          // null 아니면 업데이트
-        private List<String> imageUrls;  // null 아니면 전체 교체(1~10장 검증)
+        private String content; // 이미지말고 게시글 내용만 수정
     }
 }
