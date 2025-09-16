@@ -131,7 +131,7 @@ public class PostResponse {
         private Integer postId;
         private Boolean deleted; // 항상 true로 반환 (멱등)
     }
-    
+
     @Data
     public static class SearchListDTO {
         private Integer current;     // 현재 페이지(0-base)
@@ -173,6 +173,25 @@ public class PostResponse {
             this.postId = postId;
             this.postImageUrl = postImageUrl;
             this.content = content;
+        }
+    }
+
+    @Data
+    public static class UpdateDTO {
+        private Integer postId;
+        private String content;
+        private LocalDateTime updatedAt;
+        private List<ImageDTO> images;
+
+        public static UpdateDTO from(Post post, List<PostImage> images) {
+            UpdateDTO dto = new UpdateDTO();
+            dto.postId = post.getId();
+            dto.content = post.getContent();
+            dto.updatedAt = post.getUpdatedAt();
+            dto.images = images.stream()
+                    .map(i -> new ImageDTO(i.getId(), i.getUrl()))
+                    .toList();
+            return dto;
         }
     }
 }

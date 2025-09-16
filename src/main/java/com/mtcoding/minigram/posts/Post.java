@@ -63,4 +63,8 @@ public class Post {
         this.updatedAt = updatedAt;
         this.images = images;
     }
+
+    public void updateContent(String content) {
+        this.content = content; // @UpdateTimestamp로 updatedAt 자동 갱신
+    }
 }

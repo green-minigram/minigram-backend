@@ -230,4 +230,35 @@ public class PostsControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postList[0].content").value("오늘의 추천 음악 \uD83C\uDFB6"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
+    @Test
+    void update_ok() throws Exception {
+        Integer postId = 3;
+
+        PostRequest.UpdateDTO reqDTO = new PostRequest.UpdateDTO();
+        reqDTO.setContent("수정된 본문");
+
+        String requestBody = om.writeValueAsString(reqDTO);
+        // System.out.println(requestBody);
+
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .put("/s/api/posts/{postId}", postId)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", accessToken)
+        );
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postId").value(3));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.content").value("수정된 본문"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.updatedAt", Matchers.matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?$")));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.images[0].id").value(4));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.images[0].url").isString());
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }
