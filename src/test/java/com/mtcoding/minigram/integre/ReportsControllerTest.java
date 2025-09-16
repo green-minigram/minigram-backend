@@ -79,4 +79,29 @@ public class ReportsControllerTest extends MyRestDoc {
 
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
+
+    @Test
+    public void getReasons_test() throws Exception {
+        // given
+
+        // when
+        ResultActions actions = mvc.perform(
+                MockMvcRequestBuilders
+                        .get("/s/api/reports/reasons")
+                        .header("Authorization", accessToken1)
+        );
+
+        // eye
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+        // System.out.println(responseBody);
+
+        // then
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList").isArray());
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList[0].id").value(1));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList[0].code").value("DISLIKE"));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList[0].label").value("마음에 들지 않습니다"));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }

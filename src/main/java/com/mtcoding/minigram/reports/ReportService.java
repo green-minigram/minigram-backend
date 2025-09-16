@@ -4,6 +4,7 @@ import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.reports.reasons.ReportReason;
+import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
 import com.mtcoding.minigram.reports.reasons.ReportReasonRepository;
 import com.mtcoding.minigram.stories.StoryRepository;
 import com.mtcoding.minigram.users.User;
@@ -11,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -55,6 +60,15 @@ public class ReportService {
         Report reportPS = reportRepository.save(report);
 
         return new ReportResponse.DTO(reportPS);
+    }
+
+
+    public ReportResponse.ReasonListDTO getReasons() {
+        List<ReportResponse.ReasonItemDTO> reasonItemList = Arrays.stream(ReportReasonCode.values())
+                .map(ReportResponse.ReasonItemDTO::from)
+                .collect(Collectors.toList());
+        return new ReportResponse.ReasonListDTO(reasonItemList);
+
     }
 }
 
