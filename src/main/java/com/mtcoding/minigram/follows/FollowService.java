@@ -3,6 +3,7 @@ package com.mtcoding.minigram.follows;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.notifications.NotificationService;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.List;
 public class FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public FollowResponse.DTO create(Integer currentUserId, Integer followeeId) {
@@ -41,7 +43,13 @@ public class FollowService {
 
         try {
             Follow followPS = followRepository.save(follow);
+
+            // 알림
+            notificationService.notifyFollow(followPS, follower);
+
+
             return new FollowResponse.DTO(followPS);
+
         } catch (DataIntegrityViolationException e) {
             // (follower_id, followee_id) 유니크 제약 위반 등
             throw new ExceptionApi400("이미 팔로우 중입니다");

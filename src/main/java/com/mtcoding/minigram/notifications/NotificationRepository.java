@@ -99,4 +99,9 @@ public class NotificationRepository {
                 .setParameter("ids", storyLikeIdSet)
                 .getResultList();
     }
+
+    public Notification save(Notification notification) {
+        em.persist(notification);
+        return notification;
+    }
 }

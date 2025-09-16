@@ -3,19 +3,19 @@ package com.mtcoding.minigram.posts.comments;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi403;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.notifications.NotificationService;
 import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.PostStatus;
-import com.mtcoding.minigram.posts.comments.likes.CommentLikeRepository;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,15 +24,16 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     //게시글 댓글 조회
     public CommentResponse.ListDTO findAllByPostId(Integer page, Integer postId, Integer currentUserId) {
-        Post postPS =  postRepository.findById(postId)
+        Post postPS = postRepository.findById(postId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다"));
 
         switch (postPS.getStatus()) {
             case DELETED -> throw new ExceptionApi404("삭제된 게시글입니다: postId=" + postId);
-            case HIDDEN  -> throw new ExceptionApi404("숨김 처리된 게시글입니다: postId=" + postId);
+            case HIDDEN -> throw new ExceptionApi404("숨김 처리된 게시글입니다: postId=" + postId);
         }
 
         List<Object[]> obsList = commentRepository.findAllByPostId(page, postId, currentUserId);
@@ -41,9 +42,9 @@ public class CommentService {
                 .map(obs -> {
                     Comment comment = (Comment) obs[0];
                     boolean isLiked = Boolean.TRUE.equals(obs[1]);
-                    int likeCount   = ((Number) obs[2]).intValue();
+                    int likeCount = ((Number) obs[2]).intValue();
                     boolean hasUnseen = Boolean.TRUE.equals(obs[3]);
-                    boolean isOwner   = Objects.equals(comment.getUser().getId(), currentUserId);
+                    boolean isOwner = Objects.equals(comment.getUser().getId(), currentUserId);
 
                     return new CommentResponse.ItemDTO(
                             comment,
@@ -95,9 +96,9 @@ public class CommentService {
                 .map(obs -> {
                     Comment comment = (Comment) obs[0];
                     boolean isLiked = Boolean.TRUE.equals(obs[1]);
-                    int likeCount   = ((Number) obs[2]).intValue();
+                    int likeCount = ((Number) obs[2]).intValue();
                     boolean hasUnseen = Boolean.TRUE.equals(obs[3]);
-                    boolean isOwner   = Objects.equals(comment.getUser().getId(), currentUserId);
+                    boolean isOwner = Objects.equals(comment.getUser().getId(), currentUserId);
 
                     return new CommentResponse.ItemDTO(
                             comment,
@@ -117,7 +118,7 @@ public class CommentService {
     @Transactional
     public CommentResponse.DTO create(Integer postId, CommentRequest.CreateDTO reqDTO, Integer currentUserId) {
         // 1. 게시글 존재 + 상태 체크
-        Post postPS =  postRepository.findById(postId)
+        Post postPS = postRepository.findById(postId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다"));
 
         if (postPS.getStatus() != PostStatus.ACTIVE) {
@@ -150,6 +151,9 @@ public class CommentService {
         }
 
         Comment commentPS = commentRepository.save(reqDTO.toEntity(postPS, root, parentPS, userRef));
+
+        // 알림
+        notificationService.notifyComment(postPS, commentPS, userRef);
 
         return new CommentResponse.DTO(commentPS);
     }
