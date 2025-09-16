@@ -118,4 +118,18 @@ public class AdvertisementRepository {
     public Optional<User> findUser(Integer userId) {
         return Optional.ofNullable(em.find(User.class, userId));
     }
+
+    // * endAt < now 인 ACTIVE 광고를 INACTIVE로 일괄 전환
+    public int updateExpiredToInactive(LocalDateTime now) {
+        return em.createQuery(
+                        "update Advertisement a " +
+                                "set a.status = :inactive " +
+                                "where a.status = :active " +
+                                "  and a.endAt < :now")
+                .setParameter("inactive", AdvertisementStatus.INACTIVE)
+                .setParameter("active", AdvertisementStatus.ACTIVE)
+                .setParameter("now", now)
+                .executeUpdate();
+    }
+
 }
