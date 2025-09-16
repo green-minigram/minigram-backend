@@ -21,10 +21,12 @@ public class NotificationResponse {
         private Integer notificationId;
         private NotificationType type; // POST_LIKED, COMMENTED, FOLLOWED
         private UserDTO sender;
-        private Integer targetId; // post_like.id / comment.id / follow.id
-        private Integer postId; // 댓글/좋아요일 때만
+        private Integer targetId; // post_like.id / comment.id / follow.id / story_like.id
+        private Integer postId; // 댓글/게시글 좋아요일때만
         private String postImageUrl;
         private String commentContent; // 댓글일 때만
+        private Integer storyId; // 스토리 좋아요일때만
+        private String storyThumbnailUrl; // 스토리 좋아요일때만
         private LocalDateTime createdAt;
         private ReadStatus readStatus;
 
@@ -43,7 +45,7 @@ public class NotificationResponse {
             }
         }
 
-        public ItemDTO(Notification notification, Boolean isFollowing, Integer postId, String postImageUrl, String commentContent) {
+        public ItemDTO(Notification notification, Boolean isFollowing, Integer postId, String postImageUrl, String commentContent, Integer storyId, String storyThumbnailUrl) {
             this.notificationId = notification.getId();
             this.type = notification.getType();
             this.sender = new UserDTO(notification.getSender(), isFollowing);
@@ -51,6 +53,8 @@ public class NotificationResponse {
             this.postId = postId;
             this.postImageUrl = postImageUrl;
             this.commentContent = commentContent;
+            this.storyId = storyId;
+            this.storyThumbnailUrl = storyThumbnailUrl;
             this.createdAt = notification.getCreatedAt();
             this.readStatus = notification.getStatus();
         }

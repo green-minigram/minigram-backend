@@ -18,11 +18,13 @@ public class NotificationService {
         List<Object[]> obsList = notificationRepository.findAllByRecipientIdWithinOneMonth(userId);
         if (obsList.isEmpty()) return new NotificationResponse.ListDTO(List.of());
 
-        record NotificationRow(Notification notification, Boolean isFollowing) {}
+        record NotificationRow(Notification notification, Boolean isFollowing) {
+        }
 
         List<NotificationRow> rows = new ArrayList<>(obsList.size());
         Set<Integer> postLikeIdSet = new HashSet<>();
         Set<Integer> commentIdSet = new HashSet<>();
+        Set<Integer> storyLikeIdSet = new HashSet<>();
 
         // 2. notification, isFollowing -> NotificationRow 조립
         for (Object[] obs : obsList) {
@@ -34,12 +36,15 @@ public class NotificationService {
                 postLikeIdSet.add(notification.getTargetId());
             } else if (notification.getType() == NotificationType.COMMENTED) {
                 commentIdSet.add(notification.getTargetId());
+            } else if (notification.getType() == NotificationType.STORY_LIKED) {
+                storyLikeIdSet.add(notification.getTargetId());
             }
         }
 
         // 3. targetId 기반 타입별 추가 정보 조회
         // 3-1. type = POST_LIKED
-        record PostLikeTargetDetail(Integer postId, String postImageUrl) {}
+        record PostLikeTargetDetail(Integer postId, String postImageUrl) {
+        }
         Map<Integer, PostLikeTargetDetail> postLikeDetailMap = new HashMap<>();
         if (!postLikeIdSet.isEmpty()) {
             for (Object[] obs : notificationRepository.findPostLikeTargetDetailsByIds(postLikeIdSet)) {
@@ -51,7 +56,8 @@ public class NotificationService {
         }
 
         // 3-2. type = COMMENTED
-        record CommentTargetDetail(Integer postId, String postImageUrl, String commentContent) {}
+        record CommentTargetDetail(Integer postId, String postImageUrl, String commentContent) {
+        }
         Map<Integer, CommentTargetDetail> commentDetailMap = new HashMap<>();
         if (!commentIdSet.isEmpty()) {
             for (Object[] obs : notificationRepository.findCommentTargetDetailsByIds(commentIdSet)) {
@@ -63,12 +69,25 @@ public class NotificationService {
             }
         }
 
+        // 3-3. type = STORY_LIKED
+        record StoryLikeTargetDetail(Integer storyId, String storyThumbnailUrl) {
+        }
+        Map<Integer, StoryLikeTargetDetail> storyLikeDetailMap = new HashMap<>();
+        if (!storyLikeIdSet.isEmpty()) {
+            for (Object[] obs : notificationRepository.findStoryLikeTargetDetailsByIds(storyLikeIdSet)) {
+                Integer targetId = (Integer) obs[0];
+                Integer storyId = (Integer) obs[1];
+                String storyThumbnailUrl = (String) obs[2];
+                storyLikeDetailMap.put(targetId, new StoryLikeTargetDetail(storyId, storyThumbnailUrl));
+            }
+        }
+
         // 4. ItemDTO 조립
         List<NotificationResponse.ItemDTO> itemDTOList = new ArrayList<>(rows.size());
         for (NotificationRow row : rows) {
             Notification notification = row.notification();
             Boolean isFollowing = row.isFollowing();
-            
+
             switch (notification.getType()) {
                 case POST_LIKED -> {
                     PostLikeTargetDetail detail = postLikeDetailMap.get(notification.getTargetId());
@@ -77,6 +96,8 @@ public class NotificationService {
                             isFollowing,
                             detail != null ? detail.postId() : null,
                             detail != null ? detail.postImageUrl() : null,
+                            null,
+                            null,
                             null
                     ));
                 }
@@ -87,11 +108,24 @@ public class NotificationService {
                             isFollowing,
                             detail != null ? detail.postId() : null,
                             detail != null ? detail.postImageUrl() : null,
-                            detail != null ? detail.commentContent() : null
+                            detail != null ? detail.commentContent() : null,
+                            null,
+                            null
                     ));
                 }
                 case FOLLOWED -> {
-                    itemDTOList.add(new NotificationResponse.ItemDTO(notification, isFollowing, null, null, null));
+                    itemDTOList.add(new NotificationResponse.ItemDTO(notification, isFollowing, null, null, null, null, null));
+                }
+                case STORY_LIKED -> {
+                    StoryLikeTargetDetail detail = storyLikeDetailMap.get(notification.getTargetId());
+                    itemDTOList.add(new NotificationResponse.ItemDTO(
+                            notification, isFollowing,
+                            null,
+                            null,
+                            null,
+                            detail != null ? detail.storyId() : null,
+                            detail != null ? detail.storyThumbnailUrl() : null
+                    ));
                 }
             }
         }
