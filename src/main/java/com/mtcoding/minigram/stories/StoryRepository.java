@@ -98,4 +98,27 @@ public class StoryRepository {
                 .setParameter("storyHidden", StoryStatus.HIDDEN)
                 .getSingleResult();
     }
+
+    public Optional<Story> findWithAuthorById(Integer storyId) {
+        String jpql = """
+                    select s from Story s
+                    join fetch s.user u
+                    where s.id = :storyId
+                """;
+        return em.createQuery(jpql, Story.class)
+                .setParameter("storyId", storyId)
+                .getResultList().stream().findFirst();
+    }
+
+    public int countLikesByStoryId(Integer storyId) {
+        String jpql = "select count(l) from StoryLike l where l.story.id = :storyId";
+        Long cnt = em.createQuery(jpql, Long.class)
+                .setParameter("storyId", storyId)
+                .getSingleResult();
+        return cnt.intValue();
+    }
+
+    public int countCommentsByStoryIdOrZero(Integer storyId) {
+        return 0;
+    }
 }

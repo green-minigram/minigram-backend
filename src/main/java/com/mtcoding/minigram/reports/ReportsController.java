@@ -35,8 +35,8 @@ public class ReportsController {
     }
 
     @GetMapping("/s/api/reports/{reportId}")
-    public ResponseEntity<?> find(@PathVariable Integer reportId, @AuthenticationPrincipal User user) {
-        ReportResponse.DetailDTO respDTO = reportService.find(reportId, user.getId());
+    public ResponseEntity<?> find(@PathVariable Integer reportId) {
+        var respDTO = reportService.find(reportId);
         return Resp.ok(respDTO);
     }
 }

@@ -2,10 +2,13 @@ package com.mtcoding.minigram.reports;
 
 import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
+import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
+import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.reports.reasons.ReportReason;
 import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
 import com.mtcoding.minigram.reports.reasons.ReportReasonRepository;
+import com.mtcoding.minigram.stories.Story;
 import com.mtcoding.minigram.stories.StoryRepository;
 import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
@@ -71,10 +74,29 @@ public class ReportService {
 
     }
 
-    public ReportResponse.DetailDTO find(Integer reportId, Integer id) {
-        return null;
+    @Transactional(readOnly = true)
+    public ReportResponse.AdminDetailDTO find(Integer reportId) {
+        var report = reportRepository.findWithReporterAndReasonById(reportId)
+                .orElseThrow(() -> new ExceptionApi404("존재하지 않는 신고입니다."));
+
+        if (report.getType() == ReportType.STORY) {
+            Story story = storyRepository.findWithAuthorById(report.getTargetId())
+                    .orElseThrow(() -> new ExceptionApi404("대상 스토리가 존재하지 않습니다."));
+            int likeCount = storyRepository.countLikesByStoryId(story.getId());
+            int commentCount = storyRepository.countCommentsByStoryIdOrZero(story.getId());
+            return ReportResponse.AdminDetailDTO.fromStory(report, story, likeCount, commentCount);
+        }
+
+        // POST
+        Post post = postRepository.findByIdWithAuthor(report.getTargetId())
+                .orElseThrow(() -> new ExceptionApi404("대상 게시글이 존재하지 않습니다."));
+        List<PostImage> images = postRepository.findImagesByPostId(post.getId());
+        int likeCount = postRepository.countLikesByPostId(post.getId());
+        int commentCount = postRepository.countCommentsByPostId(post.getId());
+        return ReportResponse.AdminDetailDTO.fromPost(report, post, images, likeCount, commentCount);
     }
 }
+
 
 
 
