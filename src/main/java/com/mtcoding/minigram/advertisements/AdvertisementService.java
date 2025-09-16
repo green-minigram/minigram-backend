@@ -31,6 +31,8 @@ public class AdvertisementService {
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
     private final UserRepository userRepository;
+    private final AdvertisementRepository adRepo;
+
 
     @Transactional
     public AdvertisementResponse.CreateDTO create(AdvertisementRequest.CreateDTO req, Integer adminUserId) {
@@ -124,6 +126,12 @@ public class AdvertisementService {
         return new AdvertisementResponse.UpdateDTO(
                 ad.getPostId(), ad.getStatus(), ad.getStartAt(), ad.getEndAt(), ad.getUpdatedAt()
         );
+    }
+
+    // 프록시 체인 문제가 터져서 여기서 레파지토리 호출한뒤에 사용
+    @Transactional
+    public int expire() {
+        return adRepo.updateExpiredToInactive(LocalDateTime.now());
     }
 
 }
