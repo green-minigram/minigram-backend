@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,8 @@ public class AdvertisementService {
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
     private final UserRepository userRepository;
+    private final AdvertisementRepository adRepo;
+
 
     @Transactional
     public AdvertisementResponse.CreateDTO create(AdvertisementRequest.CreateDTO req, Integer adminUserId) {
@@ -89,4 +92,46 @@ public class AdvertisementService {
         // 6) 응답 (공유 PK라 adId == postId)
         return AdvertisementResponse.CreateDTO.from(ad);
     }
+
+    @Transactional
+    public AdvertisementResponse.UpdateDTO update(Integer adId, AdvertisementRequest.UpdateDTO req, Integer adminUserId) {
+        // 1) 권한
+        var admin = advertisementRepository.findUser(adminUserId)
+                .orElseThrow(() -> new ExceptionApi404("사용자를 찾을 수 없습니다."));
+
+        if (!admin.getRoles().contains("ADMIN")) {
+            throw new ExceptionApi403("관리자 권한이 필요합니다.");
+        }
+
+        // 2) 로드
+        var ad = advertisementRepository.findByPostId(adId)
+                .orElseThrow(() -> new ExceptionApi404("광고가 존재하지 않습니다."));
+
+        if (ad.getStatus() == AdvertisementStatus.DELETED) {
+            throw new ExceptionApi400("삭제된 광고는 수정할 수 없습니다.");
+        }
+
+        // 3) 부분 수정 값 준비
+        LocalDateTime newStart = req.getStartAt() != null ? req.getStartAt() : ad.getStartAt();
+        LocalDateTime newEnd = req.getEndAt() != null ? req.getEndAt() : ad.getEndAt();
+
+        if (newStart.isAfter(newEnd)) {
+            throw new ExceptionApi400("startAt은 endAt보다 이후일 수 없습니다.");
+        }
+
+        // 4) 도메인 갱신
+        ad.reschedule(newStart, newEnd); // 아래 엔티티 메서드
+
+        // 5) 응답
+        return new AdvertisementResponse.UpdateDTO(
+                ad.getPostId(), ad.getStatus(), ad.getStartAt(), ad.getEndAt(), ad.getUpdatedAt()
+        );
+    }
+
+    // 프록시 체인 문제가 터져서 여기서 레파지토리 호출한뒤에 사용
+    @Transactional
+    public int expire() {
+        return adRepo.updateExpiredToInactive(LocalDateTime.now());
+    }
+
 }

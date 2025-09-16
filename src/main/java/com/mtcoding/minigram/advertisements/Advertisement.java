@@ -77,4 +77,10 @@ public class Advertisement {
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void reschedule(LocalDateTime startAt, LocalDateTime endAt) {
+        this.startAt = startAt;
+        this.endAt = endAt;
+        // @PreUpdate가 updatedAt 갱신
+    }
 }

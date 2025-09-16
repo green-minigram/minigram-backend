@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -84,4 +85,30 @@ public class AdvertisementsControllerTest extends MyRestDoc {
                 .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
+    @Test
+    @DisplayName("광고 수정 - OK(스케줄 변경)")
+    void update_ok() throws Exception {
+        String body = """
+                {
+                  "startAt": "2025-09-20T00:00:00",
+                  "endAt": "2025-10-05T23:59:59"
+                }
+                """;
+
+        ResultActions actions = mvc.perform(put("/s/api/admin/advertisements/{adId}", 1)
+                .header("Authorization", "Bearer " + adminToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
+
+//        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.body.adId").value(1))
+                .andExpect(jsonPath("$.body.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.body.startAt").value("2025-09-20T00:00:00"))
+                .andExpect(jsonPath("$.body.endAt").value("2025-10-05T23:59:59"))
+                .andExpect(jsonPath("$.body.updatedAt").isString())
+                .andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
 }

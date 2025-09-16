@@ -6,10 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,5 +21,11 @@ public class AdvertisementsController {
         return Resp.ok(respDTO); // DetailDTO 반환
     }
 
+    @PutMapping("/{adId}")
+    public ResponseEntity<?> update(@PathVariable Integer adId, @AuthenticationPrincipal User user,
+                                    @RequestBody AdvertisementRequest.UpdateDTO reqDTO) {
+        AdvertisementResponse.UpdateDTO respDTO = advertisementService.update(adId, reqDTO, user.getId());
+        return Resp.ok(respDTO);
+    }
 
 }

@@ -17,4 +17,10 @@ public class AdvertisementRequest {
         private LocalDateTime endAt; // 광고 종료일
     }
 
+    @Data
+    public static class UpdateDTO {
+        // 둘 중 하나만 보내도 됨 (부분 수정)
+        private LocalDateTime startAt; // optional
+        private LocalDateTime endAt;   // optional
+    }
 }

@@ -32,4 +32,14 @@ public class AdvertisementResponse {
             );
         }
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class UpdateDTO {
+        private Integer adId;                  // = postId (@MapsId)
+        private AdvertisementStatus status;    // ACTIVE/INACTIVE/DELETED
+        private LocalDateTime startAt;
+        private LocalDateTime endAt;
+        private LocalDateTime updatedAt;
+    }
 }
