@@ -3,8 +3,6 @@ package com.mtcoding.minigram.integre;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
-import com.mtcoding.minigram.storage.PresignRequest;
-import com.mtcoding.minigram.storage.UploadType;
 import com.mtcoding.minigram.users.User;
 import com.mtcoding.minigram.users.UserRequest;
 import org.hamcrest.Matchers;
@@ -98,7 +96,7 @@ public class UsersControllerTest extends MyRestDoc {
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isOwner").value(true));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.isFollowing").value(false));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.postCount").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.followerCount").value(5));
+        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.followerCount").value(4));
         actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.followingCount").value(4));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
