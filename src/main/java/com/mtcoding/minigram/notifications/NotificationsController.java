@@ -43,7 +43,7 @@ public class NotificationsController {
 
         try {
             // 4. "첫 이벤트" 전송
-            //    - Emitter 생성 후 1분 동안 서버에서 아무 데이터도 보내지 않으면 브라우저가 연결을 끊음
+            //    - Emitter 생성 후 30분 동안 서버에서 아무 데이터도 보내지 않으면 브라우저가 연결을 끊음
             //    - SSE 프로토콜은 헤더만 받고 body 데이터가 없으면 연결을 유지하지 않음
             //    - 최소 한 번은 body 데이터를 흘려보내야 연결이 "keep-alive" 상태가 됨
             //    - 그렇지 않으면 브라우저가 재연결 시 403 Service Unavailable 발생 가능
