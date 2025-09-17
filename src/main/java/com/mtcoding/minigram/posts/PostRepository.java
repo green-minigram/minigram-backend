@@ -195,30 +195,6 @@ public class PostRepository {
                 .getResultList();
         return rows.stream().findFirst();
     }
-
-    // 좋아요 수
-    public int countLikesByPostId(Integer postId) {
-        Long cnt = em.createQuery("""
-                            select count(l)
-                            from PostLike l
-                            where l.post.id = :postId
-                        """, Long.class)
-                .setParameter("postId", postId)
-                .getSingleResult();
-        return cnt.intValue();
-    }
-
-    // 댓글 수
-    public int countCommentsByPostId(Integer postId) {
-        Long cnt = em.createQuery("""
-                            select count(c)
-                            from Comment c
-                            where c.post.id = :postId
-                        """, Long.class)
-                .setParameter("postId", postId)
-                .getSingleResult();
-        return cnt.intValue();
-    }
 }
 
 

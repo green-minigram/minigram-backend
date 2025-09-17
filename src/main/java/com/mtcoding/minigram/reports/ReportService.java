@@ -4,6 +4,7 @@ import com.mtcoding.minigram._core.error.ex.ExceptionApi400;
 import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
+import com.mtcoding.minigram.posts.comments.CommentRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.reasons.ReportReason;
@@ -34,6 +35,7 @@ public class ReportService {
     private final StoryRepository storyRepository;
     private final PostLikeRepository postLikeRepository;
     private final StoryLikeRepository storyLikeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public ReportResponse.DTO create(ReportRequest.SaveDTO reqDTO, User user) {
@@ -112,13 +114,12 @@ public class ReportService {
         List<PostImage> images = postRepository.findImagesByPostId(post.getId());
 
         // 3-3) POST 집계: 좋아요/댓글 수
-        int likeCount = postRepository.countLikesByPostId(post.getId());
-        int commentCount = postRepository.countCommentsByPostId(post.getId());
-
+        int likeCount = Math.toIntExact(postLikeRepository.countByPostId(post.getId()));
         Boolean liked = (viewerId == null) ? null
                 : postLikeRepository.existsByPostIdAndUserId(post.getId(), viewerId);
-
         var likes = new ReportResponse.AdminDetailDTO.LikesDTO(likeCount, liked);
+
+        int commentCount = Math.toIntExact(commentRepository.countByPostId(post.getId()));
 
         // 3-4) POST 상세 DTO 조립 및 반환
         return ReportResponse.AdminDetailDTO.fromPost(report, post, images, likes, commentCount);
