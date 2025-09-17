@@ -45,4 +45,16 @@ public class StoryLikeRepository {
                 .getSingleResult();
         return cnt > 0;
     }
+
+    // 좋아요 수
+    public int countLikesByStoryId(Integer storyId) {
+        Long cnt = em.createQuery("""
+                            select count(l)
+                            from StoryLike l
+                            where l.story.id = :id
+                        """, Long.class)
+                .setParameter("id", storyId)
+                .getSingleResult();
+        return cnt.intValue();
+    }
 }

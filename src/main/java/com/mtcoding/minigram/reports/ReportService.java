@@ -93,7 +93,7 @@ public class ReportService {
                     .orElseThrow(() -> new ExceptionApi404("대상 스토리가 존재하지 않습니다."));
 
             // 2-2) STORY 집계: 좋아요/댓글 수
-            int likeCount = storyRepository.countLikesByStoryId(story.getId());
+            int likeCount = storyLikeRepository.countLikesByStoryId(story.getId());
 
             Boolean liked = (viewerId == null) ? null
                     : storyLikeRepository.existsByStoryIdAndUserId(story.getId(), viewerId);
