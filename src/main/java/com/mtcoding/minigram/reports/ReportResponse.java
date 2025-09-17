@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReportResponse {
@@ -158,7 +159,7 @@ public class ReportResponse {
         // ===== Factory =====
 
         public static AdminDetailDTO fromStory(Report report, Story story, LikesDTO likes) {
-            var media = new java.util.ArrayList<MediaDTO>();
+            var media = new ArrayList<MediaDTO>();
             if (story.getVideoUrl() != null) media.add(new MediaDTO("VIDEO", story.getVideoUrl()));
             if (story.getThumbnailUrl() != null) media.add(new MediaDTO("IMAGE", story.getThumbnailUrl()));
 
