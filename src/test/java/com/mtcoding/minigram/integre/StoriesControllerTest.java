@@ -37,7 +37,7 @@ public class StoriesControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findByStoryId_test() throws Exception {
+    public void find_by_story_id_test() throws Exception {
         // given
         Integer storyId = 1;
 
@@ -75,10 +75,11 @@ public class StoriesControllerTest extends MyRestDoc {
         // given
         StoryRequest.CreateDTO reqDTO = new StoryRequest.CreateDTO();
         reqDTO.setVideoUrl("dummy-video.png");
+        reqDTO.setThumbnailUrl("dummy-thumbnail.png");
 
 
         String requestBody = om.writeValueAsString(reqDTO);
-        System.out.println(requestBody);
+        // System.out.println(requestBody);
 
         // when
         ResultActions actions = mvc.perform(

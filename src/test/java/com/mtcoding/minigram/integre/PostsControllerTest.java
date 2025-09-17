@@ -7,7 +7,6 @@ import com.mtcoding.minigram.posts.PostRequest;
 import com.mtcoding.minigram.users.User;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,7 +42,6 @@ public class PostsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("게시글 단건 조회 - OK (일반 게시글)")
     void find_test() throws Exception {
 
         int postId = 18;
@@ -80,11 +78,10 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body.postedAt").isString())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body.isReported").value(true));
 
-        actions.andDo(document);
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
     @Test
-    @DisplayName("게시글 작성 - OK (JSON)")
     void create_test() throws Exception {
         var req = new PostRequest.CreateDTO();
         req.setContent("주말 바다 🌊");
@@ -119,11 +116,10 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body.postedAt").isString())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body.updatedAt").isString());
 
-        actions.andDo(document);
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
     @Test
-    @DisplayName("게시글 작성 - 실패(이미지 없음) - 400")
     void create_fail_test() throws Exception {
         var req = new PostRequest.CreateDTO();
         req.setContent("이미지 없이 작성");
@@ -147,11 +143,10 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.msg", Matchers.containsString("이미지")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body").doesNotExist());
 
-        actions.andDo(document);
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
     @Test
-    @DisplayName("게시글 삭제 - OK (소유자, 멱등 + 이후 조회 404)")
     void delete_test() throws Exception {
         int postId = 3; // ssar(id=2)가 소유한 게시글이라고 가정
 
@@ -169,8 +164,8 @@ public class PostsControllerTest extends MyRestDoc {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.body.postId").value(postId))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.body.deleted").value(true))
-                .andDo(document);
+                .andExpect(MockMvcResultMatchers.jsonPath("$.body.deleted").value(true));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
 
         // 2) 삭제 후 상세 조회 → 404
         mvc.perform(
@@ -232,7 +227,7 @@ public class PostsControllerTest extends MyRestDoc {
     }
 
     @Test
-    void update_ok() throws Exception {
+    void update_test() throws Exception {
         Integer postId = 3;
 
         PostRequest.UpdateDTO reqDTO = new PostRequest.UpdateDTO();

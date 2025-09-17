@@ -81,7 +81,7 @@ public class ReportsControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getReasons_test() throws Exception {
+    public void get_reasons_test() throws Exception {
         // given
 
         // when

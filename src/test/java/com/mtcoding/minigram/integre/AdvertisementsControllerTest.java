@@ -5,7 +5,6 @@ import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -45,8 +44,7 @@ public class AdvertisementsControllerTest extends MyRestDoc {
 
 
     @Test
-    @DisplayName("광고 생성(신규 게시글 포함) - OK")
-    void create_withPost_ok() throws Exception {
+    void create_test() throws Exception {
         // given
         String body = """
                 {
@@ -85,7 +83,6 @@ public class AdvertisementsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("광고 삭제 - OK (광고=DELETED + 게시글=DELETED → 상세 404)")
     void delete_ok() throws Exception {
         int adId = 1; // @MapsId → adId == postId
 
