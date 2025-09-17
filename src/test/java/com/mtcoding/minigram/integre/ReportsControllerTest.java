@@ -112,7 +112,7 @@ public class ReportsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("신고 승인 - POST(PENDING) → APPROVED + POST_HIDDEN")
-    void approve_post_ok() throws Exception {
+    void approve_test() throws Exception {
         int reportId = 1; // 테이블상 PENDING & TYPE=POST
 
         ResultActions actions = mvc.perform(put("/s/api/admin/reports/{id}/approve", reportId)
@@ -133,7 +133,7 @@ public class ReportsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("신고 거절 - STORY(PENDING) → REJECTED")
-    void reject_story_ok() throws Exception {
+    void reject_test() throws Exception {
         int reportId = 12; // 테이블상 PENDING & TYPE=STORY
 
         ResultActions actions = mvc.perform(put("/s/api/admin/reports/{id}/reject", reportId)
