@@ -44,4 +44,10 @@ public class PostImageRepository {
 
         return Optional.ofNullable(postImagePS);
     }
+
+    public void deleteByPostId(Integer postId) {
+        em.createQuery("delete from PostImage pi where pi.post.id = :postId")
+                .setParameter("postId", postId)
+                .executeUpdate();
+    }
 }

@@ -186,5 +186,37 @@ public class PostService {
 
         return new UserResponse.PostListDTO(postItemList, page, totalCount);
     }
+
+    @Transactional
+    public PostResponse.UpdateDTO update(Integer postId, PostRequest.UpdateDTO reqDTO, Integer userId) {
+        // 1) 로드 + 존재/상태 체크
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ExceptionApi404("존재하지 않는 게시글입니다."));
+
+        if (post.getStatus() == PostStatus.DELETED) {
+            throw new ExceptionApi404("존재하지 않는 게시글입니다.");
+        }
+
+        // 2) 권한(소유자)
+        if (!post.getUser().getId().equals(userId)) {
+            throw new ExceptionApi403("본인 게시글만 수정할 수 있습니다.");
+        }
+
+        // 3) content 수정
+        if (reqDTO.getContent() == null) {
+            throw new ExceptionApi400("수정할 내용이 없습니다.");
+        }
+        String newContent = reqDTO.getContent().trim();
+        if (newContent.isBlank()) {
+            throw new ExceptionApi400("내용은 공백일 수 없습니다.");
+        }
+        post.updateContent(newContent);
+
+        // 4) 이미지 그대로 조회
+        List<PostImage> images = postRepository.findImagesByPostId(postId);
+
+        // 5) 응답
+        return PostResponse.UpdateDTO.from(post, images);
+    }
 }
 

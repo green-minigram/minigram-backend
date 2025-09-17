@@ -13,4 +13,9 @@ public class PostRequest {
         private String content;       // 캡션
         private List<String> imageUrls; // Presign 업로드 후 최종 URL들
     }
+
+    @Data
+    public static class UpdateDTO {
+        private String content; // 이미지말고 게시글 내용만 수정
+    }
 }
