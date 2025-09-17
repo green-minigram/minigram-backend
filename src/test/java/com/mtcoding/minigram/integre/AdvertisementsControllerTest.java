@@ -47,7 +47,7 @@ public class AdvertisementsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("광고 생성(신규 게시글 포함) - OK")
-    void create_withPost_ok() throws Exception {
+    void create_test() throws Exception {
         // given
         String body = """
                 {
@@ -87,7 +87,7 @@ public class AdvertisementsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("광고 수정 - OK(스케줄 변경)")
-    void update_ok() throws Exception {
+    void update_test() throws Exception {
         String body = """
                 {
                   "startAt": "2025-09-20T00:00:00",
