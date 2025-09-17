@@ -5,11 +5,13 @@ import com.mtcoding.minigram._core.error.ex.ExceptionApi404;
 import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.PostRepository;
 import com.mtcoding.minigram.posts.images.PostImage;
+import com.mtcoding.minigram.posts.likes.PostLikeRepository;
 import com.mtcoding.minigram.reports.reasons.ReportReason;
 import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
 import com.mtcoding.minigram.reports.reasons.ReportReasonRepository;
 import com.mtcoding.minigram.stories.Story;
 import com.mtcoding.minigram.stories.StoryRepository;
+import com.mtcoding.minigram.stories.likes.StoryLikeRepository;
 import com.mtcoding.minigram.users.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,8 @@ public class ReportService {
     private final ReportReasonRepository reportReasonRepository;
     private final PostRepository postRepository;
     private final StoryRepository storyRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final StoryLikeRepository storyLikeRepository;
 
     @Transactional
     public ReportResponse.DTO create(ReportRequest.SaveDTO reqDTO, User user) {
@@ -74,7 +78,7 @@ public class ReportService {
     }
 
     @Transactional(readOnly = true)
-    public ReportResponse.AdminDetailDTO find(Integer reportId) {
+    public ReportResponse.AdminDetailDTO find(Integer reportId, Integer viewerId) {
 
         // 1) 신고 본문 + 신고자 + 신고 사유 로딩 (존재 검증)
         var report = reportRepository.findWithReporterAndReasonById(reportId)
@@ -89,8 +93,13 @@ public class ReportService {
             // 2-2) STORY 집계: 좋아요/댓글 수
             int likeCount = storyRepository.countLikesByStoryId(story.getId());
 
+            Boolean liked = (viewerId == null) ? null
+                    : storyLikeRepository.existsByStoryIdAndUserId(story.getId(), viewerId);
+
+            var likes = new ReportResponse.AdminDetailDTO.LikesDTO(likeCount, liked);
+
             // 2-3) STORY 상세 DTO 조립 및 반환
-            return ReportResponse.AdminDetailDTO.fromStory(report, story, likeCount);
+            return ReportResponse.AdminDetailDTO.fromStory(report, story, likes);
         }
 
         // 3) POST 경로
@@ -106,8 +115,13 @@ public class ReportService {
         int likeCount = postRepository.countLikesByPostId(post.getId());
         int commentCount = postRepository.countCommentsByPostId(post.getId());
 
+        Boolean liked = (viewerId == null) ? null
+                : postLikeRepository.existsByPostIdAndUserId(post.getId(), viewerId);
+
+        var likes = new ReportResponse.AdminDetailDTO.LikesDTO(likeCount, liked);
+
         // 3-4) POST 상세 DTO 조립 및 반환
-        return ReportResponse.AdminDetailDTO.fromPost(report, post, images, likeCount, commentCount);
+        return ReportResponse.AdminDetailDTO.fromPost(report, post, images, likes, commentCount);
     }
 }
 

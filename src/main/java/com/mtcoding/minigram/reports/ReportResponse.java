@@ -150,16 +150,20 @@ public class ReportResponse {
             private String url;
         }
 
+
         @Data
-        @AllArgsConstructor
         @NoArgsConstructor
+        @AllArgsConstructor
+        @Builder
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class LikesDTO {
             private Integer count;
-            private boolean isLiked;
+            private Boolean isLiked;
         }
 
+
         public static AdminDetailDTO fromStory(Report report, Story story,
-                                               int likeCount) {
+                                               LikesDTO likes) {
             var media = new java.util.ArrayList<MediaDTO>();
             if (story.getVideoUrl() != null) media.add(new MediaDTO("VIDEO", story.getVideoUrl()));
             if (story.getThumbnailUrl() != null) media.add(new MediaDTO("IMAGE", story.getThumbnailUrl()));
@@ -176,7 +180,7 @@ public class ReportResponse {
                     .author(author)
                     .mediaList(media)
                     .postedAt(story.getCreatedAt())
-                    .likes(new LikesDTO(likeCount, false))
+                    .likes(likes)
                     .build();
 
             return AdminDetailDTO.builder()
@@ -193,8 +197,8 @@ public class ReportResponse {
         }
 
         public static AdminDetailDTO fromPost(Report report, Post post,
-                                              java.util.List<PostImage> images,
-                                              int likeCount, int commentCount) {
+                                              List<PostImage> images,
+                                              LikesDTO likes, int commentCount) {
             var media = images.stream()
                     .map(i -> new MediaDTO("IMAGE", i.getUrl()))
                     .toList();
@@ -212,7 +216,7 @@ public class ReportResponse {
                     .mediaList(media)
                     .content(post.getContent())
                     .postedAt(post.getCreatedAt())
-                    .likes(new LikesDTO(likeCount, false))
+                    .likes(likes)
                     .commentsCount(commentCount)
                     .build();
 
