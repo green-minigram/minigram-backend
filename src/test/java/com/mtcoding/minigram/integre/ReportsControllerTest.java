@@ -112,7 +112,7 @@ public class ReportsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("신고 상세 - POST - OK")
-    void find_post_ok() throws Exception {
+    void find_post_test() throws Exception {
         // 1) 호출
         int reportId = 1; // POST 타입
         ResultActions actions = mvc.perform(
@@ -162,7 +162,7 @@ public class ReportsControllerTest extends MyRestDoc {
 
     @Test
     @DisplayName("신고 상세 - STORY - OK(POST 전용 필드 미출력)")
-    void find_story_ok() throws Exception {
+    void find_story_test() throws Exception {
         // 1) 호출
         int reportId = 8; // STORY 타입
         ResultActions actions = mvc.perform(
