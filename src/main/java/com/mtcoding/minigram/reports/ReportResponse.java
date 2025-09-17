@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.reports;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mtcoding.minigram.posts.Post;
 import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
@@ -119,6 +120,7 @@ public class ReportResponse {
         @Builder
         @AllArgsConstructor
         @NoArgsConstructor
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class ReportedObjectDTO {
             private String type;       // POST / STORY
             private Integer objectId;
@@ -157,7 +159,7 @@ public class ReportResponse {
         }
 
         public static AdminDetailDTO fromStory(Report report, Story story,
-                                               int likeCount, int commentCount) {
+                                               int likeCount) {
             var media = new java.util.ArrayList<MediaDTO>();
             if (story.getVideoUrl() != null) media.add(new MediaDTO("VIDEO", story.getVideoUrl()));
             if (story.getThumbnailUrl() != null) media.add(new MediaDTO("IMAGE", story.getThumbnailUrl()));
@@ -173,10 +175,8 @@ public class ReportResponse {
                     .objectId(story.getId())
                     .author(author)
                     .mediaList(media)
-                    .content(null)
                     .postedAt(story.getCreatedAt())
                     .likes(new LikesDTO(likeCount, false))
-                    .commentsCount(commentCount)
                     .build();
 
             return AdminDetailDTO.builder()

@@ -56,16 +56,17 @@ public class ReportRepository {
         return !result.isEmpty();
     }
 
-    // reporter + reason을 한 번에 로딩
-    public Optional<Report> findWithReporterAndReasonById(Integer id) {
-        String jpql = """
-                    select r from Report r
-                    join fetch r.reporter u
-                    join fetch r.reason rr
-                    where r.id = :id
-                """;
-        return em.createQuery(jpql, Report.class)
-                .setParameter("id", id)
-                .getResultList().stream().findFirst();
+    // 신고 + 신고자 + 신고사유 join fetch
+    public Optional<Report> findWithReporterAndReasonById(Integer reportId) {
+        List<Report> rows = em.createQuery("""
+                            select r
+                            from Report r
+                            join fetch r.reporter u
+                            join fetch r.reason rr
+                            where r.id = :id
+                        """, Report.class)
+                .setParameter("id", reportId)
+                .getResultList();
+        return rows.stream().findFirst();
     }
 }

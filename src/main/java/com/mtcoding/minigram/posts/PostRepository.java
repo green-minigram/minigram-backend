@@ -183,37 +183,38 @@ public class PostRepository {
                 .getSingleResult();
     }
 
-    // 작성자까지 join fetch  (⚠️ 필드명은 user)
+    // 작성자 포함 단건
     public Optional<Post> findByIdWithAuthor(Integer postId) {
-        String jpql = """
-                    select p from Post p
-                    join fetch p.user u
-                    where p.id = :postId
-                """;
-        return em.createQuery(jpql, Post.class)
-                .setParameter("postId", postId)
-                .getResultList().stream().findFirst();
+        List<Post> rows = em.createQuery("""
+                            select p
+                            from Post p
+                            join fetch p.user a
+                            where p.id = :id
+                        """, Post.class)
+                .setParameter("id", postId)
+                .getResultList();
+        return rows.stream().findFirst();
     }
 
-    // 이미지 목록 (정렬은 id ASC로)
-//    public List<PostImage> findImagesByPostId(Integer postId) {
-//        String jpql = "select pi from PostImage pi where pi.post.id = :postId order by pi.id asc";
-//        return em.createQuery(jpql, PostImage.class)
-//                .setParameter("postId", postId)
-//                .getResultList();
-//    }
-
+    // 좋아요 수
     public int countLikesByPostId(Integer postId) {
-        String jpql = "select count(l) from PostLike l where l.post.id = :postId";
-        Long cnt = em.createQuery(jpql, Long.class)
+        Long cnt = em.createQuery("""
+                            select count(l)
+                            from PostLike l
+                            where l.post.id = :postId
+                        """, Long.class)
                 .setParameter("postId", postId)
                 .getSingleResult();
         return cnt.intValue();
     }
 
+    // 댓글 수
     public int countCommentsByPostId(Integer postId) {
-        String jpql = "select count(c) from Comment c where c.post.id = :postId";
-        Long cnt = em.createQuery(jpql, Long.class)
+        Long cnt = em.createQuery("""
+                            select count(c)
+                            from Comment c
+                            where c.post.id = :postId
+                        """, Long.class)
                 .setParameter("postId", postId)
                 .getSingleResult();
         return cnt.intValue();

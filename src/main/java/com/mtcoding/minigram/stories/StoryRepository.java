@@ -99,21 +99,27 @@ public class StoryRepository {
                 .getSingleResult();
     }
 
+    // 작성자 포함 단건
     public Optional<Story> findWithAuthorById(Integer storyId) {
-        String jpql = """
-                    select s from Story s
-                    join fetch s.user u
-                    where s.id = :storyId
-                """;
-        return em.createQuery(jpql, Story.class)
-                .setParameter("storyId", storyId)
-                .getResultList().stream().findFirst();
+        List<Story> rows = em.createQuery("""
+                            select s
+                            from Story s
+                            join fetch s.user a
+                            where s.id = :id
+                        """, Story.class)
+                .setParameter("id", storyId)
+                .getResultList();
+        return rows.stream().findFirst();
     }
 
+    // 좋아요 수
     public int countLikesByStoryId(Integer storyId) {
-        String jpql = "select count(l) from StoryLike l where l.story.id = :storyId";
-        Long cnt = em.createQuery(jpql, Long.class)
-                .setParameter("storyId", storyId)
+        Long cnt = em.createQuery("""
+                            select count(l)
+                            from StoryLike l
+                            where l.story.id = :id
+                        """, Long.class)
+                .setParameter("id", storyId)
                 .getSingleResult();
         return cnt.intValue();
     }

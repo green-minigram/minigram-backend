@@ -88,10 +88,9 @@ public class ReportService {
 
             // 2-2) STORY 집계: 좋아요/댓글 수
             int likeCount = storyRepository.countLikesByStoryId(story.getId());
-            int commentCount = storyRepository.countCommentsByStoryIdOrZero(story.getId());
 
             // 2-3) STORY 상세 DTO 조립 및 반환
-            return ReportResponse.AdminDetailDTO.fromStory(report, story, likeCount, commentCount);
+            return ReportResponse.AdminDetailDTO.fromStory(report, story, likeCount);
         }
 
         // 3) POST 경로
