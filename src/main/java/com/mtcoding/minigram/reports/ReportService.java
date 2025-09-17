@@ -65,7 +65,6 @@ public class ReportService {
         return new ReportResponse.DTO(reportPS);
     }
 
-
     public ReportResponse.ReasonListDTO getReasons() {
         List<ReportResponse.ReasonItemDTO> reasonItemList = Arrays.stream(ReportReasonCode.values())
                 .map(ReportResponse.ReasonItemDTO::from)
@@ -76,23 +75,39 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public ReportResponse.AdminDetailDTO find(Integer reportId) {
+
+        // 1) 신고 본문 + 신고자 + 신고 사유 로딩 (존재 검증)
         var report = reportRepository.findWithReporterAndReasonById(reportId)
                 .orElseThrow(() -> new ExceptionApi404("존재하지 않는 신고입니다."));
 
+        // 2) 대상 타입 분기 (STORY / POST)
         if (report.getType() == ReportType.STORY) {
+            // 2-1) STORY 조회 (작성자 포함) + 존재 검증
             Story story = storyRepository.findWithAuthorById(report.getTargetId())
                     .orElseThrow(() -> new ExceptionApi404("대상 스토리가 존재하지 않습니다."));
+
+            // 2-2) STORY 집계: 좋아요/댓글 수
             int likeCount = storyRepository.countLikesByStoryId(story.getId());
             int commentCount = storyRepository.countCommentsByStoryIdOrZero(story.getId());
+
+            // 2-3) STORY 상세 DTO 조립 및 반환
             return ReportResponse.AdminDetailDTO.fromStory(report, story, likeCount, commentCount);
         }
 
-        // POST
+        // 3) POST 경로
+
+        // 3-1) POST 조회 (작성자 포함) + 존재 검증
         Post post = postRepository.findByIdWithAuthor(report.getTargetId())
                 .orElseThrow(() -> new ExceptionApi404("대상 게시글이 존재하지 않습니다."));
+
+        // 3-2) POST 미디어 목록 로딩
         List<PostImage> images = postRepository.findImagesByPostId(post.getId());
+
+        // 3-3) POST 집계: 좋아요/댓글 수
         int likeCount = postRepository.countLikesByPostId(post.getId());
         int commentCount = postRepository.countCommentsByPostId(post.getId());
+
+        // 3-4) POST 상세 DTO 조립 및 반환
         return ReportResponse.AdminDetailDTO.fromPost(report, post, images, likeCount, commentCount);
     }
 }

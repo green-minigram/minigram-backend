@@ -34,9 +34,10 @@ public class ReportsController {
 
     }
 
-    @GetMapping("/s/api/reports/{reportId}")
+    //3. 관리자용 신고 상세
+    @GetMapping("/s/api/admin/reports/{reportId}")
     public ResponseEntity<?> find(@PathVariable Integer reportId) {
-        var respDTO = reportService.find(reportId);
+        ReportResponse.AdminDetailDTO respDTO = reportService.find(reportId);
         return Resp.ok(respDTO);
     }
 }
