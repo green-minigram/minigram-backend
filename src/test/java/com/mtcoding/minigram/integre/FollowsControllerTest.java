@@ -111,7 +111,7 @@ public class FollowsControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findFollowers_test() throws Exception {
+    public void find_followers_test() throws Exception {
         // 2번을 팔로우 하는 사람들
 
         // given
@@ -141,7 +141,7 @@ public class FollowsControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findFollowing_test() throws Exception {
+    public void find_following_test() throws Exception {
         // 2가 팔로우 하는 사람들
 
         // given

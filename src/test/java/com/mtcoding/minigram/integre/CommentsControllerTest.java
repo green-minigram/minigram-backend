@@ -6,26 +6,20 @@ import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.posts.comments.CommentRequest;
 import com.mtcoding.minigram.users.User;
-import com.mtcoding.minigram.users.UserRequest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,7 +40,7 @@ public class CommentsControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findAllByPostId_test() throws Exception {
+    public void find_all_by_post_id_test() throws Exception {
         // given
         Integer postId = 18;
         Integer page = 0;
@@ -91,7 +85,6 @@ public class CommentsControllerTest extends MyRestDoc {
     }
 
     @Test
-    @DisplayName("댓글 삭제")
     void delete_test() throws Exception {
         int commentId = 1; // ssar(2번)의 댓글
 
@@ -106,11 +99,11 @@ public class CommentsControllerTest extends MyRestDoc {
                 .andExpect(jsonPath("$.msg").value("성공"))
                 .andExpect(jsonPath("$.body.commentId").value(commentId))
                 .andExpect(jsonPath("$.body.message").value("댓글을 삭제했습니다."))
-                .andDo(document);
+                .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
     @Test
-    public void findRepliesByRoot_test() throws Exception {
+    public void find_replies_by_root_test() throws Exception {
         // given
         Integer commentId = 2;
         Integer page = 0;
@@ -160,7 +153,7 @@ public class CommentsControllerTest extends MyRestDoc {
         Integer postId = 18;
 
         CommentRequest.CreateDTO reqDTO = new CommentRequest.CreateDTO();
-        reqDTO.setContent( "좋은 아이디어네요! 다음 영상도 기대할게요 😊");
+        reqDTO.setContent("좋은 아이디어네요! 다음 영상도 기대할게요 😊");
         reqDTO.setParentId(2);
 
         String requestBody = om.writeValueAsString(reqDTO);
@@ -200,7 +193,7 @@ public class CommentsControllerTest extends MyRestDoc {
         Integer commentId = 41;
 
         CommentRequest.UpdateDTO reqDTO = new CommentRequest.UpdateDTO();
-        reqDTO.setContent( "댓글 수정했어요");
+        reqDTO.setContent("댓글 수정했어요");
 
         String requestBody = om.writeValueAsString(reqDTO);
         // System.out.println(requestBody);

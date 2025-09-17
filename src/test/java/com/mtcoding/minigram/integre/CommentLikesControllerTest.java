@@ -5,7 +5,6 @@ import com.mtcoding.minigram.MyRestDoc;
 import com.mtcoding.minigram._core.util.JwtUtil;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -39,8 +39,7 @@ class CommentLikesControllerTest extends MyRestDoc {
 
     //댓글 좋아요
     @Test
-    @DisplayName("댓글 좋아요 - OK (응답 출력)")
-    void like_ok_test() throws Exception {
+    void like_test() throws Exception {
         int commentId = 42; // seed에 존재한다고 가정
 
         // (setup) 항상 clean 상태 보장: 좋아요 취소 한 번
@@ -60,16 +59,13 @@ class CommentLikesControllerTest extends MyRestDoc {
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.body.isLiked").value(true))
-                .andExpect(jsonPath("$.body.count").isNumber());
-
-
-        actions.andDo(document);
+                .andExpect(jsonPath("$.body.count").isNumber())
+                .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 
     //댓글 좋아요 취소
     @Test
-    @DisplayName("댓글 좋아요 취소 - OK")
-    void unlike_ok_test() throws Exception {
+    void unlike_test() throws Exception {
         int commentId = 42;
 
         //(setup) 좋아요 생성
@@ -89,8 +85,7 @@ class CommentLikesControllerTest extends MyRestDoc {
         actions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(200))
                 .andExpect(jsonPath("$.body.isLiked").value(false))
-                .andExpect(jsonPath("$.body.count").isNumber());
-
-        actions.andDo(document);
+                .andExpect(jsonPath("$.body.count").isNumber())
+                .andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 }

@@ -36,7 +36,7 @@ public class NotificationControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findAllWithinOneMonth_test() throws Exception {
+    public void find_all_within_one_month_test() throws Exception {
         // given
 
         // when

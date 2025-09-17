@@ -39,7 +39,7 @@ public class FeedControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findPosts_test() throws Exception {
+    public void find_posts_test() throws Exception {
         // given
         Integer page = 2;
 
@@ -86,7 +86,7 @@ public class FeedControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findStoryPreviews_test() throws Exception {
+    public void find_story_previews_test() throws Exception {
         // given
         Integer page = 0;
 
@@ -122,7 +122,7 @@ public class FeedControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findMyStories_test() throws Exception {
+    public void find_my_stories_test() throws Exception {
         // given
 
         // when
@@ -155,7 +155,7 @@ public class FeedControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findStoriesByUserId_test() throws Exception {
+    public void find_stories_by_user_id_test() throws Exception {
         // given
         Integer userId = 2;
 
@@ -189,7 +189,7 @@ public class FeedControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void findAll_test() throws Exception {
+    public void find_all_test() throws Exception {
         // given
         Integer previewPage = 0;
         Integer postPage = 0;

@@ -39,7 +39,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getUserProfile_test() throws Exception {
+    public void get_user_profile_test() throws Exception {
         // given
         Integer userId = 3;
 
@@ -71,7 +71,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getMyProfile_test() throws Exception {
+    public void get_my_profile_test() throws Exception {
         // given
 
         // when
@@ -102,7 +102,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getUserPosts_test() throws Exception {
+    public void get_user_posts_test() throws Exception {
         // given
         Integer userId = 2;
         Integer page = 0;
@@ -136,7 +136,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getMyPosts_test() throws Exception {
+    public void get_my_posts_test() throws Exception {
         // given
         Integer page = 0;
 
@@ -169,7 +169,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getUserStories_test() throws Exception {
+    public void get_user_stories_test() throws Exception {
         // 2번 유저가 3번 유저의 게시글 조회
         // given
         Integer userId = 3;
@@ -204,7 +204,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getMyStories_test() throws Exception {
+    public void get_my_stories_test() throws Exception {
         // given
         Integer page = 0;
 
@@ -237,7 +237,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getUserDetail_test() throws Exception {
+    public void get_user_detail_test() throws Exception {
         // 2번 유저가 3번 유저의 상세 조회
         // given
         Integer userId = 3;
@@ -274,7 +274,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void getMyDetail_test() throws Exception {
+    public void get_my_detail_test() throws Exception {
         // given
         Integer postPage = 0;
         Integer storyPage = 0;
@@ -310,7 +310,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void checkEmailAvailable_test() throws Exception {
+    public void check_email_available_test() throws Exception {
         // given
         String email = "ssar1234@nate.com";
 
@@ -332,7 +332,7 @@ public class UsersControllerTest extends MyRestDoc {
     }
 
     @Test
-    public void checkUsernameAvailable_test() throws Exception {
+    public void check_username_available_test() throws Exception {
         // given
         String username = "ssar1234";
 

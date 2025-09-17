@@ -2,14 +2,20 @@ ifndef::snippets[]
 :snippets: ./build/generated-snippets
 endif::[]
 
-:user: user-controller-test
-:post: post-controller-test
-:comment: comment-controller-test
-:story: story-controller-test
-:feed: feed-controller-test
-:search: search-controller-test
-:notification: notification-controller-test
-:report: report-controller-test
+:auth: auth-controller-test
+:user: users-controller-test
+:feed: feeds-controller-test
+:post: posts-controller-test
+:post-like : post-likes-controller-test
+:comment: comments-controller-test
+:comment-like : comment-likes-controller-test
+:story: stories-controller-test
+:story-like : story-likes-controller-test
+:presign: presign-controller-test
+:follow: follows-controller-test
+:notification: notifications-controller-test
+:advertisement: advertisements-controller-test
+:report: reports-controller-test
 
 = REST API
 :toc: left
@@ -22,208 +28,350 @@ endif::[]
 |===
 | Method | URL | 설명
 
-| POST | /api/auth/join           | 회원가입
-| POST | /api/auth/login          | 로그인
-| GET  | /api/auth/check-email    | 이메일 중복 체크
-| GET  | /api/auth/check-username | 아이디 중복 체크
-| GET  | /h2-console              | H2 데이터베이스 콘솔
+| POST | /api/auth/join                       | 회원가입
+| POST | /api/auth/login                      | 로그인
+| GET  | /api/check-email-available/{email}   | 이메일 중복 확인
+| GET  | /api/check-username-available/{username} | 아이디 중복 확인
+| GET  | /h2-console                          | H2 데이터베이스 콘솔 접속
 |===
 
 === 로그인 필수 / JWT 필요
 |===
-| Method | URL | 설명
+| Method | URL                                | 설명
 
-| POST   | /api/auth/logout                | 로그아웃
-| GET    | /api/users/me                   | 내 정보 조회
-| PUT    | /api/users/me                   | 내 정보 수정
-| GET    | /api/users/{userId}             | 유저 상세 조회
-| GET    | /api/users/{userId}/followers   | 팔로워 목록
-| GET    | /api/users/{userId}/following   | 팔로잉 목록
-| POST   | /api/users/{userId}/follow      | 팔로우 등록
-| DELETE | /api/users/{userId}/follow      | 언팔로우
-| GET    | /api/feed                       | 메인 피드(스토리+게시글+광고 4:1)
-| POST   | /api/posts                      | 게시글 작성(사진 N장)
-| GET    | /api/posts/{postId}             | 게시글 상세
-| PUT    | /api/posts/{postId}             | 게시글 수정(content만)
-| DELETE | /api/posts/{postId}             | 게시글 삭제
-| POST   | /api/posts/{postId}/likes       | 게시글 좋아요 등록
-| DELETE | /api/posts/{postId}/likes       | 게시글 좋아요 취소
-| GET    | /api/posts/{postId}/comments    | 댓글 목록
-| POST   | /api/posts/{postId}/comments    | 댓글/대댓글 등록
-| PUT    | /api/comments/{commentId}       | 댓글 수정
-| DELETE | /api/comments/{commentId}       | 댓글 삭제
-| POST   | /api/comments/{commentId}/likes | 댓글 좋아요 등록
-| DELETE | /api/comments/{commentId}/likes | 댓글 좋아요 취소
-| GET    | /api/stories                    | 피드 상단 스토리 목록
-| GET    | /api/users/{userId}/stories     | 특정 유저 스토리 목록
-| POST   | /api/stories                    | 스토리 업로드(영상)
-| DELETE | /api/stories/{storyId}          | 스토리 삭제
-| GET    | /api/search/posts?keyword=      | 게시글 검색
-| GET    | /api/notifications              | 알림 목록
-| PUT    | /api/notifications/{id}/read    | 알림 읽음 처리
-| GET    | /api/report-reasons             | 신고 사유 목록
-| POST   | /api/reports                    | 신고 등록(게시글/스토리)
+| GET    | /s/api/users/{userId}/profile      | 유저 프로필 조회
+| GET    | /s/api/users/me/profile            | 내 프로필 조회
+| GET    | /s/api/users/{userId}/posts        | 유저 게시글 목록 조회
+| GET    | /s/api/users/me/posts              | 내 게시글 목록 조회
+| GET    | /s/api/users/{userId}/stories      | 유저 스토리 목록 조회
+| GET    | /s/api/users/me/stories            | 내 스토리 목록 조회
+| GET    | /s/api/users/{userId}/detail       | 유저 상세 조회 (프로필+게시글+스토리)
+| GET    | /s/api/users/me/detail             | 내 상세 조회 (프로필+게시글+스토리)
+| PUT    | /s/api/users                       | 유저 정보 수정
+| GET    | /s/api/feed/posts                  | 피드 게시글 목록 조회
+| GET    | /s/api/feed/story-previews         | 피드 스토리 프리뷰 목록 조회
+| GET    | /s/api/feed/users/me/stories       | 내 최신 스토리 조회 (최근 5개)
+| GET    | /s/api/feed/users/{userId}/stories | 유저 최신 스토리 조회 (최근 5개)
+| GET    | /s/api/feed                        | 메인 피드 조회
+| GET    | /s/api/posts/{postId}              | 게시글 상세 조회
+| POST   | /s/api/posts                       | 게시글 등록
+| PUT    | /s/api/posts/{postId}              | 게시글 수정
+| DELETE | /s/api/posts/{postId}              | 게시글 삭제
+| GET    | /s/api/search/posts                | 게시글 검색
+| POST   | /s/api/posts/{postId}/likes        | 게시글 좋아요 등록
+| DELETE | /s/api/posts/{postId}/likes        | 게시글 좋아요 취소
+| GET    | /s/api/posts/{postId}/comments     | 댓글 목록 조회
+| POST   | /s/api/posts/{postId}/comments     | 댓글 등록
+| PUT    | /s/api/comments/{commentId}        | 댓글 수정
+| DELETE | /s/api/comments/{commentId}        | 댓글 삭제
+| GET    | /s/api/comments/{commentId}/replies | 대댓글 목록 조회
+| POST   | /s/api/comments/{commentId}/likes  | 댓글 좋아요 등록
+| DELETE | /s/api/comments/{commentId}/likes  | 댓글 좋아요 취소
+| GET    | /s/api/stories/{storyId}           | 스토리 상세 조회
+| POST   | /s/api/stories                     | 스토리 등록
+| DELETE | /s/api/stories/{storyId}           | 스토리 삭제
+| POST   | /s/api/stories/{storyId}/likes     | 스토리 좋아요 등록
+| DELETE | /s/api/stories/{storyId}/likes     | 스토리 좋아요 취소
+| POST   | /s/api/storage/presignedUrl        | Presigned URL 발급
+| POST   | /s/api/users/{followeeId}/follow   | 팔로우 등록
+| DELETE | /s/api/users/{followeeId}/follow   | 팔로우 취소
+| GET    | /s/api/users/{userId}/followers    | 팔로워 목록 조회
+| GET    | /s/api/users/{userId}/following    | 팔로잉 목록 조회
+| GET    | /s/api/notifications               | 알림 목록 조회 (최근 1개월)
+| GET    | /s/api/notifications/connect       | 알림 SSE 연결
+| POST   | /s/api/admin/advertisements        | 광고 등록
+| DELETE | /s/api/admin/advertisements/{adId} | 광고 삭제
+| POST   | /s/api/reports                     | 신고 등록
+| GET    | /s/api/reports/reasons             | 신고 사유 목록 조회
 |===
 
-== 유저
+
+== 인증
 === 1. 회원가입
 ===== Request Example
-include::{snippets}/{user}/join/http-request.adoc[]
+include::{snippets}/{auth}/join_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{user}/join/http-response.adoc[]
-===== Curl
-include::{snippets}/{user}/join/curl-request.adoc[]
+include::{snippets}/{auth}/join_test/http-response.adoc[]
 
 === 2. 로그인
 ===== Request Example
-include::{snippets}/{user}/login/http-request.adoc[]
+include::{snippets}/{auth}/login_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{user}/login/http-response.adoc[]
-===== Curl
-include::{snippets}/{user}/login/curl-request.adoc[]
+include::{snippets}/{auth}/login_test/http-response.adoc[]
 
-=== 3. 내 정보 조회/수정
-===== Request Example
-include::{snippets}/{user}/me-find/http-request.adoc[]
-===== Response Example
-include::{snippets}/{user}/me-find/http-response.adoc[]
-===== Request Example
-include::{snippets}/{user}/me-update/http-request.adoc[]
-===== Response Example
-include::{snippets}/{user}/me-update/http-response.adoc[]
 
-=== 4. 유저 상세 조회 & 팔로우
-===== Request Example
-include::{snippets}/{user}/find-one/http-request.adoc[]
-===== Response Example
-include::{snippets}/{user}/find-one/http-response.adoc[]
-===== Request Example
-include::{snippets}/{user}/follow-create/http-request.adoc[]
-===== Response Example
-include::{snippets}/{user}/follow-create/http-response.adoc[]
-===== Request Example
-include::{snippets}/{user}/follow-delete/http-request.adoc[]
-===== Response Example
-include::{snippets}/{user}/follow-delete/http-response.adoc[]
+== 유저
+=== 1. 프로필 조회
+===== 다른 유저 프로필
+include::{snippets}/{user}/get_user_profile_test/http-request.adoc[]
+include::{snippets}/{user}/get_user_profile_test/http-response.adoc[]
+
+===== 내 프로필
+include::{snippets}/{user}/get_my_profile_test/http-request.adoc[]
+include::{snippets}/{user}/get_my_profile_test/http-response.adoc[]
+
+=== 2. 게시글 목록 조회
+===== 다른 유저 게시글
+include::{snippets}/{user}/get_user_posts_test/http-request.adoc[]
+include::{snippets}/{user}/get_user_posts_test/http-response.adoc[]
+
+===== 내 게시글
+include::{snippets}/{user}/get_my_posts_test/http-request.adoc[]
+include::{snippets}/{user}/get_my_posts_test/http-response.adoc[]
+
+=== 3. 스토리 목록 조회
+===== 다른 유저 스토리
+include::{snippets}/{user}/get_user_stories_test/http-request.adoc[]
+include::{snippets}/{user}/get_user_stories_test/http-response.adoc[]
+
+===== 내 스토리
+include::{snippets}/{user}/get_my_stories_test/http-request.adoc[]
+include::{snippets}/{user}/get_my_stories_test/http-response.adoc[]
+
+=== 4. 상세 조회 (프로필+게시글+스토리)
+===== 다른 유저 상세
+include::{snippets}/{user}/get_user_detail_test/http-request.adoc[]
+include::{snippets}/{user}/get_user_detail_test/http-response.adoc[]
+
+===== 내 상세
+include::{snippets}/{user}/get_my_detail_test/http-request.adoc[]
+include::{snippets}/{user}/get_my_detail_test/http-response.adoc[]
+
+=== 5. 중복 체크
+===== 이메일 중복
+include::{snippets}/{user}/check_email_available_test/http-request.adoc[]
+include::{snippets}/{user}/check_email_available_test/http-response.adoc[]
+
+===== 아이디 중복
+include::{snippets}/{user}/check_username_available_test/http-request.adoc[]
+include::{snippets}/{user}/check_username_available_test/http-response.adoc[]
+
+=== 6. 유저 정보 수정
+include::{snippets}/{user}/update_test/http-request.adoc[]
+include::{snippets}/{user}/update_test/http-response.adoc[]
+
 
 == 피드
-=== 1. 메인 피드
+=== 1. 피드 게시글 목록 조회
 ===== Request Example
-include::{snippets}/{feed}/main/http-request.adoc[]
+include::{snippets}/{feed}/find_posts_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{feed}/main/http-response.adoc[]
+include::{snippets}/{feed}/findPosts_test/http-response.adoc[]
+
+=== 2. 피드 스토리 프리뷰 목록 조회
+===== Request Example
+include::{snippets}/{feed}/find_story_previews_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{feed}/find_story_previews_test/http-response.adoc[]
+
+=== 3. 내 스토리 목록 (최근 5개)
+===== Request Example
+include::{snippets}/{feed}/find_my_stories_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{feed}/find_my_stories_test/http-response.adoc[]
+
+=== 4. 특정 유저 스토리 목록 (최근 5개)
+===== Request Example
+include::{snippets}/{feed}/find_stories_by_user_id_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{feed}/find_stories_by_user_id_test/http-response.adoc[]
+
+=== 5. 메인 피드 조회 (스토리 프리뷰 + 게시글)
+===== Request Example
+include::{snippets}/{feed}/find_all_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{feed}/find_all_test/http-response.adoc[]
+
 
 == 게시글
 === 1. 작성
 ===== Request Example
-include::{snippets}/{post}/save/http-request.adoc[]
+include::{snippets}/{post}/create_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{post}/save/http-response.adoc[]
-===== Curl
-include::{snippets}/{post}/save/curl-request.adoc[]
+include::{snippets}/{post}/create_test/http-response.adoc[]
 
 === 2. 상세
 ===== Request Example
-include::{snippets}/{post}/find-one/http-request.adoc[]
+include::{snippets}/{post}/find_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{post}/find-one/http-response.adoc[]
+include::{snippets}/{post}/find_test/http-response.adoc[]
 
 === 3. 수정
 ===== Request Example
-include::{snippets}/{post}/update/http-request.adoc[]
+include::{snippets}/{post}/update_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{post}/update/http-response.adoc[]
+include::{snippets}/{post}/update_test/http-response.adoc[]
 
 === 4. 삭제
 ===== Request Example
-include::{snippets}/{post}/delete/http-request.adoc[]
+include::{snippets}/{post}/delete_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{post}/delete/http-response.adoc[]
+include::{snippets}/{post}/delete_test/http-response.adoc[]
 
-=== 5. 좋아요
+=== 5. 검색
 ===== Request Example
-include::{snippets}/{post}/like-create/http-request.adoc[]
+include::{snippets}/{post}/search_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{post}/like-create/http-response.adoc[]
-===== Request Example
-include::{snippets}/{post}/like-delete/http-request.adoc[]
-===== Response Example
-include::{snippets}/{post}/like-delete/http-response.adoc[]
+include::{snippets}/{post}/search_test/http-response.adoc[]
 
-=== 6. 댓글
+
+== 게시글 좋아요
+=== 1. 등록
 ===== Request Example
-include::{snippets}/{comment}/list/http-request.adoc[]
+include::{snippets}/{post-like}/like_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{comment}/list/http-response.adoc[]
+include::{snippets}/{post-like}/like_test/http-response.adoc[]
+
+=== 2. 취소
 ===== Request Example
-include::{snippets}/{comment}/create/http-request.adoc[]
+include::{snippets}/{post-like}/unlike_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{comment}/create/http-response.adoc[]
+include::{snippets}/{post-like}/unlike_test/http-response.adoc[]
+
+
+== 댓글
+=== 1. 목록 조회
+===== 게시글 기준 댓글 목록
+include::{snippets}/{comment}/find_all_by_post_id_test/http-request.adoc[]
+include::{snippets}/{comment}/find_all_by_post_id_test/http-response.adoc[]
+
+===== 특정 댓글 기준 대댓글 목록
+include::{snippets}/{comment}/find_replies_by_root_test/http-request.adoc[]
+include::{snippets}/{comment}/find_replies_by_root_test/http-response.adoc[]
+
+=== 2. 등록
+include::{snippets}/{comment}/create_test/http-request.adoc[]
+include::{snippets}/{comment}/create_test/http-response.adoc[]
+
+=== 3. 수정
+include::{snippets}/{comment}/update_test/http-request.adoc[]
+include::{snippets}/{comment}/update_test/http-response.adoc[]
+
+=== 4. 삭제
+include::{snippets}/{comment}/delete_test/http-request.adoc[]
+include::{snippets}/{comment}/delete_test/http-response.adoc[]
+
+
+== 댓글 좋아요
+=== 1. 등록
 ===== Request Example
-include::{snippets}/{comment}/update/http-request.adoc[]
+include::{snippets}/{comment-like}/like_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{comment}/update/http-response.adoc[]
+include::{snippets}/{comment-like}/like_test/http-response.adoc[]
+
+=== 2. 취소
 ===== Request Example
-include::{snippets}/{comment}/delete/http-request.adoc[]
+include::{snippets}/{comment-like}/unlike_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{comment}/delete/http-response.adoc[]
-===== Request Example
-include::{snippets}/{comment}/like-create/http-request.adoc[]
-===== Response Example
-include::{snippets}/{comment}/like-create/http-response.adoc[]
-===== Request Example
-include::{snippets}/{comment}/like-delete/http-request.adoc[]
-===== Response Example
-include::{snippets}/{comment}/like-delete/http-response.adoc[]
+include::{snippets}/{comment-like}/unlike_test/http-response.adoc[]
+
 
 == 스토리
-=== 1. 목록
+=== 1. 상세 조회
 ===== Request Example
-include::{snippets}/{story}/list/http-request.adoc[]
+include::{snippets}/{story}/find_by_story_id_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{story}/list/http-response.adoc[]
-
-=== 2. 업로드
-===== Request Example
-include::{snippets}/{story}/create/http-request.adoc[]
-===== Response Example
-include::{snippets}/{story}/create/http-response.adoc[]
-
-=== 3. 삭제
-===== Request Example
-include::{snippets}/{story}/delete/http-request.adoc[]
-===== Response Example
-include::{snippets}/{story}/delete/http-response.adoc[]
-
-== 검색
-=== 1. 게시글 검색
-===== Request Example
-include::{snippets}/{search}/posts/http-request.adoc[]
-===== Response Example
-include::{snippets}/{search}/posts/http-response.adoc[]
-
-== 알림
-=== 1. 목록
-===== Request Example
-include::{snippets}/{notification}/list/http-request.adoc[]
-===== Response Example
-include::{snippets}/{notification}/list/http-response.adoc[]
-
-=== 2. 읽음 처리
-===== Request Example
-include::{snippets}/{notification}/read/http-request.adoc[]
-===== Response Example
-include::{snippets}/{notification}/read/http-response.adoc[]
-
-== 신고
-=== 1. 사유 목록
-===== Request Example
-include::{snippets}/{report}/reasons/http-request.adoc[]
-===== Response Example
-include::{snippets}/{report}/reasons/http-response.adoc[]
+include::{snippets}/{story}/find_by_story_id_test/http-response.adoc[]
 
 === 2. 등록
 ===== Request Example
-include::{snippets}/{report}/create/http-request.adoc[]
+include::{snippets}/{story}/create_test/http-request.adoc[]
 ===== Response Example
-include::{snippets}/{report}/create/http-response.adoc[]
+include::{snippets}/{story}/create_test/http-response.adoc[]
+
+=== 3. 삭제
+===== Request Example
+include::{snippets}/{story}/delete_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{story}/delete_test/http-response.adoc[]
+
+
+== 스토리 좋아요
+=== 1. 등록
+===== Request Example
+include::{snippets}/{story-like}/create_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{story-like}/create_test/http-response.adoc[]
+
+=== 2. 취소
+===== Request Example
+include::{snippets}/{story-like}/delete_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{story-like}/delete_test/http-response.adoc[]
+
+
+== 스토리지 (Presigned URL)
+=== 1. Presigned URL 생성
+===== Request Example
+include::{snippets}/{presign}/create_upload_url_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{presign}/create_upload_url_test/http-response.adoc[]
+
+
+== 팔로우
+=== 1. 등록
+===== Request Example
+include::{snippets}/{follow}/create_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{follow}/create_test/http-response.adoc[]
+
+=== 2. 취소
+===== Request Example
+include::{snippets}/{follow}/delete_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{follow}/delete_test/http-response.adoc[]
+
+=== 3. 팔로워 목록 조회
+===== Request Example
+include::{snippets}/{follow}/find_followers_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{follow}/find_followers_test/http-response.adoc[]
+
+=== 4. 팔로잉 목록 조회
+===== Request Example
+include::{snippets}/{follow}/find_following_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{follow}/find_following_test/http-response.adoc[]
+
+
+== 알림
+=== 1. 알림 목록 조회
+===== Request Example
+include::{snippets}/{notification}/find_all_within_one_month_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{notification}/find_all_within_one_month_test/http-response.adoc[]
+
+=== 2. SSE 연결
+===== Request Example
+include::{snippets}/{notification}/connect_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{notification}/connect_test/http-response.adoc[]
+
+
+== 광고
+=== 1. 등록
+===== Request Example
+include::{snippets}/{advertisement}/create_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{advertisement}/create_test/http-response.adoc[]
+
+=== 2. 삭제
+===== Request Example
+include::{snippets}/{advertisement}/delete_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{advertisement}/delete_test/http-response.adoc[]
+
+
+== 신고
+=== 1. 등록
+===== Request Example
+include::{snippets}/{report}/create_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{report}/create_test/http-response.adoc[]
+
+=== 2. 사유 목록 조회
+===== Request Example
+include::{snippets}/{report}/get_reasons_test/http-request.adoc[]
+===== Response Example
+include::{snippets}/{report}/get_reasons_test/http-response.adoc[]
+
