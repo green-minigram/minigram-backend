@@ -8,12 +8,13 @@ public class StoryRequest {
     @Data
     public static class CreateDTO {
         private String videoUrl;
+        private String thumbnailUrl;
 
         public Story toEntity(User user) {
             return Story.builder()
                     .user(user)
                     .videoUrl(videoUrl)
-                    .thumbnailUrl("default-thumbnail.png")
+                    .thumbnailUrl(thumbnailUrl)
                     .status(StoryStatus.ACTIVE)
                     .build();
         }
