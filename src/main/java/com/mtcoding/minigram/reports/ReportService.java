@@ -74,7 +74,7 @@ public class ReportService {
 
     // 승인
     @Transactional
-    public ReportResponse.ApproveDTO approve(Integer reportId, Integer adminId) {
+    public ReportResponse.ApproveDTO approve(Integer reportId) {
         // 1) 잠금 걸고 신고 로딩 (중복 처리 방지)
         Report report = reportRepository.findByIdForUpdate(reportId)
                 .orElseThrow(() -> new ExceptionApi404("신고를 찾을 수 없습니다."));
@@ -103,7 +103,7 @@ public class ReportService {
 
     // 거절
     @Transactional
-    public ReportResponse.RejectDTO reject(Integer reportId, Integer adminId) {
+    public ReportResponse.RejectDTO reject(Integer reportId) {
         // 1) 잠금 걸고 신고 로딩
         Report report = reportRepository.findByIdForUpdate(reportId)
                 .orElseThrow(() -> new ExceptionApi404("신고를 찾을 수 없습니다."));

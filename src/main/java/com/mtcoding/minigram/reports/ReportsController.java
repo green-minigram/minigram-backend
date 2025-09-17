@@ -35,14 +35,14 @@ public class ReportsController {
     }
 
     @PutMapping("/s/api/admin/reports/{reportId}/approve")
-    public ResponseEntity<?> approve(@PathVariable Integer reportId, @AuthenticationPrincipal User admin) {
-        ReportResponse.ApproveDTO respDTO = reportService.approve(reportId, admin.getId());
+    public ResponseEntity<?> approve(@PathVariable Integer reportId) {
+        ReportResponse.ApproveDTO respDTO = reportService.approve(reportId);
         return Resp.ok(respDTO);
     }
 
     @PutMapping("/s/api/admin/reports/{reportId}/reject")
-    public ResponseEntity<?> reject(@PathVariable Integer reportId, @AuthenticationPrincipal User admin) {
-        ReportResponse.RejectDTO respDTO = reportService.reject(reportId, admin.getId());
+    public ResponseEntity<?> reject(@PathVariable Integer reportId) {
+        ReportResponse.RejectDTO respDTO = reportService.reject(reportId);
         return Resp.ok(respDTO);
     }
 
