@@ -34,4 +34,27 @@ public class StoryLikeRepository {
                 .setParameter("currentUserId", currentUserId)
                 .executeUpdate();
     }
+
+    public boolean existsByStoryIdAndUserId(Integer storyId, Integer userId) {
+        Long cnt = em.createQuery("""
+                            select count(sl) from StoryLike sl
+                            where sl.story.id = :sid and sl.user.id = :uid
+                        """, Long.class)
+                .setParameter("sid", storyId)
+                .setParameter("uid", userId)
+                .getSingleResult();
+        return cnt > 0;
+    }
+
+    // 좋아요 수
+    public int countLikesByStoryId(Integer storyId) {
+        Long cnt = em.createQuery("""
+                            select count(l)
+                            from StoryLike l
+                            where l.story.id = :id
+                        """, Long.class)
+                .setParameter("id", storyId)
+                .getSingleResult();
+        return cnt.intValue();
+    }
 }

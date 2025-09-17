@@ -55,4 +55,18 @@ public class ReportRepository {
 
         return !result.isEmpty();
     }
+
+    // 신고 + 신고자 + 신고사유 join fetch
+    public Optional<Report> findWithReporterAndReasonById(Integer reportId) {
+        List<Report> rows = em.createQuery("""
+                            select r
+                            from Report r
+                            join fetch r.reporter u
+                            join fetch r.reason rr
+                            where r.id = :id
+                        """, Report.class)
+                .setParameter("id", reportId)
+                .getResultList();
+        return rows.stream().findFirst();
+    }
 }

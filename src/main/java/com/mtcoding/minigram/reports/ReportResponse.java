@@ -1,14 +1,22 @@
 package com.mtcoding.minigram.reports;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.mtcoding.minigram.posts.Post;
+import com.mtcoding.minigram.posts.images.PostImage;
 import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
+import com.mtcoding.minigram.stories.Story;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReportResponse {
 
+    // ===================== 사유 목록 =====================
     @Data
     public static class ReasonListDTO {
         private List<ReasonItemDTO> reasonList;
@@ -54,6 +62,8 @@ public class ReportResponse {
         }
     }
 
+    // ===================== 관리자 뷰(확장) =====================
+
     @Data
     @Builder
     public static class AdminViewDTO {
@@ -75,6 +85,144 @@ public class ReportResponse {
                     .reasonLabel(report.getReason().getLabel())
                     .status(report.getStatus())
                     .createdAt(report.getCreatedAt())
+                    .build();
+        }
+    }
+
+    // ===================== 신고 상세(기본) =====================
+
+    @Data
+    @Builder
+    public static class AdminDetailDTO {
+
+        private Integer reportId;
+
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime reportedAt;
+
+        private ReporterDTO reporter;
+        private ReportedObjectDTO reportedObject;
+        private String reportReasonLabel; // label만 노출
+        private String status;            // PENDING/APPROVED/REJECTED
+
+        // 신고자 정보
+        @Data
+        @AllArgsConstructor
+        public static class ReporterDTO {
+            private Integer userId;
+            private String username;
+            private String profileImageUrl;
+        }
+
+        // 신고 대상 객체(POST/STORY 공통) — 스토리 전용 누락 필드는 null → JSON 미출력
+        @Data
+        @Builder
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public static class ReportedObjectDTO {
+            private String type;       // POST / STORY
+            private Integer objectId;
+            private AuthorDTO author;
+            private List<MediaDTO> mediaList;
+            private String content;
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime postedAt;
+            private LikesDTO likes;
+            private Integer commentsCount;
+        }
+
+        // 작성자 정보
+        @Data
+        @AllArgsConstructor
+        public static class AuthorDTO {
+            private Integer userId;
+            private String username;
+            private String profileImageUrl;
+        }
+
+        // 영상,사진 항목
+        @Data
+        @AllArgsConstructor
+        public static class MediaDTO {
+            private String type; // IMAGE / VIDEO
+            private String url;
+        }
+
+
+        // 좋아요 집계
+        @Data
+        @AllArgsConstructor
+        public static class LikesDTO {
+            private Integer count;
+            private Boolean isLiked;
+        }
+
+        // ===== Factory =====
+
+        public static AdminDetailDTO fromStory(Report report, Story story, LikesDTO likes) {
+            var media = new ArrayList<MediaDTO>();
+            if (story.getVideoUrl() != null) media.add(new MediaDTO("VIDEO", story.getVideoUrl()));
+            if (story.getThumbnailUrl() != null) media.add(new MediaDTO("IMAGE", story.getThumbnailUrl()));
+
+            var author = new AuthorDTO(
+                    story.getUser().getId(),
+                    story.getUser().getUsername(),
+                    story.getUser().getProfileImageUrl()
+            );
+
+            var object = ReportedObjectDTO.builder()
+                    .type("STORY")
+                    .objectId(story.getId())
+                    .author(author)
+                    .mediaList(media)
+                    .postedAt(story.getCreatedAt())
+                    .likes(likes)
+                    .build();
+
+            return AdminDetailDTO.builder()
+                    .reportId(report.getId())
+                    .reportedAt(report.getCreatedAt())
+                    .reporter(new ReporterDTO(
+                            report.getReporter().getId(),
+                            report.getReporter().getUsername(),
+                            report.getReporter().getProfileImageUrl()))
+                    .reportedObject(object)
+                    .reportReasonLabel(report.getReason().getLabel())
+                    .status(report.getStatus().name())
+                    .build();
+        }
+
+        public static AdminDetailDTO fromPost(Report report, Post post, List<PostImage> images, LikesDTO likes, int commentCount) {
+            var media = images.stream()
+                    .map(i -> new MediaDTO("IMAGE", i.getUrl()))
+                    .toList();
+
+            var author = new AuthorDTO(
+                    post.getUser().getId(),
+                    post.getUser().getUsername(),
+                    post.getUser().getProfileImageUrl()
+            );
+
+            var object = ReportedObjectDTO.builder()
+                    .type("POST")
+                    .objectId(post.getId())
+                    .author(author)
+                    .mediaList(media)
+                    .content(post.getContent())
+                    .postedAt(post.getCreatedAt())
+                    .likes(likes)
+                    .commentsCount(commentCount)
+                    .build();
+
+            return AdminDetailDTO.builder()
+                    .reportId(report.getId())
+                    .reportedAt(report.getCreatedAt())
+                    .reporter(new ReporterDTO(
+                            report.getReporter().getId(),
+                            report.getReporter().getUsername(),
+                            report.getReporter().getProfileImageUrl()))
+                    .reportedObject(object)
+                    .reportReasonLabel(report.getReason().getLabel())
+                    .status(report.getStatus().name())
                     .build();
         }
     }

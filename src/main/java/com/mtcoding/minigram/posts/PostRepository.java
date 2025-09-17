@@ -182,6 +182,19 @@ public class PostRepository {
                 .setParameter("postHidden", PostStatus.HIDDEN)
                 .getSingleResult();
     }
+
+    // 작성자 포함 단건
+    public Optional<Post> findByIdWithAuthor(Integer postId) {
+        List<Post> rows = em.createQuery("""
+                            select p
+                            from Post p
+                            join fetch p.user a
+                            where p.id = :id
+                        """, Post.class)
+                .setParameter("id", postId)
+                .getResultList();
+        return rows.stream().findFirst();
+    }
 }
 
 

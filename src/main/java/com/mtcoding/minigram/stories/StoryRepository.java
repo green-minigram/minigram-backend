@@ -98,4 +98,18 @@ public class StoryRepository {
                 .setParameter("storyHidden", StoryStatus.HIDDEN)
                 .getSingleResult();
     }
+
+    // 작성자 포함 단건
+    public Optional<Story> findWithAuthorById(Integer storyId) {
+        List<Story> rows = em.createQuery("""
+                            select s
+                            from Story s
+                            join fetch s.user a
+                            where s.id = :id
+                        """, Story.class)
+                .setParameter("id", storyId)
+                .getResultList();
+        return rows.stream().findFirst();
+    }
+
 }

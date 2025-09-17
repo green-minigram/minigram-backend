@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,6 +32,13 @@ public class ReportsController {
 
         return Resp.ok(reasonListDTO);
 
+    }
+
+    //3. 관리자용 신고 상세
+    @GetMapping("/s/api/admin/reports/{reportId}")
+    public ResponseEntity<?> find(@PathVariable Integer reportId, @AuthenticationPrincipal User admin) {
+        ReportResponse.AdminDetailDTO respDTO = reportService.find(reportId, admin.getId());
+        return Resp.ok(respDTO);
     }
 }
 
