@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -36,5 +33,18 @@ public class ReportsController {
         return Resp.ok(reasonListDTO);
 
     }
+
+    @PutMapping("/s/api/admin/reports/{reportId}/approve")
+    public ResponseEntity<?> approve(@PathVariable Integer reportId) {
+        ReportResponse.ApproveDTO respDTO = reportService.approve(reportId);
+        return Resp.ok(respDTO);
+    }
+
+    @PutMapping("/s/api/admin/reports/{reportId}/reject")
+    public ResponseEntity<?> reject(@PathVariable Integer reportId) {
+        ReportResponse.RejectDTO respDTO = reportService.reject(reportId);
+        return Resp.ok(respDTO);
+    }
+
 }
 

@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.reports;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -55,4 +56,18 @@ public class ReportRepository {
 
         return !result.isEmpty();
     }
+
+    // 처리 시 동시성 방지: 비관적 잠금
+    public Optional<Report> findByIdForUpdate(Integer reportId) {
+        List<Report> rows = em.createQuery("""
+                            select r
+                            from Report r
+                            where r.id = :id
+                        """, Report.class)
+                .setParameter("id", reportId)
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .getResultList();
+        return rows.stream().findFirst();
+    }
+
 }

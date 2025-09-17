@@ -182,6 +182,15 @@ public class PostRepository {
                 .setParameter("postHidden", PostStatus.HIDDEN)
                 .getSingleResult();
     }
+
+    public int updateStatusHidden(Integer postId) {
+        return em.createQuery("""
+                            update Post p set p.status = 'HIDDEN' where p.id = :id
+                        """)
+                .setParameter("id", postId)
+                .executeUpdate();
+    }
+
 }
 
 

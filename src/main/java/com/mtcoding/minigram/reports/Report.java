@@ -63,4 +63,18 @@ public class Report {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public boolean isPending() {
+        return this.status == ReportStatus.PENDING;
+    }
+
+    public void approve() {
+        if (!isPending()) throw new IllegalStateException("이미 처리된 신고입니다.");
+        this.status = ReportStatus.APPROVED;
+    }
+
+    public void reject() {
+        if (!isPending()) throw new IllegalStateException("이미 처리된 신고입니다.");
+        this.status = ReportStatus.REJECTED;
+    }
 }

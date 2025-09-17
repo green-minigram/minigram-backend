@@ -98,4 +98,12 @@ public class StoryRepository {
                 .setParameter("storyHidden", StoryStatus.HIDDEN)
                 .getSingleResult();
     }
+
+    public int updateStatusHidden(Integer storyId) {
+        return em.createQuery("""
+                            update Story s set s.status = 'HIDDEN' where s.id = :id
+                        """)
+                .setParameter("id", storyId)
+                .executeUpdate();
+    }
 }

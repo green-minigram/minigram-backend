@@ -7,6 +7,7 @@ import com.mtcoding.minigram.reports.ReportRequest;
 import com.mtcoding.minigram.reports.ReportType;
 import com.mtcoding.minigram.users.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,8 +16,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
 @AutoConfigureMockMvc
@@ -68,14 +72,14 @@ public class ReportsControllerTest extends MyRestDoc {
         System.out.println(responseBody);
 
         // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reportId").value(15));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reportType").value("POST"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.targetId").value(6));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.userId").value(2));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonId").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.status").value("PENDING"));
+        actions.andExpect(jsonPath("$.status").value(200));
+        actions.andExpect(jsonPath("$.msg").value("성공"));
+        actions.andExpect(jsonPath("$.body.reportId").value(15));
+        actions.andExpect(jsonPath("$.body.reportType").value("POST"));
+        actions.andExpect(jsonPath("$.body.targetId").value(6));
+        actions.andExpect(jsonPath("$.body.userId").value(2));
+        actions.andExpect(jsonPath("$.body.reasonId").value(1));
+        actions.andExpect(jsonPath("$.body.status").value("PENDING"));
 
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
@@ -96,12 +100,54 @@ public class ReportsControllerTest extends MyRestDoc {
         // System.out.println(responseBody);
 
         // then
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.status").value(200));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.msg").value("성공"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList").isArray());
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList[0].id").value(1));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList[0].code").value("DISLIKE"));
-        actions.andExpect(MockMvcResultMatchers.jsonPath("$.body.reasonList[0].label").value("마음에 들지 않습니다"));
+        actions.andExpect(jsonPath("$.status").value(200));
+        actions.andExpect(jsonPath("$.msg").value("성공"));
+        actions.andExpect(jsonPath("$.body.reasonList").isArray());
+        actions.andExpect(jsonPath("$.body.reasonList[0].id").value(1));
+        actions.andExpect(jsonPath("$.body.reasonList[0].code").value("DISLIKE"));
+        actions.andExpect(jsonPath("$.body.reasonList[0].label").value("마음에 들지 않습니다"));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+
+    @Test
+    @DisplayName("신고 승인 - POST(PENDING) → APPROVED + POST_HIDDEN")
+    void approve_test() throws Exception {
+        int reportId = 1; // 테이블상 PENDING & TYPE=POST
+
+        ResultActions actions = mvc.perform(put("/s/api/admin/reports/{id}/approve", reportId)
+                .header("Authorization", "Bearer " + accessToken2)
+                .accept(MediaType.APPLICATION_JSON));
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.reportId").value(reportId))
+                .andExpect(jsonPath("$.body.status").value("APPROVED"))
+                .andExpect(jsonPath("$.body.action").value("POST_HIDDEN"));
+        actions.andDo(MockMvcResultHandlers.print()).andDo(document);
+    }
+
+    @Test
+    @DisplayName("신고 거절 - STORY(PENDING) → REJECTED")
+    void reject_test() throws Exception {
+        int reportId = 12; // 테이블상 PENDING & TYPE=STORY
+
+        ResultActions actions = mvc.perform(put("/s/api/admin/reports/{id}/reject", reportId)
+                .header("Authorization", "Bearer " + accessToken2)
+                .accept(MediaType.APPLICATION_JSON));
+
+        String responseBody = actions.andReturn().getResponse().getContentAsString();
+//        System.out.println(responseBody);
+
+        actions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.msg").value("성공"))
+                .andExpect(jsonPath("$.body.reportId").value(reportId))
+                .andExpect(jsonPath("$.body.status").value("REJECTED"));
         actions.andDo(MockMvcResultHandlers.print()).andDo(document);
     }
 }

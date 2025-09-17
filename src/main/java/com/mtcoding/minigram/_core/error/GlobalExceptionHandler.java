@@ -36,12 +36,18 @@ public class GlobalExceptionHandler {
         return Resp.fail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(ExceptionApi409.class)
+    public ResponseEntity<?> exApi409(ExceptionApi409 e) {
+        log.warn(e.getMessage());
+        return Resp.fail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
     @ExceptionHandler(ExceptionApi500.class)
     public ResponseEntity<?> exApi500(ExceptionApi500 e) {
         log.error("알 수 없는 에러 발생" + e.getMessage());
         return Resp.fail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
-    
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> exUnKnown(Exception e) {
         log.error("알 수 없는 에러 발생", e);

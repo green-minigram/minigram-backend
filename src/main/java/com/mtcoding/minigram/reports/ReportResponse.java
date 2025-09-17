@@ -1,6 +1,7 @@
 package com.mtcoding.minigram.reports;
 
 import com.mtcoding.minigram.reports.reasons.ReportReasonCode;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -77,5 +78,20 @@ public class ReportResponse {
                     .createdAt(report.getCreatedAt())
                     .build();
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class ApproveDTO {
+        private final Integer reportId;
+        private final String status; // APPROVED
+        private final String action; // POST_HIDDEN | STORY_HIDDEN
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class RejectDTO {
+        private final Integer reportId;
+        private final String status; // REJECTED
     }
 }
